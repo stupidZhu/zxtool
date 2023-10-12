@@ -2,7 +2,7 @@
   "name": "zxtool",
   "private": true,
   "scripts": {
-    "build-site:gh-pages": "cross-env HOMEPAGE=/zxtool/ turbo run build --filter=zxtool",
+    "build-site:gh-pages": "cross-env HOMEPAGE=/zxtool/ turbo run build --filter=zxtool-site",
     "build-site:vercel": "turbo run build --filter=zxtool",
     "init": "turbo run init",
     "prepare": "husky install"

@@ -1,0 +1,27 @@
+@import "docs/utils-doc/style";
+
+.custom-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  .field-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid rgba(#000, 0.1);
+    border-radius: 5px;
+    pointer-events: none;
+    &.editing {
+      border-color: rgba($theme-green, 0.5);
+      pointer-events: auto;
+    }
+    i {
+      pointer-events: auto;
+      cursor: pointer;
+      &:hover {
+        color: skyblue;
+      }
+    }
+  }
+}
