@@ -15,7 +15,7 @@ const isProd = process.env.NODE_ENV === "production"
 export default [
   defineConfig({
     input: "src/index.ts",
-    output: { file: pkg.main, format: "umd", name: "ZXTRU", globals: { "@zxtool/utils": "ZXTU" } },
+    output: { file: pkg.main, format: "umd", name: "ZXTRU", globals: { "@zxtool/utils": "ZU" } },
     plugins: [
       autoExternal(),
       resolve(),

@@ -8,4 +8,4 @@ export type Merge<T> = {
 }
 export type PartialByKeys<O, K extends keyof O> = Merge<Partial<O> & Omit<O, K>>
 
-export as namespace ZXTU
+export as namespace ZU

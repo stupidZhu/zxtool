@@ -17,7 +17,7 @@
     "eslint": "^8.48.0",
     "eslint-config-custom": "workspace:*",
     "stylelint": "^14.12.1",
-    "stylelint-config-custom": "*",
+    "stylelint-config-custom": "workspace:*",
     "tsconfig": "workspace:*"
   },
   "dependencies": {

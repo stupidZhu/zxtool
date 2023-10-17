@@ -56,7 +56,7 @@ import esBuild from "rollup-plugin-esbuild"
 
 export default defineConfig({
   input: "src/index.ts",
-  output: [{ file: "dist/index.umd.js", format: "umd", name: "ZXTU" }],
+  output: [{ file: "dist/index.umd.js", format: "umd", name: "ZU" }],
   plugins: [
     autoExternal(),
     resolve(),
