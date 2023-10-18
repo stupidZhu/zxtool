@@ -74,7 +74,7 @@ float Scene(vec2 uv) {
   // 如果点在圆形内 ([+,-] => [-,+] => -)
   // float d = min(-rect, - circle);
   
-  float d = max(-triangle, - circle);
+  float d = smin(triangle, circle, 0.1);
   
   return smoothstep(w, - w, d);
   // return step(0.0, - d);

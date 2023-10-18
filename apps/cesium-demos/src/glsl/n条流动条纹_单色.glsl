@@ -13,17 +13,16 @@ void main() {
   vec4 bgColor = vec4(0.1529, 0.5412, 0.8588, 0.2);
   
   float t = fract(u_time / 5.0);
-  float alphas[N];
   
   float alpha;
   
   for(int i = 0; i < N; i ++ ) {
     float ti = fract(t + float(i) / float(N));
     ti *= (1.0 + percent);
-    // alphas[i] = step(ti - percent, st.s) * step(-ti, - st.s);
+    // float _alpha = step(ti - percent, st.s) * step(-ti, - st.s);
     // 线条的宽度为 ti - (ti - percent) = percent, 左界由 smoothstep 第一个参数决定, 右界由 step 第一个参数决定
-    alphas[i] = smoothstep(ti - percent, ti , st.s) * step(-ti , - st.s);
-    alpha += alphas[i] * color.a;
+    float _alpha = smoothstep(ti - percent, ti , st.s) * step(-ti , - st.s);
+    alpha += _alpha * color.a;
   }
   
   gl_FragColor = mix(bgColor, vec4(color.rgb, 1.0), alpha);
