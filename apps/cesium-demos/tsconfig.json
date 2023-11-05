@@ -1,9 +1,0 @@
-{
-  "extends": "tsconfig/react.json",
-  "compilerOptions": {
-    "importHelpers": true,
-    "baseUrl": "."
-  },
-  "include": ["src"],
-  "exclude": ["dist"]
-}

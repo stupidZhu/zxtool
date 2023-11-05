@@ -1,8 +1,9 @@
-import { Camera } from "cesium"
+import { Camera, Viewer } from "cesium"
 import { merge } from "lodash"
 
 export interface ZCUConfigType {
   CESIUM_TOKEN?: string
+  viewerOptions?: Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
   homeView?: Parameters<Camera["flyTo"]>[0]
 }
 

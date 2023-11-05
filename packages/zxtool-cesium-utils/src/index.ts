@@ -1,4 +1,7 @@
 export { default as TrailLine2MaterialProperty } from "./materialProperty/TrailLine2MaterialProperty"
 export { default as TrailLineMaterialProperty } from "./materialProperty/TrailLineMaterialProperty"
+export { default as ViewerUtil } from "./util/ViewerUtil"
 export * from "./util/ZCUConfig"
+export * from "./widget/ScreenEventHelper"
+export { default as ScreenEventHelper } from "./widget/ScreenEventHelper"
 export { default as ViewerHelper } from "./widget/ViewerHelper"
