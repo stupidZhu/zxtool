@@ -1,13 +1,15 @@
-import { ViewerHelper } from "@zxtool/cesium-utils"
+import { InitViewerProps, ViewerHelper } from "@zxtool/cesium-utils"
 import { ClassStyle } from "@zxtool/react-utils/dist/type"
 import classNames from "classnames"
 import React, { useEffect } from "react"
 
-const Earth: React.FC<ClassStyle> = ({ className, style }) => {
-  useEffect(() => {
-    const viewer = ViewerHelper.init("cesium-container", { hideWidget: true })
-    // viewer.scene.terrainProvider = Cesium.createWorldTerrain({ requestVertexNormals: true, requestWaterMask: true })
+interface EarthProps extends ClassStyle {
+  initViewerProps?: InitViewerProps
+}
 
+const Earth: React.FC<EarthProps> = ({ initViewerProps = {}, className, style }) => {
+  useEffect(() => {
+    const viewer = ViewerHelper.init("cesium-container", initViewerProps)
     return ViewerHelper.destroy
   }, [])
 

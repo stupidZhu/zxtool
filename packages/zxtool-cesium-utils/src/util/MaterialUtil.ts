@@ -1,4 +1,14 @@
+import { IObj } from "@zxtool/utils/dist/type"
 import * as Cesium from "cesium"
+
+interface MaterialTemplate {
+  fabric: {
+    type: string
+    source: string
+    uniforms?: IObj<unknown>
+  }
+  translucent: boolean | (() => boolean)
+}
 
 interface MaterialPropertyUtil {
   defined(value: any): boolean
@@ -9,7 +19,7 @@ interface MaterialPropertyUtil {
   getValueOrDefault(property: any, time: any, valueDefault: any, result: any): any
   getValueOrClonedDefault(property: any, time: any, valueDefault: any, result: any): any
   createPropertyDescriptor(name: any, configurable?: any, createPropertyCallback?: any): any
-  addMaterial(type: string, materialTemplate: any): void
+  addMaterial(type: string, materialTemplate: MaterialTemplate): void
 }
 
 const Util: MaterialPropertyUtil = {

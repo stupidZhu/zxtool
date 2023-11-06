@@ -60,9 +60,7 @@ MaterialUtil.addMaterial("TrailLineMaterial", {
     uniforms: { image: "", speed: 5 },
     source: glsl,
   },
-  translucent() {
-    return true
-  },
+  translucent: true,
 })
 
 export default TrailLineMaterialProperty

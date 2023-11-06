@@ -3,6 +3,7 @@
   "display": "AppConfig",
   "extends": "./base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "resolveJsonModule": true
   }
 }

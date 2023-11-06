@@ -5,13 +5,12 @@ import { ZCUConfig } from "../util/ZCUConfig"
 
 export const cesiumValueHelper = new ListenValueHelper()
 
+export type InitViewerProps = Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
+
 class ViewerHelper {
   private viewer?: Cesium.Viewer
 
-  init = (
-    container: string | Element,
-    options: Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean } = {},
-  ) => {
+  init = (container: string | Element, options: InitViewerProps = {}) => {
     const { hideWidget, fxaa = true, ...rest } = options
 
     const token =
@@ -24,7 +23,8 @@ class ViewerHelper {
 
     // @ts-ignore
     hideWidget && (this.viewer.cesiumWidget.creditContainer.style.display = "none")
-    this.viewer.scene.globe.depthTestAgainstTerrain = true
+
+    // this.viewer.scene.globe.depthTestAgainstTerrain = true
 
     fxaa && _ViewerUtil.fxaa(this.viewer)
 

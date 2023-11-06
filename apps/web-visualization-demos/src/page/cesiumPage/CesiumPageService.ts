@@ -1,4 +1,4 @@
-import { primitive基础 } from "./primitive"
+import { 加载3DTiles } from "./3dtiles"
 
 class CesiumPageService {
   moduleEnter() {
@@ -11,7 +11,15 @@ class CesiumPageService {
     // initCameraGUI()
     // 世界坐标()
 
-    primitive基础()
+    // primitive基础()
+    // fabric基础()
+    // shader基础()
+
+    // 加载geojson()
+
+    // 芜湖起飞()
+
+    加载3DTiles()
   }
 }
 

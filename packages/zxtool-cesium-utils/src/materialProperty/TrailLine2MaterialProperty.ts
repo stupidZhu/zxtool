@@ -123,9 +123,7 @@ MaterialUtil.addMaterial("TrailLine2Material", {
     },
     source: glsl,
   },
-  translucent() {
-    return true
-  },
+  translucent: true,
 })
 
 export default TrailLine2MaterialProperty

@@ -1,10 +1,11 @@
-import { Camera, Viewer } from "cesium"
+import * as Cesium from "cesium"
 import { merge } from "lodash"
 
 export interface ZCUConfigType {
   CESIUM_TOKEN?: string
-  viewerOptions?: Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
-  homeView?: Parameters<Camera["flyTo"]>[0]
+  viewerOptions?: Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
+  homeView?: Parameters<Cesium.Camera["flyTo"]>[0]
+  tilesetConfig?: Omit<ConstructorParameters<typeof Cesium.Cesium3DTileset>[0], "url">
 }
 
 class ZCUC {
