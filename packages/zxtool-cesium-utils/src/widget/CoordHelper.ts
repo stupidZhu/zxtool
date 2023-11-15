@@ -9,6 +9,11 @@ class CoordHelper {
     if (c3) this.c3 = c3
   }
 
+  static translate(c3: Cesium.Cartesian3, xyz: number[]) {
+    const matrix = Cesium.Transforms.eastNorthUpToFixedFrame(c3)
+    return Cesium.Matrix4.multiplyByPoint(matrix, new Cesium.Cartesian3(...xyz), new Cesium.Cartesian3())
+  }
+
   setFromCartesian3(c3: Cesium.Cartesian3) {
     this.c3 = c3
   }
@@ -17,7 +22,7 @@ class CoordHelper {
     this.c3 = Cesium.Cartesian3.fromDegrees(...lonLatHeight)
   }
   setFromScreenCoord(screen: Cesium.Cartesian2) {
-    const c3 = this.viewer.scene.globe.pick(this.viewer.camera.getPickRay(screen), this.viewer.scene)
+    const c3 = this.viewer.scene.globe.pick(this.viewer.camera.getPickRay(screen)!, this.viewer.scene)
     if (c3) this.c3 = c3
   }
 
@@ -45,6 +50,8 @@ class CoordHelper {
 
   translate(xyz: number[]) {
     if (!this.c3) throw new Error("[@zxtool/cesium-utils - CoordHelper] 请先设置坐标")
+    this.c3 = CoordHelper.translate(this.c3, xyz)
+    return this
   }
   setHeight(height: number) {
     if (!this.c3) throw new Error("[@zxtool/cesium-utils - CoordHelper] 请先设置坐标")

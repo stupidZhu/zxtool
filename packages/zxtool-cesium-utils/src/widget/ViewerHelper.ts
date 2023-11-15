@@ -24,7 +24,7 @@ class ViewerHelper {
     // @ts-ignore
     hideWidget && (this.viewer.cesiumWidget.creditContainer.style.display = "none")
 
-    // this.viewer.scene.globe.depthTestAgainstTerrain = true
+    this.viewer.scene.globe.depthTestAgainstTerrain = true
 
     fxaa && _ViewerUtil.fxaa(this.viewer)
 

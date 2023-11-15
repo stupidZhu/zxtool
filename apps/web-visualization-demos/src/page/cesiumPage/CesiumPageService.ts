@@ -1,7 +1,9 @@
-import { 加载3DTiles } from "./3dtiles"
+import { CommonUtil } from "@zxtool/cesium-utils"
+import { 加载3DTiles } from "./3DTiles"
 
 class CesiumPageService {
   moduleEnter() {
+    CommonUtil.enableIframe()
     this.init()
   }
 
@@ -20,6 +22,9 @@ class CesiumPageService {
     // 芜湖起飞()
 
     加载3DTiles()
+    // 偏移矩阵()
+
+    // cesiumFlightTracker()
   }
 }
 

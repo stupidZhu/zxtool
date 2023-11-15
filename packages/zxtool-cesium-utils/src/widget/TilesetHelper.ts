@@ -17,7 +17,7 @@ export type TilesetObj = {
 export type TilesetFilterCondition = Partial<Omit<TilesetObj, "tileset">>
 
 export interface AddTilesetProps {
-  url: string
+  url: string | Cesium.Resource | Promise<Cesium.Resource> | Promise<string>
   key: string
   type: TilesetType
   flyTo?: boolean

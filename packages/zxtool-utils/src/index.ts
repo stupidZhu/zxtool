@@ -1,5 +1,7 @@
 export { default as CacheHelper } from "./widget/CacheHelper/CacheHelper"
 export { default as CommonUtil } from "./widget/CommonUtil/CommonUtil"
+export * from "./widget/EmitterHelper/EmitterHelper"
+export { default as EmitterHelper } from "./widget/EmitterHelper/EmitterHelper"
 export { default as FileUtil } from "./widget/FileUtil/FileUtil"
 export { default as FormatUtil } from "./widget/FormatUtil/FormatUtil"
 export { default as ListenValueHelper } from "./widget/ListenValueHelper/ListenValueHelper"

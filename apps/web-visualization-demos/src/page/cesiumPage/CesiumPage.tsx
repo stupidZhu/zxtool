@@ -5,6 +5,7 @@ import CesiumPageService from "./CesiumPageService"
 const CesiumPage = () => {
   useEffect(() => {
     CesiumPageService.moduleEnter()
+
     return () => {
       CesiumPageService.moduleExit()
     }
