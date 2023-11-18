@@ -4,6 +4,7 @@
  */
 
 import { StorageHelper } from "@zxtool/utils"
+import React from "react"
 
 const storageHelper = new StorageHelper("ZX")
 

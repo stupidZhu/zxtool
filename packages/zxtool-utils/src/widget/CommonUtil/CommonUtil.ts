@@ -1,4 +1,4 @@
-import { cloneDeep, isPlainObject, merge } from "lodash"
+import { cloneDeep, isNil, isPlainObject, merge } from "lodash"
 import { IKey, IObj, IOption } from "../../type"
 import TreeUtil from "./TreeUtil"
 
@@ -160,6 +160,39 @@ const removeStr = (str: string, config: { removeStart?: string; removeEnd?: stri
   return str.replace(reg, "")
 }
 
+/**
+ * 取默认值的工具函数
+ */
+interface GetValueOrDefaultProps<T> {
+  value: T
+  defaultValue: T
+  condition?: (v: T) => boolean
+}
+export interface GetNumberProps {
+  value: number
+  defaultValue: number
+  min?: number
+  max?: number
+  intStrategy?: "floor" | "ceil" | "round" | "trunc"
+}
+const getValueUtil = {
+  getValueOrDefault<T>(props: GetValueOrDefaultProps<T>) {
+    const { value, defaultValue, condition } = props
+    if (condition) {
+      return condition(value) ? value : defaultValue
+    }
+    return value ?? defaultValue
+  },
+  getNumber(props: GetNumberProps) {
+    const { value, defaultValue, min, max, intStrategy } = props
+    let res = value
+    if (intStrategy) res = Math[intStrategy](value)
+    if (Number.isNaN(res)) return defaultValue
+    if ((!isNil(min) && res < min) || (!isNil(max) && res > max)) return defaultValue
+    return res
+  },
+}
+
 export default {
   hashCacheKey,
   addCacheWrapper,
@@ -174,5 +207,6 @@ export default {
   union,
   genMap,
   removeStr,
+  getValueUtil,
   ...TreeUtil,
 }
