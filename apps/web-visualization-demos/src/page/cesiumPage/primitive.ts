@@ -175,3 +175,48 @@ export const shader基础 = () => {
 
   viewer.scene.primitives.add(primitive)
 }
+
+export const primitiveV = () => {
+  const viewer = ViewerHelper.getViewer()!
+  // viewer.scene.globe.depthTestAgainstTerrain = false
+
+  const geometry = new Cesium.BoxGeometry({
+    minimum: new Cesium.Cartesian3(0, 0, 0),
+    maximum: new Cesium.Cartesian3(100000, 100000, 100000),
+    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+  })
+
+  const instance1 = new Cesium.GeometryInstance({
+    geometry,
+    modelMatrix: Cesium.Matrix4.multiplyByTranslation(
+      Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(-100.0, 40.0)),
+      new Cesium.Cartesian3(0.0, 0.0, 0),
+      new Cesium.Matrix4(),
+    ),
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.TEAL),
+    },
+  })
+
+  const instance2 = new Cesium.GeometryInstance({
+    geometry,
+    modelMatrix: Cesium.Matrix4.multiplyByTranslation(
+      Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(-100.0, 40.0)),
+      new Cesium.Cartesian3(0.0, 0.0, 100000.0),
+      new Cesium.Matrix4(),
+    ),
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.PINK),
+    },
+  })
+
+  const primitive = new Cesium.Primitive({
+    geometryInstances: [instance1, instance2],
+    appearance: new Cesium.PerInstanceColorAppearance({
+      faceForward: false,
+      translucent: false,
+    }),
+  })
+
+  viewer.scene.primitives.add(primitive)
+}

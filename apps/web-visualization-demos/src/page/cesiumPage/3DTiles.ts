@@ -14,7 +14,6 @@ export const 加载3DTiles = () => {
   TilesetHelper.add({
     key: "columns",
     url: "/model/3dtiles/columns/tileset.json",
-    type: "bimModel",
     flyTo: false,
   }).then(({ tileset }) => {
     tileset.style = new Cesium.Cesium3DTileStyle({
@@ -36,7 +35,6 @@ export const 加载3DTiles = () => {
   TilesetHelper.add({
     key: "building",
     url: "/model/3dtiles/building/tileset.json",
-    type: "bimModel",
     flyTo: true,
   }).then(({ tileset }) => {
     tileset.customShader = new Cesium.CustomShader({
@@ -62,7 +60,6 @@ export const 偏移矩阵 = async () => {
   const { tileset } = await TilesetHelper.add({
     key: "columns",
     url: "/model/3dtiles/columns/tileset.json",
-    type: "bimModel",
     flyTo: true,
   })
 
@@ -97,4 +94,17 @@ export const 偏移矩阵 = async () => {
       new Cesium.Cartesian3(2, 3, 4),
     ),
   )
+}
+
+export const 点云 = async () => {
+  const viewer = ViewerHelper.getViewer()!
+
+  // const { tileset } = await TilesetHelper.add({
+  //   url: "https://assets.ion.cesium.com/ap-northeast-1/asset_depot/28945/MontrealPointCloud/v1/tileset.json?v=2",
+  //   key: 28945,
+  // })
+
+  console.log(Cesium.IonResource.fromAssetId(10890))
+
+  // viewer.flyTo(tileset)
 }

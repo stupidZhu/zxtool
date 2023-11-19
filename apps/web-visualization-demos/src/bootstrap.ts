@@ -1,9 +1,11 @@
 import { ZCUConfig } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 
+const myToken =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNjZmNmYzMi1iMWIwLTRlMmEtYWE1OC1mY2U0ZmVmMDk4ZWQiLCJpZCI6MzQyMzcsImlhdCI6MTY5NzIwMzk0MX0.BwX4c-xXJemVGcPhSD2dnntstoLyED9fUaYnoNHLwWM"
+
 ZCUConfig.setConfig({
-  CESIUM_TOKEN:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNjZmNmYzMi1iMWIwLTRlMmEtYWE1OC1mY2U0ZmVmMDk4ZWQiLCJpZCI6MzQyMzcsImlhdCI6MTY5NzIwMzk0MX0.BwX4c-xXJemVGcPhSD2dnntstoLyED9fUaYnoNHLwWM",
+  CESIUM_TOKEN: myToken,
   homeView: {
     destination: new Cesium.Cartesian3(-2849335.743037173, 4760846.116743013, 3145712.136593915),
     orientation: {

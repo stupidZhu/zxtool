@@ -41,7 +41,6 @@ export const cesiumFlightTracker = async () => {
   TilesetHelper.add({
     url: Cesium.IonResource.fromAssetId(2352154),
     key: "2352154",
-    type: "bimModel",
   }).then(({ tileset }) => {
     console.log(tileset)
     viewer.flyTo(tileset)

@@ -64,6 +64,13 @@ describe("EmitterHelper", () => {
     expect(fn1).toBeCalledTimes(2)
     expect(fn2).toBeCalledTimes(1)
     expect(fn3).toBeCalledTimes(3)
+
+    fn2.mockReset()
+    emitter.once(symbol, fn2)
+    emitter.off(symbol, fn2)
+    emitter.emit(symbol, 3)
+
+    expect(fn2).toBeCalledTimes(0)
   })
 
   test("history", () => {

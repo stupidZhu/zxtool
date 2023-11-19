@@ -1,7 +1,7 @@
 import CommonUtil, { GetNumberProps } from "../CommonUtil/CommonUtil"
 
 export type REST<T = any> = T[]
-export type EmitterHandler<T extends REST = REST> = (...rest: T) => void
+export type EmitterHandler<T extends REST = REST> = ((...rest: T) => void) & { _raw?: (...rest: T) => void }
 export type EmitterKey = string | number | symbol
 export type OverflowStrategy = "prevent" | "shift"
 
@@ -49,6 +49,7 @@ export default class EmitterHelper {
       this.off(key, _handler as EmitterHandler)
       handler(...rest)
     }
+    _handler._raw = handler
 
     this.setCollection("handler", key, _handler)
 
@@ -56,6 +57,19 @@ export default class EmitterHelper {
       const history = this.historyCollection.get(key)
       if (history?.[0]) _handler(...(history[0] as T))
     }
+  }
+
+  onceAsync(key: EmitterKey, onHistory = false) {
+    let _reject: (reason?: any) => void = () => {}
+    const promise = new Promise((resolve, reject) => {
+      _reject = reason => {
+        reject(reason)
+        this.off(key, resolve)
+      }
+      this.once(key, resolve, onHistory)
+    })
+
+    return { promise, reject: _reject }
   }
 
   emit<T extends REST>(key: EmitterKey, ...args: T) {
@@ -72,7 +86,7 @@ export default class EmitterHelper {
     const handlers = this.handlerCollection.get(key)
     if (handlers) {
       if (handler) {
-        const i = handlers.indexOf(handler)
+        const i = handlers.findIndex(item => item === handler || item._raw === handler)
         if (i !== -1) {
           handlers.splice(i, 1)
           return true

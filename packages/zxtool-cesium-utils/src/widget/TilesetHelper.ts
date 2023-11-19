@@ -1,28 +1,24 @@
-import { IObj } from "@zxtool/utils/dist/type"
+import { IKey, IObj } from "@zxtool/utils/dist/type"
 import * as Cesium from "cesium"
 import { last } from "lodash"
 import { ZCUConfig, ZCUConfigType } from "../util/ZCUConfig"
 import ViewerHelper from "./ViewerHelper"
 
-export type TilesetType = "bimModel" | "sceneModel"
-
 export type TilesetObj = {
-  key: string
-  type: TilesetType
+  key: IKey
   tileset: Cesium.Cesium3DTileset
   viewer: Cesium.Viewer
-  group?: string
+  group?: IKey
 }
 
 export type TilesetFilterCondition = Partial<Omit<TilesetObj, "tileset">>
 
 export interface AddTilesetProps {
   url: string | Cesium.Resource | Promise<Cesium.Resource> | Promise<string>
-  key: string
-  type: TilesetType
+  key: IKey
   flyTo?: boolean
   viewer?: Cesium.Viewer
-  group?: string
+  group?: IKey
   tilesetConfig?: ZCUConfigType["tilesetConfig"]
 }
 
@@ -38,7 +34,6 @@ class TilesetHelper {
     const {
       url,
       key,
-      type,
       flyTo = true,
       viewer: _viewer,
       group,
@@ -54,7 +49,7 @@ class TilesetHelper {
 
     return new Cesium.Cesium3DTileset({ url, ...tilesetConfig }).readyPromise.then(tileset => {
       viewer.scene.primitives.add(tileset)
-      this.tilesetMap[key] = { key, type, tileset, viewer, group }
+      this.tilesetMap[key] = { key, tileset, viewer, group }
       if (flyTo) viewer!.flyTo(this.tilesetMap[key].tileset)
       return this.tilesetMap[key]
     })
@@ -102,12 +97,11 @@ class TilesetHelper {
   }
 
   getTilesetObjListByCondition = (props: Partial<Omit<TilesetObj, "tileset">>) => {
-    const { key, group, viewer, type } = props
+    const { key, group, viewer } = props
     return Object.values(this.tilesetMap).filter(item => {
       if (key && item.key !== key) return false
       if (group && item.group !== group) return false
       if (viewer && item.viewer !== viewer) return false
-      if (type && item.type !== type) return false
       return true
     })
   }
