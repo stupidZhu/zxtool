@@ -24,14 +24,15 @@ group:
 
 ## result
 
-| 数据/方法    | 说明                       | 类型                                                                                            |
-| :----------- | :------------------------- | :---------------------------------------------------------------------------------------------- |
-| on           | 添加一个订阅               | `<T extends REST<any>>(key: EmitterKey, handler: EmitterHandler<T>, onHistory?: boolean): void` |
-| once         | 添加对一个只执行一次的订阅 | `<T extends REST<any>>(key: EmitterKey, handler: EmitterHandler<T>, onHistory?: boolean): void` |
-| emit         | 发布一次事件               | `<T extends REST<any>>(key: EmitterKey, ...args: T): void`                                      |
-| off          | 移除一个订阅               | `(key: EmitterKey, handler?: EmitterHandler): boolean`                                          |
-| clearHandle  | 清除订阅                   | `(key?: EmitterKey): void`                                                                      |
-| clearHistory | 清除历史记录               | `(key?: EmitterKey): void`                                                                      |
+| 数据/方法    | 说明                       | 类型                                                                                                    |
+| :----------- | :------------------------- | :------------------------------------------------------------------------------------------------------ |
+| on           | 添加一个订阅               | `<T extends REST<any>>(key: EmitterKey, handler: EmitterHandler<T>, onHistory?: boolean): void`         |
+| once         | 添加对一个只执行一次的订阅 | `<T extends REST<any>>(key: EmitterKey, handler: EmitterHandler<T>, onHistory?: boolean): void`         |
+| onceAsync    | once 的 promise 版本       | `(key: EmitterKey, onHistory?: boolean): { promise: Promise<unknown>; reject: (reason?: any) => void;}` |
+| emit         | 发布一次事件               | `<T extends REST<any>>(key: EmitterKey, ...args: T): void`                                              |
+| off          | 移除一个订阅               | `(key: EmitterKey, handler?: EmitterHandler): boolean`                                                  |
+| clearHandle  | 清除订阅                   | `(key?: EmitterKey): void`                                                                              |
+| clearHistory | 清除历史记录               | `(key?: EmitterKey): void`                                                                              |
 
 ## types
 

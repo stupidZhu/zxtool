@@ -18,6 +18,8 @@ const BaseDemo = () => {
       <button onClick={() => emitter.on("test2", console.log, true)}>on - with history - test2</button>
       <p>添加一个只执行一次事件订阅</p>
       <button onClick={() => emitter.once("test3", console.log)}>once - test3</button>
+      <p>添加一个只执行一次事件订阅 promise 版本</p>
+      <button onClick={() => emitter.onceAsync("test4").promise.then(console.log)}>once - test4</button>
       <p>添加一个能够接收所有事件的订阅</p>
       <button onClick={() => emitter.on("*", (type, ...rest) => console.log(`${type}-all`, ...rest), true)}>on - all</button>
       <hr />
@@ -27,6 +29,7 @@ const BaseDemo = () => {
         </button>
         <button onClick={() => emitter.emit("test2", "tets2")}>emit - test2</button>
         <button onClick={() => emitter.emit("test3", "tets3")}>emit - test3</button>
+        <button onClick={() => emitter.emit("test4", "tets4")}>emit - test4</button>
       </div>
       <hr />
       <div className="btn-wrapper">

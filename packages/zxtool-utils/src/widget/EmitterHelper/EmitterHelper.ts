@@ -46,8 +46,8 @@ export default class EmitterHelper {
 
   once<T extends REST>(key: EmitterKey, handler: EmitterHandler<T>, onHistory = false) {
     const _handler = (...rest: T) => {
-      this.off(key, _handler as EmitterHandler)
       handler(...rest)
+      this.off(key, _handler as EmitterHandler)
     }
     _handler._raw = handler
 
@@ -64,7 +64,6 @@ export default class EmitterHelper {
     const promise = new Promise((resolve, reject) => {
       _reject = reason => {
         reject(reason)
-        this.off(key, resolve)
       }
       this.once(key, resolve, onHistory)
     })
@@ -75,8 +74,17 @@ export default class EmitterHelper {
   emit<T extends REST>(key: EmitterKey, ...args: T) {
     this.setCollection("history", key, args)
 
-    const handlers = this.handlerCollection.get(key)
-    if (handlers) handlers.forEach(handler => handler(...args))
+    const _handlers = this.handlerCollection.get(key)
+    // ! 这里不能用 forEach
+    // 遍历的同时移除数组元素, 会有意料之外的效果
+    // if (handlers) handlers.forEach(handler => handler(...args))
+    if (_handlers) {
+      // ! 这里要浅拷贝, 防止影响原数组
+      const handlers = [..._handlers]
+      while (handlers.length) {
+        handlers.shift()?.(...args)
+      }
+    }
 
     const aHandlers = this.handlerCollection.get("*")
     if (aHandlers) aHandlers.forEach(handler => handler(key, ...args))

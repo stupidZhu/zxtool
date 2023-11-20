@@ -73,6 +73,31 @@ describe("EmitterHelper", () => {
     expect(fn2).toBeCalledTimes(0)
   })
 
+  test("多次 on 和 once 能否正常触发", () => {
+    for (let i = 0; i < 5; i++) {
+      emitter.on(symbol, fn1)
+      emitter.once(symbol, fn2)
+    }
+
+    emitter.emit(symbol, 1)
+    expect(fn1).toHaveBeenCalledTimes(5)
+    expect(fn2).toHaveBeenCalledTimes(5)
+
+    emitter.emit(symbol, 1)
+    expect(fn1).toHaveBeenCalledTimes(10)
+    expect(fn2).toHaveBeenCalledTimes(5)
+
+    for (let i = 0; i < 5; i++) {
+      emitter.on(symbol, fn1)
+      emitter.once(symbol, fn2)
+    }
+
+    emitter.emit(symbol, 1)
+    // 10 + 5 + 5
+    expect(fn1).toHaveBeenCalledTimes(20)
+    expect(fn2).toHaveBeenCalledTimes(10)
+  })
+
   test("history", () => {
     emitter.emit(symbol, 1)
     emitter.emit(symbol, {})
@@ -165,5 +190,27 @@ describe("EmitterHelper", () => {
     expect(emitter3.maxCount.handler).toBe(2)
     // @ts-ignore
     expect(emitter3.overflowStrategy.history).toBe("shift")
+  })
+
+  test("onceAsync", async () => {
+    const { promise: promise1, reject: reject1 } = emitter.onceAsync(symbol)
+    emitter.emit(symbol, 1)
+    reject1("timeout1")
+    await expect(promise1).resolves.toBe(1)
+
+    emitter.emit(symbol, 2)
+    const { promise: promise2, reject: reject2 } = emitter.onceAsync(symbol, true)
+    reject2("timeout2")
+    emitter.emit(symbol, 3)
+    await expect(promise2).resolves.toBe(1)
+
+    const { promise: promise3, reject: reject3 } = emitter.onceAsync(symbol)
+    setTimeout(() => {
+      reject3("timeout3")
+      setTimeout(() => {
+        emitter.emit(symbol, 4)
+      }, 100)
+    }, 100)
+    await expect(promise3).rejects.toMatch("timeout3")
   })
 })
