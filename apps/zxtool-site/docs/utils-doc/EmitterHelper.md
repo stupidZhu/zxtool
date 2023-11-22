@@ -24,21 +24,20 @@ group:
 
 ## result
 
-| 数据/方法    | 说明                       | 类型                                                                                                    |
-| :----------- | :------------------------- | :------------------------------------------------------------------------------------------------------ |
-| on           | 添加一个订阅               | `<T extends REST<any>>(key: EmitterKey, handler: EmitterHandler<T>, onHistory?: boolean): void`         |
-| once         | 添加对一个只执行一次的订阅 | `<T extends REST<any>>(key: EmitterKey, handler: EmitterHandler<T>, onHistory?: boolean): void`         |
-| onceAsync    | once 的 promise 版本       | `(key: EmitterKey, onHistory?: boolean): { promise: Promise<unknown>; reject: (reason?: any) => void;}` |
-| emit         | 发布一次事件               | `<T extends REST<any>>(key: EmitterKey, ...args: T): void`                                              |
-| off          | 移除一个订阅               | `(key: EmitterKey, handler?: EmitterHandler): boolean`                                                  |
-| clearHandle  | 清除订阅                   | `(key?: EmitterKey): void`                                                                              |
-| clearHistory | 清除历史记录               | `(key?: EmitterKey): void`                                                                              |
+| 数据/方法    | 说明                       | 类型                                                                                                     |
+| :----------- | :------------------------- | :------------------------------------------------------------------------------------------------------- |
+| on           | 添加一个订阅               | `<T extends REST<any>>(key: PropertyKey, handler: EmitterHandler<T>, onHistory?: boolean): void`         |
+| once         | 添加对一个只执行一次的订阅 | `<T extends REST<any>>(key: PropertyKey, handler: EmitterHandler<T>, onHistory?: boolean): void`         |
+| onceAsync    | once 的 promise 版本       | `(key: PropertyKey, onHistory?: boolean): { promise: Promise<unknown>; reject: (reason?: any) => void;}` |
+| emit         | 发布一次事件               | `<T extends REST<any>>(key: PropertyKey, ...args: T): void`                                              |
+| off          | 移除一个订阅               | `(key: PropertyKey, handler?: EmitterHandler): boolean`                                                  |
+| clearHandle  | 清除订阅                   | `(key?: PropertyKey): void`                                                                              |
+| clearHistory | 清除历史记录               | `(key?: PropertyKey): void`                                                                              |
 
 ## types
 
-| 类型                                    | 说明                 | 定义                         |
-| :-------------------------------------- | :------------------- | :--------------------------- |
-| `REST<T = any>`                         | ...rest 参数的类型   | `T[]`                        |
-| `EmitterHandler<T extends REST = REST>` | 订阅函数             | `(...rest: T) => void`       |
-| `EmitterKey`                            | key 的类型           | `string \| number \| symbol` |
-| `OverflowStrategy`                      | 超出限制时的处理策略 | `"prevent" \| "shift"`       |
+| 类型                                    | 说明                 | 定义                   |
+| :-------------------------------------- | :------------------- | :--------------------- |
+| `REST<T = any>`                         | ...rest 参数的类型   | `T[]`                  |
+| `EmitterHandler<T extends REST = REST>` | 订阅函数             | `(...rest: T) => void` |
+| `OverflowStrategy`                      | 超出限制时的处理策略 | `"prevent" \| "shift"` |

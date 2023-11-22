@@ -1,0 +1,7 @@
+{
+  "root": true,
+  "extends": ["custom/ts"],
+  "rules": {
+    "@typescript-eslint/no-unsafe-declaration-merging": "off"
+  }
+}

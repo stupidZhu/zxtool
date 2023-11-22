@@ -1,41 +1,36 @@
-import { ListenValueHelper } from "@zxtool/utils"
+import { EmitterHelper } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import _ViewerUtil from "../_util/_ViewerUtil"
 import { ZCUConfig } from "../util/ZCUConfig"
-
-export const cesiumValueHelper = new ListenValueHelper()
 
 export type InitViewerProps = Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
 
 class ViewerHelper {
   private viewer?: Cesium.Viewer
+  private vKey = Symbol("viewer")
+  private emitter = new EmitterHelper({ maxCount: { history: 1 } })
 
   init = (container: string | Element, options: InitViewerProps = {}) => {
     const { hideWidget, fxaa = true, ...rest } = options
 
-    const token =
-      ZCUConfig.getConfig("CESIUM_TOKEN", false) ??
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNjZmNmYzMi1iMWIwLTRlMmEtYWE1OC1mY2U0ZmVmMDk4ZWQiLCJpZCI6MzQyMzcsImlhdCI6MTY5NzIwMzk0MX0.BwX4c-xXJemVGcPhSD2dnntstoLyED9fUaYnoNHLwWM"
-    Cesium.Ion.defaultAccessToken = token
+    const token = ZCUConfig.getConfig("CESIUM_TOKEN", false)
+    if (token) Cesium.Ion.defaultAccessToken = token
 
     this.viewer = new Cesium.Viewer(container, { ...(hideWidget ? _ViewerUtil.getHideWidgetOption() : null), ...rest })
-    cesiumValueHelper.setValue("viewer", this.viewer)
+    this.emitter.emit(this.vKey, this.viewer)
 
     // @ts-ignore
     hideWidget && (this.viewer.cesiumWidget.creditContainer.style.display = "none")
-
-    this.viewer.scene.globe.depthTestAgainstTerrain = true
-
     fxaa && _ViewerUtil.fxaa(this.viewer)
 
-    this.viewer.scene.backgroundColor = Cesium.Color.fromCssColorString("rgba(0,0,0,0)")
+    this.viewer.scene.globe.depthTestAgainstTerrain = true
 
     return this.viewer
   }
 
   setViewer = (viewer: Cesium.Viewer) => {
     this.viewer = viewer
-    cesiumValueHelper.setValue("viewer", viewer)
+    this.emitter.emit(this.vKey, this.viewer)
   }
 
   getViewer = (): Cesium.Viewer | undefined => this.viewer
@@ -43,7 +38,7 @@ class ViewerHelper {
   getViewerPromise = async (viewer?: Cesium.Viewer) => {
     if (viewer) return viewer
     if (this.viewer) return this.viewer
-    return cesiumValueHelper.addListener<Cesium.Viewer>("viewer")
+    return this.emitter.onceAsync<Cesium.Viewer>(this.vKey, true).promise
   }
 
   flyToHome = () => {
@@ -54,7 +49,7 @@ class ViewerHelper {
   destroy = () => {
     this.viewer?.destroy()
     this.viewer = undefined
-    cesiumValueHelper.setValue("viewer", null)
+    this.emitter.clearHistory()
   }
 }
 

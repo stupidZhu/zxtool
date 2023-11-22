@@ -2,7 +2,6 @@ import CommonUtil, { GetNumberProps } from "../CommonUtil/CommonUtil"
 
 export type REST<T = any> = T[]
 export type EmitterHandler<T extends REST = REST> = ((...rest: T) => void) & { _raw?: (...rest: T) => void }
-export type EmitterKey = string | number | symbol
 export type OverflowStrategy = "prevent" | "shift"
 
 // todo 研究一下是否有内存泄漏的风险
@@ -14,8 +13,8 @@ export interface EmitterProps {
 const getNumberProps: Omit<GetNumberProps, "value"> = { defaultValue: 0, min: 0, max: 1000, intStrategy: "trunc" }
 
 export default class EmitterHelper {
-  private handlerCollection: Map<EmitterKey, EmitterHandler[]> = new Map()
-  private historyCollection: Map<EmitterKey, REST[]> = new Map()
+  private handlerCollection: Map<PropertyKey, EmitterHandler[]> = new Map()
+  private historyCollection: Map<PropertyKey, REST[]> = new Map()
 
   private maxCount = { history: 0, handler: 0 }
   private overflowStrategy = { history: "shift", handler: "shift" }
@@ -35,7 +34,7 @@ export default class EmitterHelper {
    * 如果 key 为 *, 不支持触发历史消息 (onHistory 无效)
    * 因为 historyCollection 的 key 不可能为 *
    */
-  on<T extends REST>(key: EmitterKey, handler: EmitterHandler<T>, onHistory = false) {
+  on<T extends REST>(key: PropertyKey, handler: EmitterHandler<T>, onHistory = false) {
     this.setCollection("handler", key, handler)
 
     if (onHistory) {
@@ -44,7 +43,7 @@ export default class EmitterHelper {
     }
   }
 
-  once<T extends REST>(key: EmitterKey, handler: EmitterHandler<T>, onHistory = false) {
+  once<T extends REST>(key: PropertyKey, handler: EmitterHandler<T>, onHistory = false) {
     const _handler = (...rest: T) => {
       handler(...rest)
       this.off(key, _handler as EmitterHandler)
@@ -59,9 +58,9 @@ export default class EmitterHelper {
     }
   }
 
-  onceAsync(key: EmitterKey, onHistory = false) {
+  onceAsync<T>(key: PropertyKey, onHistory = false) {
     let _reject: (reason?: any) => void = () => {}
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<T>((resolve, reject) => {
       _reject = reason => {
         reject(reason)
       }
@@ -71,7 +70,7 @@ export default class EmitterHelper {
     return { promise, reject: _reject }
   }
 
-  emit<T extends REST>(key: EmitterKey, ...args: T) {
+  emit<T extends REST>(key: PropertyKey, ...args: T) {
     this.setCollection("history", key, args)
 
     const _handlers = this.handlerCollection.get(key)
@@ -90,7 +89,7 @@ export default class EmitterHelper {
     if (aHandlers) aHandlers.forEach(handler => handler(key, ...args))
   }
 
-  off(key: EmitterKey, handler?: EmitterHandler) {
+  off(key: PropertyKey, handler?: EmitterHandler) {
     const handlers = this.handlerCollection.get(key)
     if (handlers) {
       if (handler) {
@@ -107,19 +106,19 @@ export default class EmitterHelper {
     return false
   }
 
-  clearHandle(key?: EmitterKey) {
+  clearHandle(key?: PropertyKey) {
     if (key) this.off(key)
     else this.handlerCollection.clear()
   }
 
-  clearHistory(key?: EmitterKey) {
+  clearHistory(key?: PropertyKey) {
     if (key) {
       const history = this.historyCollection.get(key)
       if (history) this.historyCollection.set(key, [])
     } else this.historyCollection.clear()
   }
 
-  private setCollection(type: "history" | "handler", key: EmitterKey, value: any) {
+  private setCollection(type: "history" | "handler", key: PropertyKey, value: any) {
     if (type === "handler") {
       const handlers = this.handlerCollection.get(key)
       if (!handlers) {

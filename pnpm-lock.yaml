@@ -47,6 +47,9 @@ importers:
       '@zxtool/react-utils':
         specifier: workspace:*
         version: link:../../packages/zxtool-react-utils
+      '@zxtool/three-utils':
+        specifier: workspace:*
+        version: link:../../packages/zxtool-three-utils
       '@zxtool/utils':
         specifier: workspace:*
         version: link:../../packages/zxtool-utils
@@ -71,6 +74,9 @@ importers:
       react-router-dom:
         specifier: 6.17.0
         version: 6.17.0(react-dom@18.2.0)(react@18.2.0)
+      three:
+        specifier: ^0.158.0
+        version: 0.158.0
     devDependencies:
       '@types/jest':
         specifier: ^29.5.7
@@ -84,6 +90,9 @@ importers:
       '@types/react-dom':
         specifier: 18.2.7
         version: 18.2.7
+      '@types/three':
+        specifier: ^0.158.2
+        version: 0.158.2
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.0.0
         version: 6.5.0(@typescript-eslint/parser@6.5.0)(eslint@8.48.0)(typescript@4.9.5)
@@ -446,6 +455,76 @@ importers:
       tslib:
         specifier: ^2.4.0
         version: 2.5.0
+      typescript:
+        specifier: ^4.8.3
+        version: 4.9.5
+
+  packages/zxtool-three-utils:
+    dependencies:
+      '@zxtool/utils':
+        specifier: workspace:*
+        version: link:../zxtool-utils
+      dayjs:
+        specifier: ^1.11.5
+        version: 1.11.5
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@rollup/plugin-commonjs':
+        specifier: ^22.0.1
+        version: 22.0.2(rollup@2.79.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^13.3.0
+        version: 13.3.0(rollup@2.79.0)
+      '@types/lodash':
+        specifier: ^4.14.185
+        version: 4.14.185
+      '@types/node':
+        specifier: ^18.7.18
+        version: 18.7.18
+      '@types/rollup-plugin-auto-external':
+        specifier: ^2.0.2
+        version: 2.0.2
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      esbuild:
+        specifier: ^0.15.7
+        version: 0.15.7
+      eslint:
+        specifier: ^8.24.0
+        version: 8.48.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
+      rimraf:
+        specifier: ^3.0.2
+        version: 3.0.2
+      rollup:
+        specifier: ^2.77.0
+        version: 2.79.0
+      rollup-plugin-auto-external:
+        specifier: ^2.0.0
+        version: 2.0.0(rollup@2.79.0)
+      rollup-plugin-copy:
+        specifier: ^3.4.0
+        version: 3.4.0
+      rollup-plugin-esbuild:
+        specifier: ^4.10.1
+        version: 4.10.1(esbuild@0.15.7)(rollup@2.79.0)
+      rollup-plugin-terser:
+        specifier: ^7.0.2
+        version: 7.0.2(rollup@2.79.0)
+      three:
+        specifier: 0.158.0
+        version: 0.158.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
       typescript:
         specifier: ^4.8.3
         version: 4.9.5
@@ -4322,6 +4401,10 @@ packages:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
     dev: true
 
+  /@types/stats.js@0.17.3:
+    resolution: {integrity: sha512-pXNfAD3KHOdif9EQXZ9deK82HVNaXP5ZIF5RP2QG6OQFNTaY2YIetfrE9t528vEreGQvEPRDDc8muaoYeK0SxQ==}
+    dev: true
+
   /@types/stylis@4.2.1:
     resolution: {integrity: sha512-OSaMrXUKxVigGlKRrET39V2xdhzlztQ9Aqumn1WbCBKHOi9ry7jKSd7rkyj0GzmWaU960Rd+LpOFpLfx5bMQAg==}
     dev: true
@@ -4332,11 +4415,24 @@ packages:
       '@types/jest': 28.1.8
     dev: true
 
+  /@types/three@0.158.2:
+    resolution: {integrity: sha512-KPYbdLI8VPhu7qnHqsayfkuk58Qk+20l1U5HBK7uG50EjtrqeCreurNNpnatMZje29XRuTM1A+pGHGdDBHPyUQ==}
+    dependencies:
+      '@types/stats.js': 0.17.3
+      '@types/webxr': 0.5.8
+      fflate: 0.6.10
+      meshoptimizer: 0.18.1
+    dev: true
+
   /@types/tough-cookie@4.0.3:
     resolution: {integrity: sha512-THo502dA5PzG/sfQH+42Lw3fvmYkceefOspdCwpHRul8ik2Jv1K8I5OZz1AT3/rs46kwgMCe9bSBmDLYkkOMGg==}
 
   /@types/unist@2.0.8:
     resolution: {integrity: sha512-d0XxK3YTObnWVp6rZuev3c49+j4Lo8g4L1ZRm9z5L0xpoZycUPshHgczK5gsUMaZOstjVYYi09p5gYvUtfChYw==}
+    dev: true
+
+  /@types/webxr@0.5.8:
+    resolution: {integrity: sha512-9vRpV4nMzuZIdJiu/nHUk1AQV0cguaBI32DIauJXBxpvG3wiXk3VD+kQKx111V7I/YvAoGyJZTyhaWODYEbZ0w==}
     dev: true
 
   /@types/yargs-parser@21.0.1:
@@ -9078,6 +9174,10 @@ packages:
     dependencies:
       node-domexception: 1.0.0
       web-streams-polyfill: 3.2.1
+    dev: true
+
+  /fflate@0.6.10:
+    resolution: {integrity: sha512-IQrh3lEPM93wVCEczc9SaAOvkmcoQn/G8Bo1e8ZPlY3X3bnAxWaBdvTdvM1hP62iZp0BXWDy4vTAy4fF0+Dlpg==}
     dev: true
 
   /figures@2.0.0:
@@ -17099,6 +17199,9 @@ packages:
     dependencies:
       real-require: 0.1.0
     dev: true
+
+  /three@0.158.0:
+    resolution: {integrity: sha512-TALj4EOpdDPF1henk2Q+s17K61uEAAWQ7TJB68nr7FKxqwyDr3msOt5IWdbGm4TaWKjrtWS8DJJWe9JnvsWOhQ==}
 
   /throttle-debounce@5.0.0:
     resolution: {integrity: sha512-2iQTSgkkc1Zyk0MeVrt/3BvuOXYPl/R8Z0U2xxo9rjwNciaHDG3R+Lm6dh4EeUci49DanvBnuqI6jshoQQRGEg==}
