@@ -3,36 +3,36 @@ import { CSSProperties } from "react"
 export type IPosition = { top: number; left: number }
 export type ISize = { width: number; height: number }
 
-export type DialogMoveCb = (props: {
-  type: "moving" | "moveStart" | "moveEnd"
-  position: IPosition
-  mousePosition: IPosition
-}) => void
-export type DialogResizeCb = (props: {
-  type: "resizing" | "resizeStart" | "resizeEnd"
-  size: ISize
-  mousePosition: IPosition
-}) => void
+export type DialogMoveCb = (props: { position: IPosition; pointerPosition: IPosition }) => void
+export type DialogResizeCb = (props: { size: ISize; pointerPosition: IPosition }) => void
 
 interface UtilOptions<CB extends Function> {
   dialog: HTMLElement
-  afterMousedown?: CB
-  beforeMousemove?: CB
-  afterMousemove?: CB
-  beforeMouseup?: CB
-  afterMouseup?: CB
+  afterPointerdown?: CB
+  beforePointermove?: CB
+  afterPointermove?: CB
+  beforePointerup?: CB
+  afterPointerup?: CB
 }
 
-type ResizeFuncUtilOptions = UtilOptions<(size: ISize, mousePosition: IPosition) => void> & {
+type ResizeFuncUtilOptions = UtilOptions<(size: ISize, pointerPosition: IPosition) => void> & {
   minWidth: number
   minHeight: number
 }
 export const resizeFunc = (e: any, options: ResizeFuncUtilOptions) => {
-  const { dialog, minWidth, minHeight, afterMousedown, beforeMousemove, afterMousemove, beforeMouseup, afterMouseup } =
-    options
-
+  const {
+    dialog,
+    minWidth,
+    minHeight,
+    afterPointerdown,
+    beforePointermove,
+    afterPointermove,
+    beforePointerup,
+    afterPointerup,
+  } = options
   const { layerX = 0, layerY = 0, clientX, clientY } = e
-  const { offsetWidth = 0, offsetHeight = 0 } = e?.target ?? {}
+  const target = e.target as HTMLElement
+  const { offsetWidth = 0, offsetHeight = 0 } = target
   const offsetX = offsetWidth - layerX || 5
   const offsetY = offsetHeight - layerY || 5
 
@@ -41,16 +41,16 @@ export const resizeFunc = (e: any, options: ResizeFuncUtilOptions) => {
     { left: clientX, top: clientY },
   ]
 
-  afterMousedown?.(...paramState)
+  afterPointerdown?.(...paramState)
 
-  document.onmouseup = () => {
-    beforeMouseup?.(...paramState)
-    document.onmousemove = null
-    document.onmouseup = null
-    afterMouseup?.(...paramState)
+  document.onpointerup = () => {
+    beforePointerup?.(...paramState)
+    document.onpointermove = null
+    document.onpointerup = null
+    afterPointerup?.(...paramState)
   }
-  document.onmousemove = (e: MouseEvent) => {
-    beforeMousemove?.(...paramState)
+  document.onpointermove = (e: PointerEvent) => {
+    beforePointermove?.(...paramState)
     let width = e.clientX - dialog.offsetLeft + offsetX
     let height = e.clientY - dialog.offsetTop + offsetY
 
@@ -66,15 +66,14 @@ export const resizeFunc = (e: any, options: ResizeFuncUtilOptions) => {
       { width, height },
       { left: e.clientX, top: e.clientY },
     ]
-    afterMousemove?.(...paramState)
+    afterPointermove?.(...paramState)
   }
 }
 
-type MoveFuncUtilOptions = UtilOptions<(position: IPosition, mousePosition: IPosition) => void> & { confine: boolean }
-export const moveFunc = (e: HTMLElementEventMap["mousedown"], options: MoveFuncUtilOptions) => {
-  const { dialog, confine, afterMousedown, beforeMousemove, afterMousemove, beforeMouseup, afterMouseup } = options
-
-  const { clientX, clientY } = e as MouseEvent
+type MoveFuncUtilOptions = UtilOptions<(position: IPosition, pointerPosition: IPosition) => void> & { confine: boolean }
+export const moveFunc = (e: PointerEvent, options: MoveFuncUtilOptions) => {
+  const { dialog, confine, afterPointerdown, beforePointermove, afterPointermove, beforePointerup, afterPointerup } = options
+  const { clientX, clientY } = e
 
   // 代表鼠标坐标到 dialog 左上角的 offset
   const offset = { x: 0, y: 0 }
@@ -86,17 +85,19 @@ export const moveFunc = (e: HTMLElementEventMap["mousedown"], options: MoveFuncU
     { left: clientX, top: clientY },
   ]
 
-  afterMousedown?.(...paramState)
+  resetStyle(dialog)
+  afterPointerdown?.(...paramState)
 
-  document.onmouseup = () => {
-    beforeMouseup?.(...paramState)
-    document.onmousemove = null
-    document.onmouseup = null
-    afterMouseup?.(...paramState)
+  document.onpointerup = () => {
+    beforePointerup?.(...paramState)
+    document.onpointermove = null
+    document.onpointerup = null
+    afterPointerup?.(...paramState)
   }
 
-  document.onmousemove = (e: MouseEvent) => {
-    beforeMousemove?.(...paramState)
+  document.onpointermove = (e: PointerEvent) => {
+    e.preventDefault()
+    beforePointermove?.(...paramState)
     let x: number = e.clientX - offset.x
     let y: number = e.clientY - offset.y
 
@@ -115,7 +116,7 @@ export const moveFunc = (e: HTMLElementEventMap["mousedown"], options: MoveFuncU
       { left: x, top: y },
       { left: e.clientX, top: e.clientY },
     ]
-    afterMousemove?.(...paramState)
+    afterPointermove?.(...paramState)
   }
 }
 

@@ -12,8 +12,6 @@ group:
 
 <code src="./demo/useDialog/provider.tsx"></code>
 
-<code src="./demo/useDialog/DialogV2.tsx"></code>
-
 ## props
 
 | 参数           | 说明                                            | 类型                     | 默认值                        |

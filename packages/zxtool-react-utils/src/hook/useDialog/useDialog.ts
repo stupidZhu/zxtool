@@ -1,192 +1,121 @@
-import { CSSProperties, useCallback, useEffect, useRef } from "react"
+import { useMemoizedFn } from "ahooks"
+import { nanoid } from "nanoid"
+import { useEffect, useRef } from "react"
 import { useConfigContext } from "../../component/ConfigProvider/ConfigProvider"
-import { IRef } from "../../type"
 import { getCurrent } from "../../util"
 import { useWatchRefEffect } from "../effect/useWatchEffect"
-
-export type IPosition = { top: number; left: number }
-export type ISize = { width: number; height: number }
-
-export type DialogMoveCb = (props: {
-  type: "moving" | "moveStart" | "moveEnd"
-  position: IPosition
-  mousePosition: IPosition
-}) => void
-export type DialogResizeCb = (props: {
-  type: "resizing" | "resizeStart" | "resizeEnd"
-  size: ISize
-  mousePosition: IPosition
-}) => void
-
+import { DialogMoveCb, DialogResizeCb, ISize, moveFunc, resizeFunc } from "./util"
+export type { DialogMoveCb, DialogResizeCb, ISize } from "./util"
 export interface UseDialogProps {
-  dialogRef: IRef<HTMLElement>
-  moveFieldRef?: IRef<HTMLElement>
-  resizeFieldRef?: IRef<HTMLElement>
   minSize?: ISize
   confine?: boolean
-  moveCb?: DialogMoveCb
-  resizeCb?: DialogResizeCb
-}
-
-const resetStyle = (dom: HTMLElement) => {
-  const style: CSSProperties = { position: "fixed", right: "unset", bottom: "unset" }
-  Object.entries(style).forEach(([k, v]) => (dom.style[k] = v))
+  onMoveStart?: DialogMoveCb
+  onMoving?: DialogMoveCb
+  onMoveEnd?: DialogMoveCb
+  onResizeStart?: DialogResizeCb
+  onResizing?: DialogResizeCb
+  onResizeEnd?: DialogResizeCb
 }
 
 const useDialog = (props: UseDialogProps) => {
   const {
-    moveFieldRef,
-    dialogRef,
-    resizeFieldRef,
     minSize = { width: 200, height: 150 },
     confine = true,
-    moveCb,
-    resizeCb,
+    onMoveStart,
+    onMoving,
+    onMoveEnd,
+    onResizeStart,
+    onResizing,
+    onResizeEnd,
   } = props
   const { width: minWidth, height: minHeight } = minSize
   const { dialogField } = useConfigContext() ?? {}
   const { getMaxZIndex, addKey, delKey } = dialogField ?? {}
 
-  // 代表鼠标坐标到 dialog 左上角的 offset
-  const { current: offset } = useRef({ x: 0, y: 0 })
-  const { current: resetStyleFlag } = useRef({ move: false, resize: false })
-  const uniqueKey = useRef(Date.now() + Math.random())
+  const uniqueKey = useRef(nanoid())
+  const moveHandlerRef = useRef<HTMLElement | null>()
+  const resizeHandlerRef = useRef<HTMLElement | null>()
+  const dialogRef = useRef<HTMLElement | null>(null)
+  const setRef = useMemoizedFn((node: HTMLElement | null, type: "dialog" | "moveHandler" | "resizeHandler") => {
+    if (type === "dialog") dialogRef.current = node
+    else if (type === "moveHandler") moveHandlerRef.current = node
+    else resizeHandlerRef.current = node
 
-  const stateRef = useRef<{ isMoving: boolean; isResizing: boolean }>({ isMoving: false, isResizing: false })
-
-  const getDialogInfo = useCallback(() => getCurrent(dialogRef)?.getBoundingClientRect(), [dialogRef])
-  const setDialogInfo = useCallback(
-    (props: { top?: string; left?: string; width?: string; height?: string }) => {
-      const dialog = getCurrent(dialogRef)
-      if (!dialog) return
-      Object.entries(props).forEach(([k, v]) => (dialog.style[k] = v))
-    },
-    [dialogRef],
-  )
-
-  const moveFunc = useCallback(
-    (e: Event) => {
-      const box = getCurrent(dialogRef)
-      if (!box) return
-      box.style.zIndex = getMaxZIndex?.() ?? "1000"
-      const { clientX, clientY } = e as MouseEvent
-
-      offset.x = clientX - box.offsetLeft
-      offset.y = clientY - box.offsetTop
-
-      let paramState: [IPosition, IPosition] = [
-        { left: clientX - offset.x, top: clientY - offset.y },
-        { left: clientX, top: clientY },
-      ]
-      moveCb?.({ type: "moveStart", position: paramState[0], mousePosition: paramState[1] })
-
-      document.onmouseup = () => {
-        moveCb?.({ type: "moveEnd", position: paramState[0], mousePosition: paramState[1] })
-        resetStyleFlag.move = false
-        document.onmousemove = null
-        document.onmouseup = null
-        setTimeout(() => (stateRef.current.isMoving = false))
-      }
-
-      document.onmousemove = (e: MouseEvent) => {
-        stateRef.current.isMoving = true
-        let x: number = e.clientX - offset.x
-        let y: number = e.clientY - offset.y
-
-        if (confine) {
-          // 不允许超出屏幕
-          if (x > window.innerWidth - box.offsetWidth) x = window.innerWidth - box.offsetWidth
-          if (y > window.innerHeight - box.offsetHeight) y = window.innerHeight - box.offsetHeight
-          if (x < 0) x = 0
-          if (y < 0) y = 0
-        }
-
-        box.style.left = x + "px"
-        box.style.top = y + "px"
-
-        if (!resetStyleFlag.move) {
-          resetStyleFlag.move = true
-          resetStyle(box)
-        }
-
-        paramState = [
-          { left: x, top: y },
-          { left: e.clientX, top: e.clientY },
-        ]
-        moveCb?.({ type: "moving", position: paramState[0], mousePosition: paramState[1] })
-      }
-    },
-    [dialogRef, offset, moveCb],
-  )
-
-  const resizeFunc = useCallback(
-    (e: any) => {
-      const { layerX = 0, layerY = 0, clientX, clientY } = e
-      const { offsetWidth = 0, offsetHeight = 0 } = e?.target ?? {}
-      const offsetX = offsetWidth - layerX || 5
-      const offsetY = offsetHeight - layerY || 5
-
-      const box = getCurrent(dialogRef)
-      if (!box) return
-      box.style.zIndex = getMaxZIndex?.() ?? "1000"
-
-      let paramState: [ISize, IPosition] = [
-        { width: clientX - box.offsetLeft + offsetX, height: clientY - box.offsetTop + offsetY },
-        { left: clientX, top: clientY },
-      ]
-      resizeCb?.({ type: "resizeStart", size: paramState[0], mousePosition: paramState[1] })
-
-      document.onmouseup = () => {
-        resizeCb?.({ type: "resizeEnd", size: paramState[0], mousePosition: paramState[1] })
-        document.onmousemove = null
-        document.onmouseup = null
-        setTimeout(() => (stateRef.current.isResizing = false))
-      }
-      document.onmousemove = (e: MouseEvent) => {
-        stateRef.current.isResizing = true
-        let width = e.clientX - box.offsetLeft + offsetX
-        let height = e.clientY - box.offsetTop + offsetY
-
-        if (width < minWidth) width = minWidth
-        if (height < minHeight) height = minHeight
-        if (width > window.innerWidth) width = window.innerWidth
-        if (height > window.innerHeight) height = window.innerHeight
-
-        box.style.width = width + "px"
-        box.style.height = height + "px"
-
-        paramState = [
-          { width, height },
-          { left: e.clientX, top: e.clientY },
-        ]
-        resizeCb?.({ type: "resizing", size: paramState[0], mousePosition: paramState[1] })
-      }
-    },
-    [dialogRef, minHeight, minWidth, resizeCb],
-  )
-
-  useWatchRefEffect(
-    (el, prevEl) => {
-      el?.addEventListener("mousedown", moveFunc)
-      prevEl?.removeEventListener("mousedown", moveFunc)
-    },
-    moveFieldRef,
-    true,
-  )
-
-  useWatchRefEffect(
-    (el, prevEl) => {
-      el?.addEventListener("mousedown", resizeFunc)
-      prevEl?.removeEventListener("mousedown", resizeFunc)
-    },
-    resizeFieldRef,
-    true,
-  )
-
-  useEffect(() => {
     const dialog = getCurrent(dialogRef)
     if (dialog) dialog.style.zIndex = getMaxZIndex?.() ?? "1000"
   })
+
+  const getDialogInfo = useMemoizedFn(() => getCurrent(dialogRef)?.getBoundingClientRect())
+  const setDialogInfo = useMemoizedFn((props: { top?: string; left?: string; width?: string; height?: string }) => {
+    const dialog = getCurrent(dialogRef)
+    if (!dialog) return
+    Object.entries(props).forEach(([k, v]) => (dialog.style[k] = v))
+  })
+
+  const onMove = useMemoizedFn((e: PointerEvent) => {
+    const dialog = getCurrent(dialogRef)
+    if (!dialog) return
+    dialog.style.zIndex = getMaxZIndex?.() ?? "1000"
+
+    moveFunc(e, {
+      dialog,
+      confine,
+      afterPointerdown(position, pointerPosition) {
+        onMoveStart?.({ position, pointerPosition })
+      },
+      afterPointermove(position, pointerPosition) {
+        onMoving?.({ position, pointerPosition })
+      },
+      afterPointerup(position, pointerPosition) {
+        onMoveEnd?.({ position, pointerPosition })
+      },
+    })
+  })
+
+  const onResize = useMemoizedFn((e: PointerEvent) => {
+    const dialog = getCurrent(dialogRef)
+    if (!dialog) return
+    dialog.style.zIndex = getMaxZIndex?.() ?? "1000"
+
+    resizeFunc(e, {
+      dialog,
+      minWidth,
+      minHeight,
+      afterPointerdown(size, pointerPosition) {
+        onResizeStart?.({ size, pointerPosition })
+      },
+      afterPointermove(size, pointerPosition) {
+        onResizing?.({ size, pointerPosition })
+      },
+      afterPointerup(size, pointerPosition) {
+        onResizeEnd?.({ size, pointerPosition })
+      },
+    })
+  })
+
+  useWatchRefEffect(
+    (el, prevEl) => {
+      if (el) {
+        el.style.touchAction = "none"
+        el.addEventListener("pointerdown", onMove)
+      }
+      prevEl?.removeEventListener("pointerdown", onMove)
+    },
+    moveHandlerRef,
+    true,
+  )
+
+  useWatchRefEffect(
+    (el, prevEl) => {
+      if (el) {
+        el.style.touchAction = "none"
+        el.addEventListener("pointerdown", onResize)
+      }
+      prevEl?.removeEventListener("pointerdown", onResize)
+    },
+    resizeHandlerRef,
+    true,
+  )
 
   useEffect(() => {
     const key = uniqueKey.current
@@ -194,7 +123,7 @@ const useDialog = (props: UseDialogProps) => {
     return () => delKey?.(key)
   }, [])
 
-  return { state: stateRef.current, getDialogInfo, setDialogInfo }
+  return { setRef, getDialogInfo, setDialogInfo }
 }
 
 export default useDialog

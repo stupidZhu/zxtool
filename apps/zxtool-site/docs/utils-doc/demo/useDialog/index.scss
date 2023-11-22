@@ -9,14 +9,6 @@
   width: 400px;
   height: 300px;
   background-color: cadetblue;
-  &.dialog-a {
-  }
-  &.dialog-b {
-    background-color: $theme-light-blue;
-    .move-field {
-      background-color: $theme-light-green;
-    }
-  }
   .move-field {
     display: flex;
     align-items: center;
@@ -42,5 +34,6 @@
   .use-dialog-content {
     flex: 1;
     overflow: auto;
+    padding: 10px;
   }
 }
