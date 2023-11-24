@@ -4,15 +4,17 @@ import React, { PropsWithChildren, useRef } from "react"
 import "./index.scss"
 
 interface Props extends UseDialogProps, PropsWithChildren {
+  visible: boolean
   close: () => void
+  title?: React.ReactNode
   position?: IPosition
 }
 
-export const MyDialog: React.FC<Props> = props => {
-  const { close, position = { left: 0, top: 0 }, children, onMoving, onMoveEnd, onResizing, onResizeEnd, ...rest } = props
+export const MyDialog: React.FC<Props> = React.memo(props => {
+  const { visible, close, title, position = {}, children, onMoving, onMoveEnd, onResizing, onResizeEnd, ...rest } = props
   const changingRef = useRef(false)
 
-  const { setRef } = useDialog({
+  const { setDialogRef, setMoveHandleRef, setResizeHandleRef, toBottom } = useDialog({
     onMoving(...rest) {
       changingRef.current = true
       onMoving?.(...rest)
@@ -32,15 +34,18 @@ export const MyDialog: React.FC<Props> = props => {
     ...rest,
   })
 
+  if (!visible) return null
+
   return (
-    <div className="use-dialog " ref={node => setRef(node, "dialog")} style={{ ...position }}>
+    <div className="use-dialog" ref={setDialogRef} style={{ ...position }}>
       <div
         className="move-field"
-        ref={node => setRef(node, "moveHandler")}
+        ref={setMoveHandleRef}
         onClick={() => {
           if (!changingRef.current) console.log("hello")
         }}
       >
+        <div className="title-wrapper">{title}</div>
         <button
           onClick={e => {
             e.stopPropagation()
@@ -51,14 +56,18 @@ export const MyDialog: React.FC<Props> = props => {
         </button>
       </div>
       <div className="use-dialog-content">{children}</div>
-      <span className="desc">鼠标移动到此处 resize -&gt;</span>
+      <span className="resize-desc">resize -&gt;</span>
+      <span className="to-bottom-desc">&lt;- to bottom</span>
       <div
         className="resize-field"
-        ref={node => setRef(node, "resizeHandler")}
+        ref={setResizeHandleRef}
         onClick={() => {
           if (!changingRef.current) console.log("world")
         }}
       ></div>
+      <div className="to-bottom-field" onClick={() => toBottom()}></div>
     </div>
   )
-}
+})
+
+MyDialog.displayName = "MyDialog"

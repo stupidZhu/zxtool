@@ -3,7 +3,7 @@
  * desc: 可拖拽, 可变大小弹窗。
  */
 import React, { useState } from "react"
-import { MyDialog } from "./MyDialog"
+import { MyDialog } from "./Mydialog"
 
 const BaseDemo = () => {
   const [show, setShow] = useState(false)
@@ -15,12 +15,10 @@ const BaseDemo = () => {
           toggleDialog
         </button>
       </div>
-      {show && (
-        <MyDialog position={{ left: 500, top: 300 }} close={() => setShow(false)}>
-          这是一个可拖拽, 可变大小弹窗。需要用户自行编写相关dom组件; useDialog hook 只提供可拖拽和 resize 支持,
-          其他的诸如样式, 动画, 蒙版, 鼠标样式等需自行实现。
-        </MyDialog>
-      )}
+      <MyDialog visible={show} title="弹窗标题" close={() => setShow(false)}>
+        这是一个可拖拽, 可变大小弹窗。需要用户自行编写相关dom组件; useDialog hook 只提供可拖拽和 resize 支持, 其他的诸如样式,
+        动画, 蒙版, 鼠标样式等需自行实现。
+      </MyDialog>
     </div>
   )
 }

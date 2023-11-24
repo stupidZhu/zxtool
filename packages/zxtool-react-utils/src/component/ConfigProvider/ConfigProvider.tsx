@@ -1,12 +1,13 @@
 import { StorageHelper } from "@zxtool/utils"
-import React, { createContext, useCallback, useContext, useRef } from "react"
-import { WithChildren } from "../../type"
+import React, { PropsWithChildren, createContext, useContext } from "react"
 import { reactStorageHelper } from "../../util/bootstrap"
+import useDialogField from "./useDialogField"
 
 interface ConfigContextDialogField {
   getMaxZIndex(): string
-  addKey(key: React.Key): void
-  delKey(key: React.Key): void
+  getMinZIndex(): string
+  addKey(key: PropertyKey): void
+  delKey(key: PropertyKey): void
 }
 
 interface ConfigContextType {
@@ -16,33 +17,17 @@ interface ConfigContextType {
 
 const ConfigContext = createContext<ConfigContextType | null>(null)
 
-interface ConfigProviderProps extends WithChildren {
-  initMaxZIndex?: number
+interface ConfigProviderProps extends PropsWithChildren {
+  initialZIndex?: number
   storageHelper?: StorageHelper
 }
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = props => {
-  const { children, initMaxZIndex = 1000, storageHelper = reactStorageHelper } = props
-  const maxZIndex = useRef<number>(initMaxZIndex)
-  const dialogCollection = useRef<Set<React.Key>>(new Set([]))
-
-  const getMaxZIndex = useCallback(() => {
-    maxZIndex.current += 1
-    return String(maxZIndex.current)
-  }, [])
-
-  const addKey = useCallback((key: React.Key) => dialogCollection.current.add(key), [])
-
-  const delKey = useCallback(
-    (key: React.Key) => {
-      dialogCollection.current.delete(key)
-      if (dialogCollection.current.size <= 0) maxZIndex.current = initMaxZIndex
-    },
-    [initMaxZIndex],
-  )
+  const { children, initialZIndex = 1000, storageHelper = reactStorageHelper } = props
+  const { addKey, delKey, getMaxZIndex, getMinZIndex } = useDialogField(initialZIndex)
 
   return (
-    <ConfigContext.Provider value={{ dialogField: { getMaxZIndex, addKey, delKey }, storageHelper }}>
+    <ConfigContext.Provider value={{ dialogField: { getMaxZIndex, getMinZIndex, addKey, delKey }, storageHelper }}>
       {children}
     </ConfigContext.Provider>
   )

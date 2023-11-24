@@ -1,5 +1,4 @@
 import { useMemoizedFn } from "ahooks"
-import { nanoid } from "nanoid"
 import { useEffect, useRef } from "react"
 import { useConfigContext } from "../../component/ConfigProvider/ConfigProvider"
 import { getCurrent } from "../../util"
@@ -30,21 +29,32 @@ const useDialog = (props: UseDialogProps) => {
   } = props
   const { width: minWidth, height: minHeight } = minSize
   const { dialogField } = useConfigContext() ?? {}
-  const { getMaxZIndex, addKey, delKey } = dialogField ?? {}
+  const { getMaxZIndex, getMinZIndex, addKey, delKey } = dialogField ?? {}
 
-  const uniqueKey = useRef(nanoid())
+  const uniqueKey = useRef(Symbol())
   const moveHandlerRef = useRef<HTMLElement | null>()
   const resizeHandlerRef = useRef<HTMLElement | null>()
   const dialogRef = useRef<HTMLElement | null>(null)
-  const setRef = useMemoizedFn((node: HTMLElement | null, type: "dialog" | "moveHandler" | "resizeHandler") => {
-    if (type === "dialog") dialogRef.current = node
-    else if (type === "moveHandler") moveHandlerRef.current = node
-    else resizeHandlerRef.current = node
 
+  const setDialogRef = useMemoizedFn((node: HTMLElement | null) => {
+    dialogRef.current = node
+    node && toTop()
+  })
+  const setMoveHandleRef = useMemoizedFn((node: HTMLElement | null) => {
+    moveHandlerRef.current = node
+  })
+  const setResizeHandleRef = useMemoizedFn((node: HTMLElement | null) => {
+    resizeHandlerRef.current = node
+  })
+
+  const toTop = useMemoizedFn(() => {
     const dialog = getCurrent(dialogRef)
     if (dialog) dialog.style.zIndex = getMaxZIndex?.() ?? "1000"
   })
-
+  const toBottom = useMemoizedFn(() => {
+    const dialog = getCurrent(dialogRef)
+    if (dialog) dialog.style.zIndex = getMinZIndex?.() ?? "1000"
+  })
   const getDialogInfo = useMemoizedFn(() => getCurrent(dialogRef)?.getBoundingClientRect())
   const setDialogInfo = useMemoizedFn((props: { top?: string; left?: string; width?: string; height?: string }) => {
     const dialog = getCurrent(dialogRef)
@@ -55,7 +65,7 @@ const useDialog = (props: UseDialogProps) => {
   const onMove = useMemoizedFn((e: PointerEvent) => {
     const dialog = getCurrent(dialogRef)
     if (!dialog) return
-    dialog.style.zIndex = getMaxZIndex?.() ?? "1000"
+    toTop()
 
     moveFunc(e, {
       dialog,
@@ -71,11 +81,10 @@ const useDialog = (props: UseDialogProps) => {
       },
     })
   })
-
   const onResize = useMemoizedFn((e: PointerEvent) => {
     const dialog = getCurrent(dialogRef)
     if (!dialog) return
-    dialog.style.zIndex = getMaxZIndex?.() ?? "1000"
+    toTop()
 
     resizeFunc(e, {
       dialog,
@@ -123,7 +132,7 @@ const useDialog = (props: UseDialogProps) => {
     return () => delKey?.(key)
   }, [])
 
-  return { setRef, getDialogInfo, setDialogInfo }
+  return { setDialogRef, setMoveHandleRef, setResizeHandleRef, getDialogInfo, setDialogInfo, toTop, toBottom }
 }
 
 export default useDialog

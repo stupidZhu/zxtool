@@ -79,7 +79,7 @@ describe("useDialog", () => {
 
   // test("测试搭配 ConfigProvider", () => {
   //   const wrapper: React.FC<WithChildren> = ({ children }) => (
-  //     <ConfigProvider initMaxZIndex={2000}>{children}</ConfigProvider>
+  //     <ConfigProvider initialZIndex={2000}>{children}</ConfigProvider>
   //   )
 
   //   const { getByTestId } = render(
