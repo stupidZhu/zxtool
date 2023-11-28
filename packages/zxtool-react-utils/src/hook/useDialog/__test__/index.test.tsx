@@ -2,7 +2,13 @@
  * @jest-environment jsdom
  */
 import "@testing-library/jest-dom"
-import useDialog from "../useDialog"
+import useDialog, { DialogMoveCb } from "../useDialog"
+
+type MoveProps = Parameters<DialogMoveCb>[0]
+
+const movePointer = (x: number, y: number) => {
+  document.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: y, screenX: x, screenY: y }))
+}
 
 const originalWarn = console.warn
 beforeAll(() => {
@@ -18,23 +24,26 @@ describe("useDialog", () => {
   })
 
   // test("dialog 移动会设置正确的 style", () => {
-  //   const func = jest.fn((type: string) => {})
-  //   const { getByTestId } = render(
-  //     <div data-testid="dialog" style={{ width: 100, height: 100 }}>
-  //       <div data-testid="move-field" style={{ width: 100, height: 50 }}></div>
-  //     </div>,
-  //   )
+  //   const func = jest.fn((type: string, props: MoveProps) => {})
 
   //   const { result } = renderHook(() =>
   //     useDialog({
-  //       dialogRef: () => getByTestId("dialog"),
-  //       moveFieldRef: () => getByTestId("move-field"),
-  //       moveCb: ({ type }) => func(type),
+  //       onMoveStart: props => func("start", props),
+  //       onMoving: props => func("moving", props),
+  //       onMoveEnd: props => func("end", props),
   //     }),
   //   )
 
-  //   fireEvent.mouseDown(getByTestId("move-field"))
-  //   expect(func).toHaveBeenCalledWith("moveStart")
+  //   const { setDialogRef, setMoveHandleRef } = result.current
+
+  //   const { getByTestId } = render(
+  //     <div data-testid="dialog" ref={setDialogRef} style={{ width: 100, height: 100 }}>
+  //       <div data-testid="move-field" ref={setMoveHandleRef} style={{ width: 100, height: 50 }}></div>
+  //     </div>,
+  //   )
+
+  //   fireEvent.pointerDown(getByTestId("move-field"))
+  //   expect(func).toHaveBeenCalledTimes(1)
 
   //   act(() => {
   //     document.dispatchEvent(new MouseEvent("mousemove", { clientX: 200, clientY: 200, screenX: 200, screenY: 200 }))

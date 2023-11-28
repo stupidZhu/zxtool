@@ -19,6 +19,7 @@ type ResizeFuncUtilOptions = UtilOptions<(size: ISize, pointerPosition: IPositio
   minWidth: number
   minHeight: number
 }
+
 export const resizeFunc = (e: any, options: ResizeFuncUtilOptions) => {
   const {
     dialog,
@@ -85,7 +86,6 @@ export const moveFunc = (e: PointerEvent, options: MoveFuncUtilOptions) => {
     { left: clientX, top: clientY },
   ]
 
-  resetStyle(dialog)
   afterPointerdown?.(...paramState)
 
   document.onpointerup = () => {
@@ -120,7 +120,16 @@ export const moveFunc = (e: PointerEvent, options: MoveFuncUtilOptions) => {
   }
 }
 
-export const resetStyle = (dom: HTMLElement) => {
-  const style: CSSProperties = { position: "fixed", right: "unset", bottom: "unset" }
-  Object.entries(style).forEach(([k, v]) => (dom.style[k] = v))
+export const resetDialogStyle = (dialog: HTMLElement) => {
+  const { top, left } = dialog.getBoundingClientRect()
+  const style: CSSProperties = {
+    position: "fixed",
+    right: "unset",
+    bottom: "unset",
+    top: `${top}px`,
+    left: `${left}px`,
+    transform: "unset",
+    margin: "unset",
+  }
+  Object.assign(dialog.style, style)
 }

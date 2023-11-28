@@ -1,54 +1,72 @@
 @import "docs/utils-doc/style";
-.use-dialog {
+.use-dialog-comp {
+  $pre: "ud-comp";
+
   position: fixed;
-  top: 30%;
-  left: calc(50% - 200px);
-  display: flex;
-  flex-direction: column;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 400px;
   height: 300px;
-  background-color: #fff;
-  box-shadow: 2px 2px 10px #00000050;
-  .move-field {
+  .#{$pre}-dialog-wrapper {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 35px;
-    background-color: #00000040;
-    cursor: move;
-    padding: 0 10px;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: 2px 2px 10px #00000050;
+    .#{$pre}-move-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 35px;
+      background-color: #00000040;
+      cursor: move;
+      padding: 0 10px;
+    }
+    .#{$pre}-resize-field {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 10px;
+      height: 10px;
+      background-color: #aaa;
+      cursor: se-resize;
+    }
+    .#{$pre}-to-bottom-field {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 10px;
+      height: 10px;
+      background-color: #aaa;
+      cursor: pointer;
+    }
+    .#{$pre}-resize-desc {
+      position: absolute;
+      right: 20px;
+      bottom: 0;
+    }
+    .#{$pre}-to-bottom-desc {
+      position: absolute;
+      left: 20px;
+      bottom: 0;
+    }
+    .#{$pre}-content {
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+    }
   }
-  .resize-field {
-    position: absolute;
+  .#{$pre}-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
     right: 0;
     bottom: 0;
-    width: 10px;
-    height: 10px;
-    background-color: #aaa;
-    cursor: se-resize;
-  }
-  .to-bottom-field {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 10px;
-    height: 10px;
-    background-color: #aaa;
-    cursor: pointer;
-  }
-  .resize-desc {
-    position: absolute;
-    right: 20px;
-    bottom: 0;
-  }
-  .to-bottom-desc {
-    position: absolute;
-    left: 20px;
-    bottom: 0;
-  }
-  .use-dialog-content {
-    flex: 1;
-    overflow: auto;
-    padding: 10px;
+    background-color: #00000080;
+    z-index: -1;
   }
 }

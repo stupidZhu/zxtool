@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"
 import { useConfigContext } from "../../component/ConfigProvider/ConfigProvider"
 import { getCurrent } from "../../util"
 import { useWatchRefEffect } from "../effect/useWatchEffect"
-import { DialogMoveCb, DialogResizeCb, ISize, moveFunc, resizeFunc } from "./util"
+import { DialogMoveCb, DialogResizeCb, ISize, moveFunc, resetDialogStyle, resizeFunc } from "./util"
 export type { DialogMoveCb, DialogResizeCb, ISize } from "./util"
 export interface UseDialogProps {
   minSize?: ISize
@@ -101,6 +101,14 @@ const useDialog = (props: UseDialogProps) => {
       },
     })
   })
+
+  useWatchRefEffect(
+    (el, prevEl) => {
+      el && resetDialogStyle(el)
+    },
+    dialogRef,
+    true,
+  )
 
   useWatchRefEffect(
     (el, prevEl) => {

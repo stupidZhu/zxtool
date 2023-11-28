@@ -51,7 +51,3 @@ group:
 | ISize          | ISize               | `{ width: number; height: number }`                                    |
 | DialogMoveCb   | Move 回调函数类型   | `(props: { position: IPosition; pointerPosition: IPosition }) => void` |
 | DialogResizeCb | Resize 回调函数类型 | `(props: { size: ISize; pointerPosition: IPosition }) => void`         |
-
-## 备注
-
-如果 confine 为 true，请不要给 dialog 设置 margin 或 translate，否则会计算出错。
