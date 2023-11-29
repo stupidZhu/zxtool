@@ -1,0 +1,100 @@
+$primary-color: #5aa7ff !default;
+
+$theme-red: #d34753 !default;
+$theme-light-red: #ff8080 !default;
+$theme-deep-red: #da1525 !default;
+
+$theme-orange: #e58d35 !default;
+$theme-light-orange: #e6af79 !default;
+$theme-deep-orange: #f77f08 !default;
+
+$theme-yellow: #e9d734 !default;
+$theme-light-yellow: #d4ce90 !default;
+$theme-deep-yellow: #ffe714 !default;
+
+$theme-green: #2ebd81 !default;
+$theme-light-green: #a9ec95 !default;
+$theme-deep-green: #0c9159 !default;
+
+$theme-cyan: #7ce9ff !default;
+$theme-light-cyan: #a7efff !default;
+$theme-deep-cyan: #00d5ff !default;
+
+$theme-blue: #0a5ac8 !default;
+$theme-light-blue: #5aa7ff !default;
+$theme-deep-blue: #102b50 !default;
+
+$theme-purple: #6742bd !default;
+$theme-light-purple: #a281f0 !default;
+$theme-deep-purple: #3a1c81 !default;
+
+$theme-bgc: #f1f3f7 !default;
+$theme-gray-blue: #44628a !default;
+
+$theme-colors: (
+  "red": $theme-red,
+  "light-red": $theme-light-red,
+  "deep-red": $theme-deep-red,
+
+  "orange": $theme-orange,
+  "light-orange": $theme-light-orange,
+  "deep-orange": $theme-deep-orange,
+
+  "yellow": $theme-yellow,
+  "light-yellow": $theme-light-yellow,
+  "deep-yellow": $theme-deep-yellow,
+
+  "green": $theme-green,
+  "light-green": $theme-light-green,
+  "deep-green": $theme-deep-green,
+
+  "cyan": $theme-cyan,
+  "light-cyan": $theme-light-cyan,
+  "deep-cyan": $theme-deep-cyan,
+
+  "blue": $theme-blue,
+  "light-blue": $theme-light-blue,
+  "deep-blue": $theme-deep-blue,
+
+  "purple": $theme-purple,
+  "light-purple": $theme-light-purple,
+  "deep-purple": $theme-deep-purple,
+
+  "gray-blue": $theme-gray-blue,
+  "t": transparent,
+  "0": #000,
+  "1": #111,
+  "2": #222,
+  "3": #333,
+  "4": #444,
+  "5": #555,
+  "6": #666,
+  "7": #777,
+  "8": #888,
+  "9": #999,
+  "a": #aaa,
+  "b": #bbb,
+  "c": #ccc,
+  "d": #ddd,
+  "e": #eee,
+  "f": #fff,
+  "05": #050505,
+  "15": #151515,
+  "25": #252525,
+  "35": #353535,
+  "45": #454545,
+  "65": #656565,
+  "75": #757575,
+  "85": #858585,
+  "95": #959595,
+  "a5": #a5a5a5,
+  "b5": #b5b5b5,
+  "c5": #c5c5c5,
+  "d5": #d5d5d5,
+  "e5": #e5e5e5,
+  "f5": #f5f5f5,
+);
+$colors: #2a8bfd, #baff7f, #00fac1, #00caff, #fde056, #4ed33c, #ff8a26, #ff5252, #9689ff, #cb00ff, #e6bd11, #ff9090, #90fff0,
+  #90aaff, #c490ff, #fff, #ff2020, #3f2fce;
+
+$opacity: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100;

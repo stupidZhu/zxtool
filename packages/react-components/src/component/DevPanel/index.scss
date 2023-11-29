@@ -1,0 +1,35 @@
+.rc-dev-panel {
+  $pre: "rc-dp";
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  > * {
+    pointer-events: auto;
+  }
+  .#{$pre}-icon {
+    cursor: pointer;
+    fill: skyblue;
+    &:hover {
+      animation: rotate 3s ease-in-out infinite;
+      fill: lighten(skyblue, 5);
+    }
+  }
+  .rc-dp-content {
+    width: 700px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 2px 2px 8px rgba(#000, 0.1);
+    color: #000;
+  }
+  @keyframes rotate {
+    0% {
+      transform: rotate(0);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}

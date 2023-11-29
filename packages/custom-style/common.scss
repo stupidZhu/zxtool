@@ -1,0 +1,87 @@
+@use "sass:math";
+@import "./normalize.scss";
+@import "./index.scss";
+@import "./cssTransition.scss";
+* {
+  box-sizing: border-box;
+}
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: vw(14);
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+      "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: vw(14);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    .iconfont {
+      font-size: vw(16);
+    }
+  }
+}
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+@each $key, $val in $theme-colors {
+  .bg-#{$key} {
+    background-color: $val !important;
+  }
+  .color-#{$key} {
+    color: $val !important;
+  }
+  .border-#{$key} {
+    border-color: $val !important;
+  }
+  @each $o in $opacity {
+    .bg-#{$key}\/#{$o} {
+      background-color: rgba($val, math.div($o, 100)) !important;
+    }
+    .color-#{$key}\/#{$o} {
+      color: rgba($val, math.div($o, 100)) !important;
+    }
+    .border-#{$key}\/#{$o} {
+      border-color: rgba($val, math.div($o, 100)) !important;
+    }
+  }
+}
+
+button {
+  cursor: pointer;
+}
+
+fieldset {
+  display: block;
+  border-width: 2px;
+  border-style: dotted;
+  border-color: #c0c0c0;
+  border-image: initial;
+  border-radius: 5px;
+  margin-inline-end: 2px;
+  margin-inline-start: 2px;
+  min-inline-size: min-content;
+  padding-block-end: 0.625em;
+  padding-block-start: 0.35em;
+  padding-inline-end: 0.75em;
+  padding-inline-start: 0.75em;
+  legend {
+    display: block;
+    width: unset;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    padding-inline-end: 2px;
+    padding-inline-start: 2px;
+  }
+}
+
+// 报错 overlay
+#webpack-dev-server-client-overlay {
+  width: 40vw !important;
+  height: 40vh !important;
+}

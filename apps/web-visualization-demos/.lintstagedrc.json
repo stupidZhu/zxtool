@@ -1,5 +1,4 @@
 {
   "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write --ignore-unknown"],
-  "*.{md,json}": "prettier --write --ignore-unknown",
   "src/**/*.{css,scss}": "stylelint --fix"
 }

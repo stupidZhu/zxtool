@@ -1,4 +1,6 @@
 import { ConfigProvider } from "@zxtool/react-utils"
+import "custom-style/common.scss"
+import "react-components/dist/style/index.scss"
 import ReactDOM from "react-dom/client"
 import { RouterProvider } from "react-router-dom"
 import "./bootstrap"

@@ -1,0 +1,24 @@
+@mixin ellipsis($line: 1) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $line;
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+// 字符间距
+@mixin letterSpacing($s: 2px) {
+  letter-spacing: $s;
+  text-indent: $s;
+}
+// chrome填充密码样式
+@mixin autoFillColor($c: #fff) {
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    background-color: transparent;
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: $c !important;
+    transition: background-color 50000s ease-in-out 0s;
+  }
+}

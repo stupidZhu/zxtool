@@ -1,0 +1,10 @@
+{
+  "name": "custom-style",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.scss",
+  "style": "index.scss",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
