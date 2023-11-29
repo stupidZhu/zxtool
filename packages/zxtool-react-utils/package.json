@@ -14,9 +14,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "rimraf dist && tsc -p tsconfig.build.json && cross-env NODE_ENV=production rollup -c",
+    "build": "rimraf dist && tsc -p tsconfig.build.json && rollup -c --configPlugin esbuild --environment MODE:prod",
     "test": "jest",
-    "watch:rollup": "cross-env NODE_ENV=development rollup -w -c",
+    "watch:rollup": "rollup -w -c --configPlugin esbuild --environment MODE:dev",
     "watch:ts": "tsc -p tsconfig.build.json -w",
     "watch": "run-p watch:ts watch:rollup",
     "init": "pnpm build",
