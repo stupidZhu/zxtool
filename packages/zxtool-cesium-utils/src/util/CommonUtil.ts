@@ -1,4 +1,4 @@
-const CommonUtil = {
+export const CommonUtil = {
   enableIframe() {
     const iframe = document.querySelector(".cesium-infoBox-iframe")
     if (iframe) {
@@ -7,5 +7,3 @@ const CommonUtil = {
     }
   },
 }
-
-export default CommonUtil

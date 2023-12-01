@@ -1,7 +1,7 @@
 import * as Cesium from "cesium"
 
-const _EntityUtil = {
-  pickEntitySync(windowPosition: Cesium.Cartesian2, viewer: Cesium.Viewer) {
+export const EntityUtilSync = {
+  pickEntity(windowPosition: Cesium.Cartesian2, viewer: Cesium.Viewer) {
     const picked = viewer.scene.pick(windowPosition)
     if (!Cesium.defined(picked)) return null
 
@@ -9,7 +9,7 @@ const _EntityUtil = {
     if (id instanceof Cesium.Entity) return id
     return null
   },
-  drillPickEntitiesSync(windowPosition: Cesium.Cartesian2, viewer: Cesium.Viewer) {
+  drillPickEntities(windowPosition: Cesium.Cartesian2, viewer: Cesium.Viewer) {
     let picked, entity
     const pickedPrimitives = viewer.scene.drillPick(windowPosition)
     const length = pickedPrimitives.length
@@ -27,5 +27,3 @@ const _EntityUtil = {
     return result
   },
 }
-
-export default _EntityUtil

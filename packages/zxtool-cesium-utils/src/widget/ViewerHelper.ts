@@ -1,6 +1,6 @@
 import { EmitterHelper } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import _ViewerUtil from "../_util/_ViewerUtil"
+import { ViewerUtilSync } from "../util/ViewerUtilSync"
 import { ZCUConfig } from "../util/ZCUConfig"
 
 export type InitViewerProps = Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
@@ -16,12 +16,12 @@ class ViewerHelper {
     const token = ZCUConfig.getConfig("CESIUM_TOKEN", false)
     if (token) Cesium.Ion.defaultAccessToken = token
 
-    this.viewer = new Cesium.Viewer(container, { ...(hideWidget ? _ViewerUtil.getHideWidgetOption() : null), ...rest })
+    this.viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
     this.emitter.emit(this.vKey, this.viewer)
 
     // @ts-ignore
     hideWidget && (this.viewer.cesiumWidget.creditContainer.style.display = "none")
-    fxaa && _ViewerUtil.fxaa(this.viewer)
+    fxaa && ViewerUtilSync.fxaa(this.viewer)
 
     this.viewer.scene.globe.depthTestAgainstTerrain = true
 

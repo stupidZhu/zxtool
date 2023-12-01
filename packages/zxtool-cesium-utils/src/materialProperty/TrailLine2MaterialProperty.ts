@@ -43,7 +43,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput){
   return material;
 }`
 
-interface Options {
+export interface TrailLine2MaterialPropertyOptions {
   color?: Cesium.Color
   bgColor?: Cesium.Color
   speed?: number
@@ -52,7 +52,7 @@ interface Options {
   count?: number
 }
 
-class TrailLine2MaterialProperty {
+export class TrailLine2MaterialProperty {
   _definitionChanged: Cesium.Event
 
   _color: Cesium.Color
@@ -62,7 +62,7 @@ class TrailLine2MaterialProperty {
   _gradient: boolean
   _count: number
 
-  constructor(options: Options) {
+  constructor(options: TrailLine2MaterialPropertyOptions) {
     const {
       color = Cesium.Color.CYAN,
       bgColor = Cesium.Color.WHITE.withAlpha(0.0),
@@ -125,5 +125,3 @@ MaterialUtil.addMaterial("TrailLine2Material", {
   },
   translucent: true,
 })
-
-export default TrailLine2MaterialProperty

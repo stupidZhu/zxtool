@@ -1,6 +1,7 @@
 type Num2 = [number, number]
 type Num3 = [number, number, number]
 type LonLat = Num2
+type LonLatKey = { key: PropertyKey; lonLat: LonLat }
 type LonLatObj = {
   lon: number
   lat: number

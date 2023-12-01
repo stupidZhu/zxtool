@@ -24,18 +24,18 @@ export enum ScreenSpaceEventType {
 // https://www.coder.work/article/1309200
 export type ScreenEventType = keyof typeof ScreenSpaceEventType
 
-interface AddEventProps {
+export interface AddEventProps {
   key: string
   type: ScreenEventType
   cb: (movement: IObj) => void
 }
 
-interface RemoveEventProps {
+export interface RemoveEventProps {
   key: string
   type?: ScreenEventType
 }
 
-class ScreenEventHelper {
+class _ScreenEventHelper {
   private handlerCollection: IObj<Cesium.ScreenSpaceEventHandler> = {}
 
   addEvent = async ({ key, type, cb }: AddEventProps) => {
@@ -59,4 +59,4 @@ class ScreenEventHelper {
   }
 }
 
-export default new ScreenEventHelper()
+export const ScreenEventHelper = new _ScreenEventHelper()

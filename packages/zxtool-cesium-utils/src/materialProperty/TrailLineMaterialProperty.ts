@@ -16,7 +16,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
   return material;
 }`
 
-class TrailLineMaterialProperty {
+export class TrailLineMaterialProperty {
   _definitionChanged: Cesium.Event
 
   _image: string
@@ -62,5 +62,3 @@ MaterialUtil.addMaterial("TrailLineMaterial", {
   },
   translucent: true,
 })
-
-export default TrailLineMaterialProperty

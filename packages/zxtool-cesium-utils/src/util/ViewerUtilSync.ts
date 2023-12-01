@@ -1,6 +1,6 @@
 import * as Cesium from "cesium"
 
-const _ViewerUtil = {
+export const ViewerUtilSync = {
   getHideWidgetOption() {
     return {
       infoBox: false, // 信息窗口
@@ -47,6 +47,43 @@ const _ViewerUtil = {
       },
     })
   },
-}
+  getScreenRect(viewer: Cesium.Viewer, type: "degree" | "radian" = "degree") {
+    const rect = viewer.scene.camera.computeViewRectangle()
+    if (rect) {
+      if (type === "radian") return { minx: rect.west, maxx: rect.east, miny: rect.south, maxy: rect.north }
+      return {
+        minx: Cesium.Math.toDegrees(rect.west),
+        maxx: Cesium.Math.toDegrees(rect.east),
+        miny: Cesium.Math.toDegrees(rect.south),
+        maxy: Cesium.Math.toDegrees(rect.north),
+      }
+    }
 
-export default _ViewerUtil
+    const canvas = viewer.scene.canvas
+    const ellipsoid = viewer.scene.globe.ellipsoid
+
+    const topLeft = viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, 0), ellipsoid)
+    const bottomRight = viewer.camera.pickEllipsoid(
+      new Cesium.Cartesian2(canvas.clientWidth, canvas.clientHeight),
+      ellipsoid,
+    )
+
+    const topLeftCartographic = ellipsoid.cartesianToCartographic(topLeft!)
+    const bottomRightCartographic = ellipsoid.cartesianToCartographic(bottomRight!)
+
+    if (type === "radian") {
+      return {
+        minx: topLeftCartographic.longitude,
+        maxx: bottomRightCartographic.longitude,
+        miny: bottomRightCartographic.latitude,
+        maxy: topLeftCartographic.latitude,
+      }
+    }
+    return {
+      minx: Cesium.Math.toDegrees(topLeftCartographic.longitude),
+      maxx: Cesium.Math.toDegrees(bottomRightCartographic.longitude),
+      miny: Cesium.Math.toDegrees(bottomRightCartographic.latitude),
+      maxy: Cesium.Math.toDegrees(topLeftCartographic.latitude),
+    }
+  },
+}

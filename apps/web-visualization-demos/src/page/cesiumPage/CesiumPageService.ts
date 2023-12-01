@@ -1,10 +1,21 @@
 import { CommonUtil, ViewerHelper } from "@zxtool/cesium-utils"
 import { EmitterHelper } from "@zxtool/utils"
+import * as Cesium from "cesium"
 import { primitiveV } from "./primitive"
 
 class CesiumPageService {
   moduleEnter() {
     CommonUtil.enableIframe()
+    const viewer = ViewerHelper.getViewer()!
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(120.65187, 31.145227, 10000),
+    })
+    viewer.scene.imageryLayers.addImageryProvider(
+      new Cesium.UrlTemplateImageryProvider({
+        url: "//map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
+      }),
+    )
+
     // this.init()
   }
 
