@@ -3,7 +3,7 @@ import { ThreeHelper } from "@zxtool/three-utils"
 import * as Cesium from "cesium"
 
 const myToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNjZmNmYzMi1iMWIwLTRlMmEtYWE1OC1mY2U0ZmVmMDk4ZWQiLCJpZCI6MzQyMzcsImlhdCI6MTY5NzIwMzk0MX0.BwX4c-xXJemVGcPhSD2dnntstoLyED9fUaYnoNHLwWM"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzZTAxYTZlOC0yOThlLTQ2OTgtYWFkZC04MDE0ZTQ2YzViYTQiLCJpZCI6NjY5ODcsImlhdCI6MTYzMTQ1MjA1NH0.IuDCpDiMstjhEw2AQ9N9ZQAHCc46n714_AF4kmKn4rw"
 
 ZCUConfig.setConfig({
   CESIUM_TOKEN: myToken,

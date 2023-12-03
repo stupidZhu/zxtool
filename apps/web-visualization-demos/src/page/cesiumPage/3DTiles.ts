@@ -1,17 +1,15 @@
-import { TilesetHelper, ViewerHelper } from "@zxtool/cesium-utils"
+import { TilesetManager, ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 import GUI from "lil-gui"
 
 export const 加载3DTiles = () => {
   const viewer = ViewerHelper.getViewer()!
 
-  viewer.scene.terrainProvider = Cesium.createWorldTerrain({ requestVertexNormals: true, requestWaterMask: true })
-  viewer.scene.primitives.add(Cesium.createOsmBuildings())
   viewer.scene.globe.enableLighting = true
 
   const center = [-1.31968, 0.698874]
 
-  TilesetHelper.add({
+  TilesetManager.add({
     key: "columns",
     url: "/model/3dtiles/columns/tileset.json",
     flyTo: false,
@@ -32,7 +30,7 @@ export const 加载3DTiles = () => {
     })
   })
 
-  TilesetHelper.add({
+  TilesetManager.add({
     key: "building",
     url: "/model/3dtiles/building/tileset.json",
     flyTo: true,
@@ -57,7 +55,7 @@ export const 偏移矩阵 = async () => {
   const viewer = ViewerHelper.getViewer()!
   viewer.scene.globe.depthTestAgainstTerrain = true
 
-  const { tileset } = await TilesetHelper.add({
+  const { tileset } = await TilesetManager.add({
     key: "columns",
     url: "/model/3dtiles/columns/tileset.json",
     flyTo: true,
@@ -99,7 +97,7 @@ export const 偏移矩阵 = async () => {
 export const 点云 = async () => {
   const viewer = ViewerHelper.getViewer()!
 
-  // const { tileset } = await TilesetHelper.add({
+  // const { tileset } = await TilesetManager.add({
   //   url: "https://assets.ion.cesium.com/ap-northeast-1/asset_depot/28945/MontrealPointCloud/v1/tileset.json?v=2",
   //   key: 28945,
   // })

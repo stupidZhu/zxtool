@@ -21,7 +21,7 @@ export const 添加分层 = () => {
 
   const rect = getScreenRect(viewer)
 
-  const _points = genMassivePoints(3000, rect)
+  const _points = genMassivePoints(10000, rect)
   const points = MPH.calcLonLatsMostDetailed(_points, { drawGrid: true, keepKeys: Array.from(Array(20), (_, i) => i) })
 
   points.forEach(item => {
@@ -34,15 +34,14 @@ export const 添加分层 = () => {
         outlineWidth: 1,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
-      // label: {
-      //   text: item.posKey,
-      //   font: "14px sans-serif",
-      //   pixelOffset: new Cesium.Cartesian2(15, -15),
-      // },
     })
   })
 }
 
 export const 移除Grid = () => {
   MPH?.removeGrid()
+}
+
+export const flyTo = () => {
+  const p = MPH?.getGrid() as Cesium.GroundPrimitive
 }

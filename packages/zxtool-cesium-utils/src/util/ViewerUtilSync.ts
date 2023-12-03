@@ -1,4 +1,5 @@
 import * as Cesium from "cesium"
+import type { IPrimitive } from "../widget/PrimitiveManager"
 
 export const ViewerUtilSync = {
   getHideWidgetOption() {
@@ -85,5 +86,8 @@ export const ViewerUtilSync = {
       miny: Cesium.Math.toDegrees(bottomRightCartographic.latitude),
       maxy: Cesium.Math.toDegrees(topLeftCartographic.latitude),
     }
+  },
+  flyToPrimitive(primitive: IPrimitive, viewer: Cesium.Viewer) {
+    // primitive.
   },
 }

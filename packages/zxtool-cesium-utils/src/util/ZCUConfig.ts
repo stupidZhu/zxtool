@@ -5,7 +5,7 @@ export interface ZCUConfigType {
   CESIUM_TOKEN?: string
   viewerOptions?: Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
   homeView?: Parameters<Cesium.Camera["flyTo"]>[0]
-  tilesetConfig?: Omit<ConstructorParameters<typeof Cesium.Cesium3DTileset>[0], "url">
+  tilesetOptions?: Cesium.Cesium3DTileset.ConstructorOptions
 }
 
 class ZCUC {

@@ -1,11 +1,12 @@
-import { TilesetHelper, ViewerHelper } from "@zxtool/cesium-utils"
+import { TilesetManager, ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 import GUI from "lil-gui"
 
 export const cesiumFlightTracker = async () => {
   const viewer = ViewerHelper.getViewer()!
-  viewer.scene.terrainProvider = Cesium.createWorldTerrain({ requestVertexNormals: true, requestWaterMask: true })
-  const buildingsTileset = Cesium.createOsmBuildings()
+  const terrainProvider = await Cesium.createWorldTerrainAsync({ requestVertexNormals: true, requestWaterMask: true })
+  viewer.scene.terrainProvider = terrainProvider
+  const buildingsTileset = await Cesium.createOsmBuildingsAsync()
   viewer.scene.primitives.add(buildingsTileset)
 
   async function addBuildingGeoJSON() {
@@ -38,10 +39,7 @@ export const cesiumFlightTracker = async () => {
   // const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2352154);
   // viewer.scene.primitives.add(newBuildingTileset);
 
-  TilesetHelper.add({
-    url: Cesium.IonResource.fromAssetId(2352154),
-    key: "2352154",
-  }).then(({ tileset }) => {
+  TilesetManager.add({ url: 2352154, key: "2352154" }).then(({ tileset }) => {
     console.log(tileset)
     viewer.flyTo(tileset)
 

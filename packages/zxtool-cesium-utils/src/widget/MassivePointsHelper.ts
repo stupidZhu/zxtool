@@ -210,4 +210,8 @@ export class MassivePointsHelper {
       this.primitive = null
     }
   }
+
+  getGrid() {
+    return this.primitive
+  }
 }

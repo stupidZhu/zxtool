@@ -2,10 +2,12 @@ import { ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 import planeData from "src/assets/plane.json"
 
-export const 芜湖起飞 = () => {
+export const 芜湖起飞 = async () => {
   const viewer = ViewerHelper.getViewer()!
-  viewer.scene.terrainProvider = Cesium.createWorldTerrain({ requestVertexNormals: true, requestWaterMask: true })
-  viewer.scene.primitives.add(Cesium.createOsmBuildings())
+  const terrainProvider = await Cesium.createWorldTerrainAsync({ requestVertexNormals: true, requestWaterMask: true })
+  viewer.scene.terrainProvider = terrainProvider
+  const buildingsTileset = await Cesium.createOsmBuildingsAsync()
+  viewer.scene.primitives.add(buildingsTileset)
 
   const interval = 30
   const totalTime = (planeData.length - 1) * interval
