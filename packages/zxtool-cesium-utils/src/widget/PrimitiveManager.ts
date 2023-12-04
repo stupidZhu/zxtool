@@ -1,8 +1,8 @@
 import { MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import ViewerHelper from "./ViewerHelper"
-
-// todo: flyTo
+import { last } from "lodash"
+import { ViewerUtilSync } from "../util/ViewerUtilSync"
+import { ViewerHelper } from "./ViewerHelper"
 
 export type IPrimitive = Cesium.GroundPrimitive | Cesium.ClassificationPrimitive | Cesium.Primitive
 
@@ -16,28 +16,37 @@ export type AddPrimitiveProps = {
   key?: PropertyKey
   primitive: IPrimitive
   viewer?: Cesium.Viewer
+  flyTo?: boolean
 } & Record<string, any>
 
 class _PrimitiveManager {
   readonly mapList = new MapList<PrimitiveObj>()
 
   async add(props: AddPrimitiveProps) {
-    const { key = Symbol(), viewer: _viewer, primitive, ...rest } = props
+    const { key = Symbol(), flyTo = true, viewer: _viewer, primitive, ...rest } = props
     const viewer = await ViewerHelper.getViewerPromise(_viewer)
 
     if (!viewer.scene.primitives.contains(primitive)) viewer.scene.primitives.add(primitive)
     const primitiveObj = { key, primitive, viewer, ...rest }
     this.mapList.set(key, primitiveObj)
+    if (flyTo) ViewerUtilSync.flyToPrimitive(primitive, viewer)
     return primitiveObj
   }
 
-  showByCondition = (condition: Partial<PrimitiveObj>) => {
+  showByCondition = (condition: Partial<PrimitiveObj>, flyTo?: boolean) => {
     const list = this.getListByCondition(condition)
     list.forEach(item => (item.primitive.show = true))
+    const lastOne = last(list)
+    if (flyTo && lastOne) ViewerUtilSync.flyToPrimitive(lastOne.primitive, lastOne.viewer)
   }
 
-  showAll = () => {
-    this.mapList.list.forEach(v => (v.primitive.show = true))
+  showAll = (flyTo?: boolean) => {
+    let last: PrimitiveObj | undefined
+    this.mapList.list.forEach(v => {
+      v.primitive.show = true
+      last = v
+    })
+    if (flyTo && last) ViewerUtilSync.flyToPrimitive(last.primitive, last.viewer)
   }
 
   hideByCondition = (condition: Partial<PrimitiveObj>) => {

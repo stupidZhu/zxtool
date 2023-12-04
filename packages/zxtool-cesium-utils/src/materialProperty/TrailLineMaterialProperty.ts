@@ -1,5 +1,5 @@
 import * as Cesium from "cesium"
-import MaterialUtil from "../util/MaterialUtil"
+import { MaterialUtil } from "../util/MaterialUtil"
 
 const glsl = `
 czm_material czm_getMaterial(czm_materialInput materialInput) 

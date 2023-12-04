@@ -2,7 +2,7 @@ import { MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { last } from "lodash"
 import { ZCUConfig, ZCUConfigType } from "../util/ZCUConfig"
-import ViewerHelper from "./ViewerHelper"
+import { ViewerHelper } from "./ViewerHelper"
 
 export type TilesetObj = {
   key: PropertyKey

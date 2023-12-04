@@ -5,7 +5,7 @@ import { ZCUConfig } from "../util/ZCUConfig"
 
 export type InitViewerProps = Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
 
-class ViewerHelper {
+class _ViewerHelper {
   private viewer?: Cesium.Viewer
   private vKey = Symbol("viewer")
   private emitter = new EmitterHelper({ maxCount: { history: 1 } })
@@ -53,4 +53,4 @@ class ViewerHelper {
   }
 }
 
-export default new ViewerHelper()
+export const ViewerHelper = new _ViewerHelper()

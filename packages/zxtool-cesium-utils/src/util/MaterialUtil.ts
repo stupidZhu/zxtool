@@ -1,7 +1,7 @@
 import { IObj } from "@zxtool/utils/dist/type"
 import * as Cesium from "cesium"
 
-interface MaterialTemplate {
+export interface MaterialTemplate {
   fabric: {
     type: string
     source: string
@@ -22,7 +22,7 @@ interface MaterialPropertyUtil {
   addMaterial(type: string, materialTemplate: MaterialTemplate): void
 }
 
-const Util: MaterialPropertyUtil = {
+export const MaterialUtil: MaterialPropertyUtil = {
   defined: Cesium.defined,
   equals: (Cesium.Property as any).equals,
   arrayEquals: (Cesium.Property as any).arrayEquals,
@@ -36,5 +36,3 @@ const Util: MaterialPropertyUtil = {
     Cesium.Material._materialCache.addMaterial(type, materialTemplate)
   },
 }
-
-export default Util

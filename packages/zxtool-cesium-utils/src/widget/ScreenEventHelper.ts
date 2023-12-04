@@ -1,6 +1,6 @@
 import { IObj } from "@zxtool/utils/dist/type"
 import * as Cesium from "cesium"
-import ViewerHelper from "./ViewerHelper"
+import { ViewerHelper } from "./ViewerHelper"
 
 // https://juejin.cn/post/7053298681037979678
 export enum ScreenSpaceEventType {
