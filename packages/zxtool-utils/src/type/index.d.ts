@@ -2,6 +2,7 @@ export type IObj<T = any> = Record<string, T>
 export type IKey = string | number
 export type ITimer = null | NodeJS.Timeout
 export type IOption<V = IKey, L = IKey> = { label: L; value: V } & IObj
+export type REST<T = any> = T[]
 
 export type Merge<T> = {
   [K in keyof T]: T[K]

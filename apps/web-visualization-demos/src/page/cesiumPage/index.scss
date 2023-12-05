@@ -1,0 +1,12 @@
+.earth-mask {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url("/img/mask.png");
+  background-size: 100% 100%;
+  opacity: 0.9;
+  pointer-events: none;
+}

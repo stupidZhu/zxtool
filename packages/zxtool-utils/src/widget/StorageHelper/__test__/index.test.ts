@@ -1,4 +1,4 @@
-import StorageHelper from "../StorageHelper"
+import { StorageHelper } from "../StorageHelper"
 
 describe("StorageHelper", () => {
   test("should be defined", () => {

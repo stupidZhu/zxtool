@@ -1,10 +1,10 @@
 import dayjs from "dayjs"
 import duration, { DurationUnitsObjectType } from "dayjs/plugin/duration"
 import { isNil } from "lodash"
-import CommonUtil from "../CommonUtil/CommonUtil"
+import { CommonUtil } from "../CommonUtil/CommonUtil"
 dayjs.extend(duration)
 
-class StorageHelper implements Storage {
+export class StorageHelper implements Storage {
   private _prefix: string
   private _storage: Storage
 
@@ -64,5 +64,3 @@ class StorageHelper implements Storage {
     this._storage.setItem(key, JSON.stringify(data))
   }
 }
-
-export default StorageHelper

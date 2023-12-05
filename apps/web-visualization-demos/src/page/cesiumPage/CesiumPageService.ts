@@ -1,21 +1,22 @@
 import { CommonUtil, TilesetManager, ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
-import { primitiveV } from "./primitive"
+import { 不同的Primitive } from "./primitive"
+import "./worker"
 
 class CesiumPageService {
   moduleEnter() {
     CommonUtil.enableIframe()
     const viewer = ViewerHelper.getViewer()!
-    // viewer.camera.flyTo({
-    //   destination: Cesium.Cartesian3.fromDegrees(120.65187, 31.145227, 10000),
-    // })
-    // viewer.scene.imageryLayers.addImageryProvider(
-    //   new Cesium.UrlTemplateImageryProvider({
-    //     url: "//map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
-    //   }),
-    // )
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(120.65187, 31.145227, 10000),
+    })
+    viewer.scene.imageryLayers.addImageryProvider(
+      new Cesium.UrlTemplateImageryProvider({
+        url: "//map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
+      }),
+    )
 
-    this.loadTileset()
+    // this.loadTileset()
     // this.init()
   }
 
@@ -24,9 +25,6 @@ class CesiumPageService {
   init() {
     const viewer = ViewerHelper.getViewer()!
     viewer.scene.debugShowFramesPerSecond = true
-    // viewer.scene.debugShowFrustumPlanes = true
-    // viewer.scene.debugShowFrustums = true
-    // viewer.scene.debugShowCommands = true
 
     // initCameraGUI()
     // 世界坐标()
@@ -34,7 +32,8 @@ class CesiumPageService {
     // primitive基础()
     // fabric基础()
     // shader基础()
-    primitiveV()
+    // primitiveV()
+    不同的Primitive()
 
     // 加载geojson()
 

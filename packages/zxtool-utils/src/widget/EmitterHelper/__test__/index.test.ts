@@ -1,4 +1,4 @@
-import EmitterHelper from "../EmitterHelper"
+import { EmitterHelper } from "../EmitterHelper"
 
 const originalWarn = console.warn
 beforeAll(() => {

@@ -1,6 +1,6 @@
-import CommonUtil from "../CommonUtil/CommonUtil"
+import { CommonUtil } from "../CommonUtil/CommonUtil"
 
-export const getBase64 = (file: File | Blob) => {
+const getBase64 = (file: File | Blob) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.readAsDataURL(file)
@@ -9,7 +9,7 @@ export const getBase64 = (file: File | Blob) => {
   })
 }
 
-export const downloadFile = (blob: Blob, fileName: string) => {
+const downloadFile = (blob: Blob, fileName: string) => {
   const link = document.createElement("a")
   const href = URL.createObjectURL(blob)
   link.download = fileName
@@ -21,14 +21,14 @@ export const downloadFile = (blob: Blob, fileName: string) => {
   URL.revokeObjectURL(href)
 }
 
-export const translateUrl = (fileName: string, type: "addPrefix" | "removePrefix", baseUrl: string) => {
+const translateUrl = (fileName: string, type: "addPrefix" | "removePrefix", baseUrl: string) => {
   if (!fileName) return fileName
   const regExp = /(^http(s?):\/\/)|(^\/\/)/
   if (type === "addPrefix") return regExp.test(fileName) ? fileName : baseUrl + fileName
   return regExp.test(fileName) ? fileName.replace(baseUrl, "") : fileName
 }
 
-export const _loadImage = (src: string): Promise<HTMLImageElement> => {
+const _loadImage = (src: string): Promise<HTMLImageElement> => {
   const img = new Image()
   img.crossOrigin = "Anonymous"
   img.src = src
@@ -39,4 +39,4 @@ export const _loadImage = (src: string): Promise<HTMLImageElement> => {
   })
 }
 
-export default { getBase64, downloadFile, translateUrl, loadImage: CommonUtil.addCacheWrapper(_loadImage) }
+export const FileUtil = { getBase64, downloadFile, translateUrl, loadImage: CommonUtil.addCacheWrapper(_loadImage) }

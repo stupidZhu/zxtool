@@ -1,4 +1,4 @@
-import ListenValueHelper from "../ListenValueHelper"
+import { ListenValueHelper } from "../ListenValueHelper"
 
 describe("ListenValueHelper", () => {
   test("should be defined", () => {

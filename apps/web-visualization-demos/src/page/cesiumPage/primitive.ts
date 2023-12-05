@@ -1,4 +1,4 @@
-import { ScreenEventHelper, ViewerHelper } from "@zxtool/cesium-utils"
+import { ScreenEventHelper, ViewerHelper, ViewerUtil } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 
 export const primitive基础 = () => {
@@ -219,4 +219,60 @@ export const primitiveV = () => {
   })
 
   viewer.scene.primitives.add(primitive)
+}
+
+export const 不同的Primitive = () => {
+  const viewer = ViewerHelper.getViewer()!
+  const geom1 = new Cesium.PolygonGeometry({
+    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+    polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray([0, 0, 0, 1, 1, 1, 1, 0, 0, 0])),
+  })
+  const instance1 = new Cesium.GeometryInstance({
+    geometry: geom1,
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.TEAL),
+    },
+  })
+  const primitive1 = new Cesium.Primitive({
+    geometryInstances: instance1,
+    appearance: new Cesium.PerInstanceColorAppearance(),
+  })
+
+  const geom2 = new Cesium.PolygonGeometry({
+    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+    polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray([1, 1, 1, 2, 2, 2, 2, 1, 1, 1])),
+  })
+  const instance2 = new Cesium.GeometryInstance({
+    geometry: geom2,
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.PINK),
+    },
+  })
+  const primitive2 = new Cesium.ClassificationPrimitive({
+    geometryInstances: instance2,
+    appearance: new Cesium.PerInstanceColorAppearance(),
+  })
+
+  const geom3 = new Cesium.PolygonGeometry({
+    vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+    polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray([2, 2, 2, 3, 3, 3, 3, 2, 2, 2])),
+  })
+  const instance3 = new Cesium.GeometryInstance({
+    geometry: geom3,
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.SKYBLUE),
+    },
+  })
+  const primitive3 = new Cesium.GroundPrimitive({
+    geometryInstances: instance3,
+    appearance: new Cesium.PerInstanceColorAppearance(),
+  })
+
+  viewer.scene.primitives.add(primitive1)
+  viewer.scene.primitives.add(primitive2)
+  viewer.scene.primitives.add(primitive3)
+
+  setTimeout(() => {
+    ViewerUtil.flyToPrimitive(primitive2, viewer)
+  }, 5000)
 }

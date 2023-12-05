@@ -11,7 +11,7 @@ export interface FormatItem {
   format: IFormat
 }
 
-export const genFormatMap = (formatList: FormatItem[]) => {
+const genFormatMap = (formatList: FormatItem[]) => {
   const res: IObj<IFormat> = {}
   formatList.forEach(item => {
     item.fields.forEach(field => {
@@ -28,7 +28,7 @@ export interface FormatDataProps {
   formatMap: IObj<IFormat>
 }
 
-export const formatData = ({ data, module, type, formatMap }: FormatDataProps) => {
+const formatData = ({ data, module, type, formatMap }: FormatDataProps) => {
   const rawData = cloneDeep(data)
   const result: IObj = {}
   Object.entries(rawData).forEach(([k, v]) => {
@@ -40,4 +40,7 @@ export const formatData = ({ data, module, type, formatMap }: FormatDataProps) =
   return result
 }
 
-export default { genFormatMap, formatData }
+export const FormatUtil = {
+  genFormatMap,
+  formatData,
+}

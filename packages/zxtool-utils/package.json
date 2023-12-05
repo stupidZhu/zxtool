@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "dayjs": "^1.11.5",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "nanoid": "^4.0.2"
   }
 }

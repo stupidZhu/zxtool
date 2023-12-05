@@ -1,9 +1,9 @@
+import { REST } from "../../type"
 import { genZUInfo } from "../../util"
-import CommonUtil, { GetNumberProps } from "../CommonUtil/CommonUtil"
+import { CommonUtil, GetNumberProps } from "../CommonUtil/CommonUtil"
 
 const genEmitterInfo = genZUInfo("EmitterHelper")
 
-export type REST<T = any> = T[]
 export type EmitterHandler<T extends REST = REST> = ((...rest: T) => void) & { _raw?: (...rest: T) => void }
 export type OverflowStrategy = "prevent" | "shift"
 
@@ -15,7 +15,7 @@ export interface EmitterProps {
 
 const getNumberProps: Omit<GetNumberProps, "value"> = { defaultValue: 0, min: 0, max: 1000, intStrategy: "trunc" }
 
-export default class EmitterHelper {
+export class EmitterHelper {
   private handlerCollection: Map<PropertyKey, EmitterHandler[]> = new Map()
   private historyCollection: Map<PropertyKey, REST[]> = new Map()
 

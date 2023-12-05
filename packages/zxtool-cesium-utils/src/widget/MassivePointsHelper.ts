@@ -1,4 +1,5 @@
 import * as Cesium from "cesium"
+import { EntityUtil, IEntities } from "../util/EntityUtil"
 import { ViewerUtilSync } from "../util/ViewerUtilSync"
 
 const { getScreenRect } = ViewerUtilSync
@@ -8,21 +9,10 @@ export interface MassivePointsHelperOptions {
   yNums?: number
 }
 
-export interface RECT {
-  minx: number
-  maxx: number
-  miny: number
-  maxy: number
-}
-
-export interface PosMapItem {
-  key: PropertyKey
-  lonLat: LonLat
+export interface PosMapItem extends LonLatKey {
   posKey: string
 }
-export interface MostDetailedPosMapItem {
-  key: PropertyKey
-  lonLat: LonLat
+export interface MostDetailedPosMapItem extends LonLatKey {
   posKey: string
   dis: number
   gridCenter?: LonLat
@@ -31,6 +21,11 @@ export interface MostDetailedPosMapItem {
 export interface CalcLonLatsOptions extends MassivePointsHelperOptions {
   keepKeys?: PropertyKey[]
   drawGrid?: boolean
+  lonLatType?: LonLatType
+}
+
+export interface calcEntitiesOptions extends Omit<CalcLonLatsOptions, "keepKeys" | "lonLatType"> {
+  keepEntities?: Cesium.Entity[] | string[]
 }
 
 export class MassivePointsHelper {
@@ -49,11 +44,11 @@ export class MassivePointsHelper {
     if (lonLat[0] > rect.maxx || lonLat[0] < rect.minx || lonLat[1] > rect.maxy || lonLat[1] < rect.miny) return
     return `${Math.floor((lonLat[0] - rect.minx) / xInterval)}-${Math.floor((lonLat[1] - rect.miny) / yInterval)}`
   }
-  static initPosMap(
-    props: Required<MassivePointsHelperOptions> & { lonLats: LonLatKey[]; rect: RECT; keepKeys: Set<PropertyKey> },
+  static initPosMap<T extends LonLatKey>(
+    props: Required<MassivePointsHelperOptions> & { lonLats: T[]; rect: RECT; keepKeys: Set<PropertyKey> },
   ) {
     const { lonLats: _lonLats, keepKeys, ...rest } = props
-    const posMap = new Map<string, PosMapItem[]>()
+    const posMap = new Map<string, Array<T & PosMapItem>>()
     const lonLats = []
 
     for (const item of _lonLats) {
@@ -70,11 +65,11 @@ export class MassivePointsHelper {
 
     return { posMap, lonLats }
   }
-  static initMostDetailedPosMap(
-    props: Required<MassivePointsHelperOptions> & { lonLats: LonLatKey[]; rect: RECT; keepKeys: Set<PropertyKey> },
+  static initMostDetailedPosMap<T extends LonLatKey>(
+    props: Required<MassivePointsHelperOptions> & { lonLats: T[]; rect: RECT; keepKeys: Set<PropertyKey> },
   ) {
     const { lonLats, posMap: _posMap } = MassivePointsHelper.initPosMap(props)
-    const posMap = new Map<string, MostDetailedPosMapItem[]>()
+    const posMap = new Map<string, Array<T & MostDetailedPosMapItem>>()
 
     _posMap.forEach((v, k) => {
       posMap.set(
@@ -85,18 +80,32 @@ export class MassivePointsHelper {
 
     return { posMap, lonLats }
   }
+  static entities2LonLats(entities: Cesium.Entity[], viewer: Cesium.Viewer) {
+    return entities
+      .filter(e => Boolean(e.position))
+      .map(entity => {
+        const cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(
+          entity.position!.getValue(new Cesium.JulianDate())!,
+        )
+        return {
+          lonLat: [cartographic.longitude, cartographic.latitude] as [number, number],
+          key: entity.id,
+          entity,
+        }
+      })
+  }
 
   constructor(viewer: Cesium.Viewer, options: MassivePointsHelperOptions = {}) {
     this.viewer = viewer
-    const { xNums = 60, yNums = 40 } = options
+    const { xNums = 30, yNums = 20 } = options
     this.xNums = xNums
     this.yNums = yNums
   }
 
-  private drawGrid(props: Required<MassivePointsHelperOptions> & { rect: RECT }) {
+  private drawGrid(props: Required<MassivePointsHelperOptions> & { rect: RECT; lonLatType: LonLatType }) {
     this.removeGrid()
 
-    const { rect, xNums, yNums } = props
+    const { rect, xNums, yNums, lonLatType } = props
     const xInterval = (rect.maxx - rect.minx) / xNums
     const yInterval = (rect.maxy - rect.miny) / yNums
     const geomList: Cesium.GeometryInstance[] = []
@@ -109,9 +118,11 @@ export class MassivePointsHelper {
         const latMax = rect.miny + (j + 1) * yInterval
 
         const pos = [lonMin, latMin, lonMax, latMin, lonMax, latMax, lonMin, latMax, lonMin, latMin]
+        const position =
+          lonLatType === "degree" ? Cesium.Cartesian3.fromDegreesArray(pos) : Cesium.Cartesian3.fromRadiansArray(pos)
 
         const geometry = new Cesium.PolygonGeometry({
-          polygonHierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(pos)),
+          polygonHierarchy: new Cesium.PolygonHierarchy(position),
           vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
         })
 
@@ -119,7 +130,7 @@ export class MassivePointsHelper {
           new Cesium.GeometryInstance({
             geometry,
             attributes: {
-              color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromRandom({ alpha: 0.2 })),
+              color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.fromRandom({ alpha: 0.1 })),
             },
           }),
         )
@@ -134,13 +145,13 @@ export class MassivePointsHelper {
     this.viewer.scene.primitives.add(this.primitive)
   }
 
-  calcLonLats(_lonLats: LonLatKey[], options: CalcLonLatsOptions = {}) {
-    const { keepKeys: _keepKeys, drawGrid, xNums = this.xNums, yNums = this.yNums } = options
+  calcLonLats<T extends LonLatKey>(_lonLats: T[], options: CalcLonLatsOptions = {}) {
+    const { keepKeys: _keepKeys, drawGrid, xNums = this.xNums, yNums = this.yNums, lonLatType = "degree" } = options
     const keepKeys = new Set(_keepKeys)
-    const rect = getScreenRect(this.viewer)
+    const rect = getScreenRect(this.viewer, lonLatType)
 
     let lonLats = _lonLats
-    let posMap = new Map<string, PosMapItem[]>()
+    let posMap = new Map<string, Array<T & PosMapItem>>()
     if (keepKeys.size) {
       const { lonLats: l, posMap: p } = MassivePointsHelper.initPosMap({ lonLats, rect, xNums, yNums, keepKeys })
       lonLats = l
@@ -154,21 +165,21 @@ export class MassivePointsHelper {
       if (posMap.size === xNums * yNums) break
     }
 
-    drawGrid && this.drawGrid({ rect, xNums, yNums })
+    drawGrid && this.drawGrid({ rect, xNums, yNums, lonLatType })
 
     return Array.from(posMap.values()).flat()
   }
 
-  calcLonLatsMostDetailed(_lonLats: LonLatKey[], options: CalcLonLatsOptions = {}) {
-    const { keepKeys: _keepKeys, drawGrid, xNums = this.xNums, yNums = this.yNums } = options
+  calcLonLatsMostDetailed<T extends LonLatKey>(_lonLats: T[], options: CalcLonLatsOptions = {}) {
+    const { keepKeys: _keepKeys, drawGrid, xNums = this.xNums, yNums = this.yNums, lonLatType = "degree" } = options
     const keepKeys = new Set(_keepKeys)
-    const rect = getScreenRect(this.viewer)
+    const rect = getScreenRect(this.viewer, lonLatType)
 
     const xInterval = (rect.maxx - rect.minx) / xNums
     const yInterval = (rect.maxy - rect.miny) / yNums
 
     let lonLats = _lonLats
-    let posMap = new Map<string, MostDetailedPosMapItem[]>()
+    let posMap = new Map<string, Array<T & MostDetailedPosMapItem>>()
     if (keepKeys.size) {
       const { lonLats: l, posMap: p } = MassivePointsHelper.initMostDetailedPosMap({ lonLats, rect, xNums, yNums, keepKeys })
       lonLats = l
@@ -195,13 +206,43 @@ export class MassivePointsHelper {
       }
     }
 
-    drawGrid && this.drawGrid({ rect, xNums, yNums })
+    drawGrid && this.drawGrid({ rect, xNums, yNums, lonLatType })
 
     return Array.from(posMap.values()).flat()
   }
 
-  calcEntities() {
-    // todo
+  calcEntities(target: IEntities, options: calcEntitiesOptions = {}) {
+    const { keepEntities, ...rest } = options
+    const entities = EntityUtil.getEntities(target)
+    const keepKeys = keepEntities?.map(e => (typeof e === "string" ? e : e.id))
+
+    const lonLats = MassivePointsHelper.entities2LonLats(entities, this.viewer)
+
+    const res = this.calcLonLats(lonLats, { lonLatType: "radian", keepKeys, ...rest })
+    const reservedEntities = new Set(res.map(item => item.entity))
+
+    entities.forEach(entity => {
+      entity.show = reservedEntities.has(entity)
+    })
+
+    return res
+  }
+
+  calcEntitiesMostDetailed(target: IEntities, options: calcEntitiesOptions = {}) {
+    const { keepEntities, ...rest } = options
+    const entities = EntityUtil.getEntities(target)
+    const keepKeys = keepEntities?.map(e => (typeof e === "string" ? e : e.id))
+
+    const lonLats = MassivePointsHelper.entities2LonLats(entities, this.viewer)
+
+    const res = this.calcLonLatsMostDetailed(lonLats, { lonLatType: "radian", keepKeys, ...rest })
+    const reservedEntities = new Set(res.map(item => item.entity))
+
+    entities.forEach(entity => {
+      entity.show = reservedEntities.has(entity)
+    })
+
+    return res
   }
 
   removeGrid() {
@@ -209,9 +250,5 @@ export class MassivePointsHelper {
       this.viewer.scene.primitives.remove(this.primitive)
       this.primitive = null
     }
-  }
-
-  getGrid() {
-    return this.primitive
   }
 }

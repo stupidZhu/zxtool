@@ -1,9 +1,9 @@
 import { IObj } from "../../type"
-import CommonUtil from "../CommonUtil/CommonUtil"
+import { CommonUtil } from "../CommonUtil/CommonUtil"
 
 const { hashCacheKey } = CommonUtil
 
-class CacheHelper {
+export class CacheHelper {
   private store: IObj = {}
 
   add = <T>(key: any[], value: T): T => {
@@ -27,5 +27,3 @@ class CacheHelper {
     return this.store[hashKey]
   }
 }
-
-export default CacheHelper

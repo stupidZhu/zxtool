@@ -193,7 +193,7 @@ const getValueUtil = {
   },
 }
 
-export default {
+export const CommonUtil = {
   hashCacheKey,
   addCacheWrapper,
   abortablePromise,

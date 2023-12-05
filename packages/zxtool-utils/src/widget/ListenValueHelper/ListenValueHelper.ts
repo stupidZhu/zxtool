@@ -1,7 +1,7 @@
 import { isNil } from "lodash"
 import { IObj, ITimer } from "../../type"
 
-class ListenValueHelper {
+export class ListenValueHelper {
   private valueMap: Record<string, any> = new Proxy(
     {},
     {
@@ -57,5 +57,3 @@ class ListenValueHelper {
   getValue = (key: string) => this.valueMap[key]
   setValue = (key: string, value: any) => (this.valueMap[key] = value)
 }
-
-export default ListenValueHelper

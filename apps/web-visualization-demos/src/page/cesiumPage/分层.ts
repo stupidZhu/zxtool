@@ -1,4 +1,4 @@
-import { MassivePointsHelper, RECT, ViewerHelper, ViewerUtilSync } from "@zxtool/cesium-utils"
+import { MassivePointsHelper, ViewerHelper, ViewerUtilSync } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 
 const { getScreenRect } = ViewerUtilSync
@@ -17,14 +17,14 @@ const genMassivePoints = (nums: number, rect: RECT) => {
 
 export const 添加分层 = () => {
   const viewer = ViewerHelper.getViewer()!
-  if (!MPH) MPH = new MassivePointsHelper(viewer, { xNums: 10, yNums: 10 })
+  if (!MPH) MPH = new MassivePointsHelper(viewer, { xNums: 30, yNums: 20 })
 
   const rect = getScreenRect(viewer)
 
   const _points = genMassivePoints(10000, rect)
-  const points = MPH.calcLonLatsMostDetailed(_points, { drawGrid: true, keepKeys: Array.from(Array(20), (_, i) => i) })
+  // const points = MPH.calcLonLats(_points, { drawGrid: true, keepKeys: Array.from(Array(20), (_, i) => i) })
 
-  points.forEach(item => {
+  _points.forEach(item => {
     viewer.entities.add({
       position: Cesium.Cartesian3.fromDegrees(...(item.lonLat as [number, number])),
       point: {
@@ -34,14 +34,16 @@ export const 添加分层 = () => {
         outlineWidth: 1,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
+      show: false,
     })
+  })
+
+  viewer.camera.moveEnd.addEventListener(() => {
+    MPH?.calcEntitiesMostDetailed(viewer.entities, { drawGrid: true })
+    console.log(MPH)
   })
 }
 
 export const 移除Grid = () => {
   MPH?.removeGrid()
-}
-
-export const flyTo = () => {
-  const p = MPH?.getGrid() as Cesium.GroundPrimitive
 }
