@@ -2,7 +2,7 @@ import { REST } from "../../type"
 import { genZUInfo } from "../../util"
 import { CommonUtil, GetNumberProps } from "../CommonUtil/CommonUtil"
 
-const genEmitterInfo = genZUInfo("EmitterHelper")
+const genInfo = genZUInfo("EmitterHelper")
 
 export type EmitterHandler<T extends REST = REST> = ((...rest: T) => void) & { _raw?: (...rest: T) => void }
 export type OverflowStrategy = "prevent" | "shift"
@@ -134,15 +134,15 @@ export class EmitterHelper {
       }
       if (handlers.length >= this.maxCount.handler) {
         if (this.overflowStrategy.handler === "prevent") {
-          throw new Error(genEmitterInfo("on 调用失败, handler 数量已达到上限"))
+          throw new Error(genInfo("on 调用失败, handler 数量已达到上限"))
         }
-        console.warn(genEmitterInfo(`key 为 ${String(key)} 的第一个 handler 已被移除`))
+        console.warn(genInfo(`key 为 ${String(key)} 的第一个 handler 已被移除`))
         handlers.shift()
         handlers.push(value as EmitterHandler)
         return
       }
     } else {
-      if (key === "*") throw new Error(genEmitterInfo("emit 调用失败, key 不允许为 *"))
+      if (key === "*") throw new Error(genInfo("emit 调用失败, key 不允许为 *"))
       const history = this.historyCollection.get(key)
       if (!history) {
         this.historyCollection.set(key, [value as REST])
@@ -154,9 +154,9 @@ export class EmitterHelper {
       }
       if (history.length >= this.maxCount.history) {
         if (this.overflowStrategy.history === "prevent") {
-          throw new Error(genEmitterInfo("emit 调用失败, history 数量已达到上限"))
+          throw new Error(genInfo("emit 调用失败, history 数量已达到上限"))
         }
-        console.warn(genEmitterInfo(`key 为 ${String(key)} 的第一条 history 已被移除`))
+        console.warn(genInfo(`key 为 ${String(key)} 的第一条 history 已被移除`))
         history.shift()
         history.push(value as REST)
         return

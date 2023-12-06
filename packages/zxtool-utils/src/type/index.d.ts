@@ -9,4 +9,18 @@ export type Merge<T> = {
 }
 export type PartialByKeys<O, K extends keyof O> = Merge<Partial<O> & Omit<O, K>>
 
+// interface RejectedPromise<E> {
+//   reject(reason: E): void
+// }
+
+// declare module "PromiseConstructor" {
+//   interface PromiseConstructor {
+//     reject<E = any>(reason?: E): Promise<T>
+//   }
+// }
+
+interface Promise<T, E> extends Promise<T> {
+  reject<E = any>(reason?: E): Promise<T>
+}
+
 export as namespace ZU
