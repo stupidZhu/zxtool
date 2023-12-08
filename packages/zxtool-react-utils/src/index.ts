@@ -16,4 +16,5 @@ export { default as useStorageStore } from "./hook/useStorageStore/useStorageSto
 export { default as useStorageValue } from "./hook/useStorageValue/useStorageValue"
 export { default as useStoreState } from "./hook/useStoreState/useStoreState"
 export { default as useWhyDidYouRender } from "./hook/useWhyDidYouRender/useWhyDidYouRender"
+export type * from "./type"
 export { default as CreatePortalHelper } from "./widget/CreatePortalHelper/CreatePortalHelper"

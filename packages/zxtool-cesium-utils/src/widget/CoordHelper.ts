@@ -14,7 +14,7 @@ export class CoordHelper {
     if (c3) this.c3 = c3
   }
 
-  private static translate(c3: Cesium.Cartesian3, xyz: number[]) {
+  static translate(c3: Cesium.Cartesian3, xyz: number[]) {
     return Cesium.Matrix4.multiplyByPoint(
       Cesium.Transforms.eastNorthUpToFixedFrame(c3),
       new Cesium.Cartesian3(...xyz),

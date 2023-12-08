@@ -1,6 +1,6 @@
 import * as Cesium from "cesium"
 import { cloneDeep, isNil } from "lodash"
-import CoordHelper from "../widget/CoordHelper"
+import { CoordHelper } from "../widget/CoordHelper"
 
 const padArr = (arr: any[], value: any, length?: number) => {
   return Array.from(Array(length ?? arr.length)).map((item, index) => (isNil(arr[index]) ? value : arr[index]))

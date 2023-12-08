@@ -1,3 +1,4 @@
+export type * from "./type"
 export * from "./widget/CacheHelper/CacheHelper"
 export * from "./widget/CommonUtil/CommonUtil"
 export * from "./widget/EmitterHelper/EmitterHelper"

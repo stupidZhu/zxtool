@@ -25,6 +25,6 @@ export interface RECT {
 }
 
 export type IEntity = Cesium.Entity & {
-  customField?: EntityCustomField
+  __custom__?: any
   [index: string]: any
 }

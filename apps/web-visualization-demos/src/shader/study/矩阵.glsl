@@ -21,18 +21,29 @@ float cross(vec2 uv, float size) {
 }
 
 mat2 rotate2d(float angle) {
-  return mat2(cos(angle), - sin(angle), sin(angle), cos(angle));
+  return mat2(
+    cos(angle), - sin(angle),
+    sin(angle), cos(angle)
+  );
+}
+
+mat2 scale2d(vec2 scale) {
+  return mat2(
+    scale.x, 0.0,
+    0.0, scale.y
+  );
 }
 
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
   uv -= 0.5;
+  
   // vec3 color = vec3(0.4824, 0.8196, 0.451);
   
   uv = rotate2d(sin(u_time) * PI) * uv;
   
   float t = cross(uv, 0.3);
-  vec3 color = vec3(uv, 1.0);
+  vec3 color = vec3(uv + 0.5, 1.0);
   color += t;
   
   gl_FragColor = vec4(color, 1.0);

@@ -1,5 +1,6 @@
 export * from "./materialProperty/TrailLine2MaterialProperty"
 export * from "./materialProperty/TrailLineMaterialProperty"
+export type * from "./type"
 export * from "./util/CommonUtil"
 export * from "./util/EntityUtil"
 export * from "./util/EntityUtilSync"
