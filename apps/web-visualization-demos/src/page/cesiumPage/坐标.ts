@@ -1,4 +1,4 @@
-import { ViewerHelper } from "@zxtool/cesium-utils"
+import { CoordHelper, ScreenEventHelper, ViewerHelper, ViewerUtilSync } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 
 const 可复用全排列 = (nums: number[]) => {
@@ -60,4 +60,36 @@ export const 世界坐标 = () => {
   })
 
   console.log(viewer.scene.globe.ellipsoid)
+}
+
+export const 转坐标 = () => {
+  const viewer = ViewerHelper.getViewer()!
+  const coordHelper = new CoordHelper(viewer)
+  const dataSource = ViewerUtilSync.getCustomDataSource({ name: "test", viewer, autoCreate: true })!
+  const drawPoint = (c3: Cesium.Cartesian3) => {
+    dataSource.entities.add({
+      position: c3,
+      point: {
+        pixelSize: 5,
+        color: Cesium.Color.TEAL,
+        outlineColor: Cesium.Color.WHITE,
+        outlineWidth: 2,
+      },
+    })
+  }
+
+  ScreenEventHelper.addEvent({
+    key: "click",
+    type: "LEFT_CLICK",
+    cb(movement) {
+      coordHelper.setFromScreenCoord(movement.position)
+      drawPoint(coordHelper.getCartesian3())
+
+      coordHelper.translate([20, 20, 20])
+      drawPoint(coordHelper.getCartesian3())
+
+      coordHelper.setHeight(10)
+      drawPoint(coordHelper.getCartesian3())
+    },
+  })
 }

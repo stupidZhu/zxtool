@@ -1,4 +1,5 @@
 import * as Cesium from "cesium"
+import type { FeatureCollection } from "geojson"
 import type { IPrimitive } from "../widget/PrimitiveManager"
 
 const getHideWidgetOption = () => {
@@ -102,6 +103,37 @@ const flyToPrimitive = (primitive: IPrimitive, viewer: Cesium.Viewer) => {
   flyToPrimitive(primitive._primitive, viewer)
 }
 
+interface GetDataSourceSyncProps {
+  viewer: Cesium.Viewer
+  name: string
+  autoCreate?: boolean
+}
+
+const getCustomDataSource = (props: GetDataSourceSyncProps): Cesium.CustomDataSource | null => {
+  const { viewer, name, autoCreate = false } = props
+  let dataSource = viewer.dataSources.getByName(name)[0]
+  if (!dataSource && autoCreate) {
+    dataSource = new Cesium.CustomDataSource(name)
+    dataSource.show = true
+    viewer.dataSources.add(dataSource)
+  }
+  return dataSource ?? null
+}
+
+const getGeojsonDataSource = (
+  props: GetDataSourceSyncProps & { geojson?: string | FeatureCollection },
+): Cesium.GeoJsonDataSource | null => {
+  const { viewer, name, geojson, autoCreate = false } = props
+  let dataSource = viewer.dataSources.getByName(name)[0] as Cesium.GeoJsonDataSource
+  if (!dataSource && autoCreate) {
+    dataSource = new Cesium.GeoJsonDataSource(name)
+    geojson && dataSource.load(geojson)
+    dataSource.show = true
+    viewer.dataSources.add(dataSource)
+  }
+  return dataSource ?? null
+}
+
 export const ViewerUtilSync = {
   getHideWidgetOption,
   hideWidget,
@@ -109,4 +141,6 @@ export const ViewerUtilSync = {
   setSkyBox,
   getScreenRect,
   flyToPrimitive,
+  getCustomDataSource,
+  getGeojsonDataSource,
 }

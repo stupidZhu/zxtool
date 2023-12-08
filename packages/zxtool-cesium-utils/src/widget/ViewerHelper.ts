@@ -7,7 +7,7 @@ export type InitViewerProps = Cesium.Viewer.ConstructorOptions & { hideWidget?: 
 
 class _ViewerHelper {
   private viewer?: Cesium.Viewer
-  private vKey = Symbol("viewer")
+  private V_KEY = Symbol("viewer")
   private emitter = new EmitterHelper({ maxCount: { history: 1 } })
 
   init = (container: string | Element, options: InitViewerProps = {}) => {
@@ -17,7 +17,7 @@ class _ViewerHelper {
     if (token) Cesium.Ion.defaultAccessToken = token
 
     this.viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
-    this.emitter.emit(this.vKey, this.viewer)
+    this.emitter.emit(this.V_KEY, this.viewer)
 
     // @ts-ignore
     hideWidget && (this.viewer.cesiumWidget.creditContainer.style.display = "none")
@@ -30,7 +30,7 @@ class _ViewerHelper {
 
   setViewer = (viewer: Cesium.Viewer) => {
     this.viewer = viewer
-    this.emitter.emit(this.vKey, this.viewer)
+    this.emitter.emit(this.V_KEY, this.viewer)
   }
 
   getViewer = (): Cesium.Viewer | undefined => this.viewer
@@ -38,7 +38,7 @@ class _ViewerHelper {
   getViewerPromise = async (viewer?: Cesium.Viewer) => {
     if (viewer) return viewer
     if (this.viewer) return this.viewer
-    return this.emitter.onceAsync<Cesium.Viewer>(this.vKey, true).promise
+    return this.emitter.onceAsync<Cesium.Viewer>(this.V_KEY, true).promise
   }
 
   flyToHome = () => {

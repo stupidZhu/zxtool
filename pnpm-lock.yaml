@@ -339,6 +339,9 @@ importers:
 
   packages/zxtool-cesium-utils:
     dependencies:
+      '@types/geojson':
+        specifier: ^7946.0.13
+        version: 7946.0.13
       '@zxtool/utils':
         specifier: workspace:*
         version: link:../zxtool-utils
@@ -633,6 +636,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      nanoid:
+        specifier: ^4.0.2
+        version: 4.0.2
     devDependencies:
       '@rollup/plugin-alias':
         specifier: ^5.1.0
@@ -4319,6 +4325,10 @@ packages:
     dependencies:
       '@types/node': 18.7.18
     dev: true
+
+  /@types/geojson@7946.0.13:
+    resolution: {integrity: sha512-bmrNrgKMOhM3WsafmbGmC+6dsF2Z308vLFsQ3a/bT8X8Sv5clVYpPars/UPq+sAaJP+5OoLAYgwbkS5QEJdLUQ==}
+    dev: false
 
   /@types/glob@7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}

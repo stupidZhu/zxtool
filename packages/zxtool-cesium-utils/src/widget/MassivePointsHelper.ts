@@ -1,4 +1,5 @@
 import * as Cesium from "cesium"
+import { LonLat, LonLatKey, LonLatType, RECT } from "../type"
 import { EntityUtil, IEntities } from "../util/EntityUtil"
 import { ViewerUtilSync } from "../util/ViewerUtilSync"
 
@@ -34,17 +35,17 @@ export class MassivePointsHelper {
   private yNums: number
   private primitive: Cesium.GroundPrimitive | null = null
 
-  static getDisSquare(lonLat1: LonLat, lonLat2: LonLat) {
+  private static getDisSquare(lonLat1: LonLat, lonLat2: LonLat) {
     return (lonLat1[0] - lonLat2[0]) ** 2 + (lonLat1[1] - lonLat2[1]) ** 2
   }
-  static getPosKey(props: Required<MassivePointsHelperOptions> & { lonLat: LonLat; rect: RECT }) {
+  private static getPosKey(props: Required<MassivePointsHelperOptions> & { lonLat: LonLat; rect: RECT }) {
     const { lonLat, rect, xNums, yNums } = props
     const xInterval = (rect.maxx - rect.minx) / xNums
     const yInterval = (rect.maxy - rect.miny) / yNums
     if (lonLat[0] > rect.maxx || lonLat[0] < rect.minx || lonLat[1] > rect.maxy || lonLat[1] < rect.miny) return
     return `${Math.floor((lonLat[0] - rect.minx) / xInterval)}-${Math.floor((lonLat[1] - rect.miny) / yInterval)}`
   }
-  static initPosMap<T extends LonLatKey>(
+  private static initPosMap<T extends LonLatKey>(
     props: Required<MassivePointsHelperOptions> & { lonLats: T[]; rect: RECT; keepKeys: Set<PropertyKey> },
   ) {
     const { lonLats: _lonLats, keepKeys, ...rest } = props
@@ -57,7 +58,7 @@ export class MassivePointsHelper {
         lonLats.push(item)
         continue
       }
-      const posKey = this.getPosKey({ lonLat, ...rest })
+      const posKey = MassivePointsHelper.getPosKey({ lonLat, ...rest })
       if (!posKey) continue
       if (!posMap.has(posKey)) posMap.set(posKey, [{ ...item, posKey }])
       else posMap.get(posKey)!.push({ ...item, posKey })
@@ -65,7 +66,7 @@ export class MassivePointsHelper {
 
     return { posMap, lonLats }
   }
-  static initMostDetailedPosMap<T extends LonLatKey>(
+  private static initMostDetailedPosMap<T extends LonLatKey>(
     props: Required<MassivePointsHelperOptions> & { lonLats: T[]; rect: RECT; keepKeys: Set<PropertyKey> },
   ) {
     const { lonLats, posMap: _posMap } = MassivePointsHelper.initPosMap(props)
@@ -80,7 +81,7 @@ export class MassivePointsHelper {
 
     return { posMap, lonLats }
   }
-  static entities2LonLats(entities: Cesium.Entity[], viewer: Cesium.Viewer) {
+  private static entities2LonLats(entities: Cesium.Entity[], viewer: Cesium.Viewer) {
     return entities
       .filter(e => Boolean(e.position))
       .map(entity => {

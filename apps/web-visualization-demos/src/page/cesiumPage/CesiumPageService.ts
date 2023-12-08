@@ -1,7 +1,6 @@
 import { CommonUtil, TilesetManager, ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
-import { 不同的Primitive } from "./primitive"
-import "./worker"
+import { 转坐标 } from "./坐标"
 
 class CesiumPageService {
   moduleEnter() {
@@ -17,7 +16,7 @@ class CesiumPageService {
     )
 
     // this.loadTileset()
-    // this.init()
+    this.init()
   }
 
   moduleExit() {}
@@ -28,12 +27,13 @@ class CesiumPageService {
 
     // initCameraGUI()
     // 世界坐标()
+    转坐标()
 
     // primitive基础()
     // fabric基础()
     // shader基础()
     // primitiveV()
-    不同的Primitive()
+    // 不同的Primitive()
 
     // 加载geojson()
 

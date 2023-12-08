@@ -1,4 +1,5 @@
 import { MassivePointsHelper, ViewerHelper, ViewerUtilSync } from "@zxtool/cesium-utils"
+import { RECT } from "@zxtool/cesium-utils/dist/type/type"
 import * as Cesium from "cesium"
 
 const { getScreenRect } = ViewerUtilSync
@@ -24,8 +25,10 @@ export const 添加分层 = () => {
   const _points = genMassivePoints(10000, rect)
   // const points = MPH.calcLonLats(_points, { drawGrid: true, keepKeys: Array.from(Array(20), (_, i) => i) })
 
+  const dataSource = ViewerUtilSync.getCustomDataSource({ viewer, name: "massivePoint", autoCreate: true })!
+
   _points.forEach(item => {
-    viewer.entities.add({
+    dataSource.entities.add({
       position: Cesium.Cartesian3.fromDegrees(...(item.lonLat as [number, number])),
       point: {
         pixelSize: 3,
@@ -39,8 +42,7 @@ export const 添加分层 = () => {
   })
 
   viewer.camera.moveEnd.addEventListener(() => {
-    MPH?.calcEntitiesMostDetailed(viewer.entities, { drawGrid: true })
-    console.log(MPH)
+    MPH?.calcEntitiesMostDetailed(dataSource)
   })
 }
 

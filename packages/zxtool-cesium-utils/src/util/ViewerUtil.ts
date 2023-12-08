@@ -1,4 +1,5 @@
 import * as Cesium from "cesium"
+import type { FeatureCollection } from "geojson"
 import { IPrimitive } from "../widget/PrimitiveManager"
 import { ViewerHelper } from "../widget/ViewerHelper"
 import { ViewerUtilSync } from "./ViewerUtilSync"
@@ -25,10 +26,28 @@ const flyToPrimitive = (primitive: IPrimitive, viewer?: Cesium.Viewer) => {
   ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.flyToPrimitive(primitive, viewer))
 }
 
+interface GetDataSourceProps {
+  viewer?: Cesium.Viewer
+  name: string
+  autoCreate?: boolean
+}
+
+const getCustomDataSource = (props: GetDataSourceProps) => {
+  const { viewer, ...rest } = props
+  return ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.getCustomDataSource({ viewer, ...rest }))
+}
+
+const getGeojsonDataSource = (props: GetDataSourceProps & { geojson?: string | FeatureCollection }) => {
+  const { viewer, ...rest } = props
+  return ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.getGeojsonDataSource({ viewer, ...rest }))
+}
+
 export const ViewerUtil = {
   hideWidget,
   fxaa,
   setSkyBox,
   getScreenRect,
   flyToPrimitive,
+  getCustomDataSource,
+  getGeojsonDataSource,
 }
