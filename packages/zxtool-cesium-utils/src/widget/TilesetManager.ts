@@ -1,8 +1,11 @@
 import { MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { last } from "lodash"
+import { genZCUInfo } from "../util"
 import { ZCUConfig, ZCUConfigType } from "../util/ZCUConfig"
 import { ViewerHelper } from "./ViewerHelper"
+
+const genInfo = genZCUInfo("TilesetManager")
 
 export type TilesetObj = {
   key: PropertyKey
@@ -17,7 +20,7 @@ export interface AddTilesetProps extends Partial<TilesetObj> {
 }
 
 class _TilesetManager {
-  readonly mapList = new MapList<TilesetObj>()
+  readonly tilesetCollection = new MapList<TilesetObj>()
 
   /**
    * @param props 如果 url 是数值则代表 Cesium.IonAssetId; url 和 tileset 传入一个即可, tileset 优先级更高
@@ -32,12 +35,12 @@ class _TilesetManager {
       tilesetOptions = ZCUConfig.getConfig("tilesetOptions", false) ?? {},
       ...rest
     } = props
-    const viewer = await ViewerHelper.getViewerPromise(_viewer)
+    const viewer = await ViewerHelper.getViewerPromise(undefined, _viewer)
 
-    let tilesetObj = this.mapList.get(key)
+    let tilesetObj = this.tilesetCollection.get(key)
     if (tilesetObj?.tileset && tilesetObj.tileset === _tileset) {
       if (flyTo) viewer!.flyTo(tilesetObj.tileset)
-      console.error(`[TilesetManager] 当前 key(${key.toString()}) 已经存在，新增 tileset 失败`)
+      console.error(genInfo(`当前 key(${key.toString()}) 已经存在，新增 tileset 失败`))
       return tilesetObj
     }
 
@@ -49,7 +52,7 @@ class _TilesetManager {
 
     if (!viewer.scene.primitives.contains(tileset)) viewer.scene.primitives.add(tileset)
     tilesetObj = { key, tileset, viewer, ...rest }
-    this.mapList.set(key, tilesetObj)
+    this.tilesetCollection.set(key, tilesetObj)
     if (flyTo) viewer!.flyTo(tileset)
     return tilesetObj
   }
@@ -63,7 +66,7 @@ class _TilesetManager {
 
   showAll = (flyTo?: boolean) => {
     let last: TilesetObj | undefined
-    this.mapList.list.forEach(v => {
+    this.tilesetCollection.list.forEach(v => {
       v.tileset.show = true
       last = v
     })
@@ -76,24 +79,24 @@ class _TilesetManager {
   }
 
   hideAll = () => {
-    this.mapList.list.forEach(v => (v.tileset.show = false))
+    this.tilesetCollection.list.forEach(v => (v.tileset.show = false))
   }
 
   removeByCondition = (condition: Partial<TilesetObj>) => {
     const list = this.getListByCondition(condition)
     list.forEach(item => {
       item.viewer.scene.primitives.remove(item.tileset)
-      this.mapList.delete(item.key)
+      this.tilesetCollection.delete(item.key)
     })
   }
 
   removeAll = () => {
-    this.mapList.list.forEach(item => item.viewer.scene.primitives.remove(item.tileset))
-    this.mapList.clear()
+    this.tilesetCollection.list.forEach(item => item.viewer.scene.primitives.remove(item.tileset))
+    this.tilesetCollection.clear()
   }
 
   getListByCondition = (props: Partial<TilesetObj>) => {
-    return this.mapList.list.filter(item => {
+    return this.tilesetCollection.list.filter(item => {
       return Object.entries(props).every(([k, v]) => {
         return item[k] === v
       })

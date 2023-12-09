@@ -6,24 +6,24 @@ import { ViewerUtilSync } from "./ViewerUtilSync"
 
 const hideWidget = (viewer?: Cesium.Viewer) => {
   setTimeout(() => {
-    ViewerHelper.getViewerPromise(viewer).then(ViewerUtilSync.hideWidget)
+    ViewerHelper.getViewerPromise(undefined, viewer).then(ViewerUtilSync.hideWidget)
   })
 }
 
 const fxaa = (viewer?: Cesium.Viewer) => {
-  ViewerHelper.getViewerPromise(viewer).then(ViewerUtilSync.fxaa)
+  ViewerHelper.getViewerPromise(undefined, viewer).then(ViewerUtilSync.fxaa)
 }
 
 const setSkyBox = ({ viewer, urls }: { viewer?: Cesium.Viewer; urls: string[] }) => {
-  ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.setSkyBox(viewer, urls))
+  ViewerHelper.getViewerPromise(undefined, viewer).then(viewer => ViewerUtilSync.setSkyBox(viewer, urls))
 }
 
 const getScreenRect = (viewer?: Cesium.Viewer, type: "degree" | "radian" = "degree") => {
-  return ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.getScreenRect(viewer, type))
+  return ViewerHelper.getViewerPromise(undefined, viewer).then(viewer => ViewerUtilSync.getScreenRect(viewer, type))
 }
 
 const flyToPrimitive = (primitive: IPrimitive, viewer?: Cesium.Viewer) => {
-  ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.flyToPrimitive(primitive, viewer))
+  ViewerHelper.getViewerPromise(undefined, viewer).then(viewer => ViewerUtilSync.flyToPrimitive(primitive, viewer))
 }
 
 interface GetDataSourceProps {
@@ -34,12 +34,16 @@ interface GetDataSourceProps {
 
 const getCustomDataSource = (props: GetDataSourceProps) => {
   const { viewer, ...rest } = props
-  return ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.getCustomDataSource({ viewer, ...rest }))
+  return ViewerHelper.getViewerPromise(undefined, viewer).then(viewer =>
+    ViewerUtilSync.getCustomDataSource({ viewer, ...rest }),
+  )
 }
 
 const getGeojsonDataSource = (props: GetDataSourceProps & { geojson?: string | FeatureCollection }) => {
   const { viewer, ...rest } = props
-  return ViewerHelper.getViewerPromise(viewer).then(viewer => ViewerUtilSync.getGeojsonDataSource({ viewer, ...rest }))
+  return ViewerHelper.getViewerPromise(undefined, viewer).then(viewer =>
+    ViewerUtilSync.getGeojsonDataSource({ viewer, ...rest }),
+  )
 }
 
 export const ViewerUtil = {

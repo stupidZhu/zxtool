@@ -1,55 +1,66 @@
-import { EmitterHelper } from "@zxtool/utils"
+import { EmitterHelper, MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
+import { genZCUInfo } from "../util"
 import { ViewerUtilSync } from "../util/ViewerUtilSync"
 import { ZCUConfig } from "../util/ZCUConfig"
+import SyncViewerHelper from "./SyncViewerHelper"
 
-export type InitViewerProps = Cesium.Viewer.ConstructorOptions & { hideWidget?: boolean; fxaa?: boolean }
+const genInfo = genZCUInfo("ViewerHelper")
+
+export type InitViewerProps = Cesium.Viewer.ConstructorOptions & {
+  hideWidget?: boolean
+  fxaa?: boolean
+  viewerKey?: PropertyKey
+}
 
 class _ViewerHelper {
-  private viewer?: Cesium.Viewer
-  private V_KEY = Symbol("viewer")
-  private emitter = new EmitterHelper({ maxCount: { history: 1 } })
+  private readonly KEY: PropertyKey = Symbol("viewer")
+  private readonly viewers: MapList<Cesium.Viewer> = new MapList()
+  private readonly emitter = new EmitterHelper({ maxCount: { history: 1 } })
+
+  readonly SyncHelper = new SyncViewerHelper(this.KEY, this.viewers)
 
   init = (container: string | Element, options: InitViewerProps = {}) => {
-    const { hideWidget, fxaa = true, ...rest } = options
+    const { hideWidget, fxaa = true, viewerKey = this.KEY, ...rest } = options
+    if (this.viewers.has(viewerKey)) throw new Error(genInfo(`key 为 ${viewerKey.toString()} 的 viewer 已经初始化过`))
 
     const token = ZCUConfig.getConfig("CESIUM_TOKEN", false)
     if (token) Cesium.Ion.defaultAccessToken = token
 
-    this.viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
-    this.emitter.emit(this.V_KEY, this.viewer)
-
+    const viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
     // @ts-ignore
-    hideWidget && (this.viewer.cesiumWidget.creditContainer.style.display = "none")
-    fxaa && ViewerUtilSync.fxaa(this.viewer)
+    hideWidget && (viewer.cesiumWidget.creditContainer.style.display = "none")
+    fxaa && ViewerUtilSync.fxaa(viewer)
+    viewer.scene.globe.depthTestAgainstTerrain = true
 
-    this.viewer.scene.globe.depthTestAgainstTerrain = true
+    this.viewers.set(viewerKey, viewer)
+    this.emitter.emit(viewerKey, viewer)
 
-    return this.viewer
+    return viewer
   }
 
-  setViewer = (viewer: Cesium.Viewer) => {
-    this.viewer = viewer
-    this.emitter.emit(this.V_KEY, this.viewer)
+  setViewer = (viewer: Cesium.Viewer, viewerKey = this.KEY) => {
+    this.viewers.set(viewerKey, viewer)
+    this.emitter.emit(viewerKey, viewer)
   }
 
-  getViewer = (): Cesium.Viewer | undefined => this.viewer
+  getViewer = (viewerKey = this.KEY) => {
+    return this.viewers.get(viewerKey)
+  }
 
-  getViewerPromise = async (viewer?: Cesium.Viewer) => {
+  getViewerPromise = async (viewerKey = this.KEY, viewer?: Cesium.Viewer) => {
     if (viewer) return viewer
-    if (this.viewer) return this.viewer
-    return this.emitter.onceAsync<Cesium.Viewer>(this.V_KEY, true).promise
+    if (this.viewers.has(viewerKey)) return this.viewers.get(viewerKey)!
+    return this.emitter.onceAsync<Cesium.Viewer>(viewerKey, true).promise
   }
 
-  flyToHome = () => {
-    const homeView = ZCUConfig.getConfig("homeView", false)
-    homeView && this.viewer?.camera.flyTo(homeView)
-  }
-
-  destroy = () => {
-    this.viewer?.destroy()
-    this.viewer = undefined
-    this.emitter.clearHistory()
+  destroy = (viewerKey = this.KEY) => {
+    const viewer = this.viewers.get(viewerKey)
+    if (viewer) {
+      viewer.destroy()
+      this.viewers.delete(viewerKey)
+    }
+    this.emitter.clearHistory(viewerKey)
   }
 }
 

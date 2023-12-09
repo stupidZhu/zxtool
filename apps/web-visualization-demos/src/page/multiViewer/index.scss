@@ -1,0 +1,8 @@
+.multi-viewer {
+  display: flex;
+  height: 100vh;
+  .rcc-cesium-container {
+    height: 100%;
+    flex: 1;
+  }
+}

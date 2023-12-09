@@ -7,7 +7,7 @@ export class MapList<T> {
   }
 
   get(key: PropertyKey) {
-    return this.map[key]
+    return this.map.get(key)
   }
 
   set(key: PropertyKey, value: T) {

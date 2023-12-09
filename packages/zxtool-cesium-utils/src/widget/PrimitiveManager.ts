@@ -20,15 +20,15 @@ export type AddPrimitiveProps = {
 } & Record<string, any>
 
 class _PrimitiveManager {
-  readonly mapList = new MapList<PrimitiveObj>()
+  readonly primitiveCollection = new MapList<PrimitiveObj>()
 
   async add(props: AddPrimitiveProps) {
     const { key = Symbol(), flyTo = true, viewer: _viewer, primitive, ...rest } = props
-    const viewer = await ViewerHelper.getViewerPromise(_viewer)
+    const viewer = await ViewerHelper.getViewerPromise(undefined, _viewer)
 
     if (!viewer.scene.primitives.contains(primitive)) viewer.scene.primitives.add(primitive)
     const primitiveObj = { key, primitive, viewer, ...rest }
-    this.mapList.set(key, primitiveObj)
+    this.primitiveCollection.set(key, primitiveObj)
     if (flyTo) ViewerUtilSync.flyToPrimitive(primitive, viewer)
     return primitiveObj
   }
@@ -42,7 +42,7 @@ class _PrimitiveManager {
 
   showAll = (flyTo?: boolean) => {
     let last: PrimitiveObj | undefined
-    this.mapList.list.forEach(v => {
+    this.primitiveCollection.list.forEach(v => {
       v.primitive.show = true
       last = v
     })
@@ -55,24 +55,24 @@ class _PrimitiveManager {
   }
 
   hideAll = () => {
-    this.mapList.list.forEach(v => (v.primitive.show = false))
+    this.primitiveCollection.list.forEach(v => (v.primitive.show = false))
   }
 
   removeByCondition = (condition: Partial<PrimitiveObj>) => {
     const list = this.getListByCondition(condition)
     list.forEach(item => {
       item.viewer.scene.primitives.remove(item.primitive)
-      this.mapList.delete(item.key)
+      this.primitiveCollection.delete(item.key)
     })
   }
 
   removeAll = () => {
-    this.mapList.list.forEach(item => item.viewer.scene.primitives.remove(item.primitive))
-    this.mapList.clear()
+    this.primitiveCollection.list.forEach(item => item.viewer.scene.primitives.remove(item.primitive))
+    this.primitiveCollection.clear()
   }
 
   getListByCondition = (props: Partial<PrimitiveObj>) => {
-    return this.mapList.list.filter(item => {
+    return this.primitiveCollection.list.filter(item => {
       return Object.entries(props).every(([k, v]) => {
         return item[k] === v
       })

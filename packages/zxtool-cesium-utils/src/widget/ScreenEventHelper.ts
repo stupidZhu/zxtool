@@ -25,36 +25,37 @@ export enum ScreenSpaceEventType {
 export type ScreenEventType = keyof typeof ScreenSpaceEventType
 
 export interface AddEventProps {
-  key: string
+  key: PropertyKey
   type: ScreenEventType
   cb: (movement: IObj) => void
+  viewer?: Cesium.Viewer
 }
 
 export interface RemoveEventProps {
-  key: string
+  key: PropertyKey
   type?: ScreenEventType
 }
 
-class _ScreenEventHelper {
-  private handlerCollection: IObj<Cesium.ScreenSpaceEventHandler> = {}
+export class _ScreenEventHelper {
+  private handlerCollection: Map<PropertyKey, Cesium.ScreenSpaceEventHandler> = new Map()
 
-  addEvent = async ({ key, type, cb }: AddEventProps) => {
-    const viewer = await ViewerHelper.getViewerPromise()
-    let handler = this.handlerCollection[key]
+  addEvent = async ({ key, type, cb, viewer: _viewer }: AddEventProps) => {
+    const viewer = await ViewerHelper.getViewerPromise(undefined, _viewer)
+    let handler = this.handlerCollection.get(key)
     if (!handler) {
       handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
-      this.handlerCollection[key] = handler
+      this.handlerCollection.set(key, handler)
     }
     handler.setInputAction(cb, ScreenSpaceEventType[type])
   }
 
   removeEvent = async ({ key, type }: RemoveEventProps) => {
-    const handler = this.handlerCollection[key]
+    const handler = this.handlerCollection.get(key)
     if (!handler) return
     if (type) handler.removeInputAction(ScreenSpaceEventType[type])
     else {
       handler.destroy()
-      Reflect.deleteProperty(this.handlerCollection, key)
+      this.handlerCollection.delete(key)
     }
   }
 }
