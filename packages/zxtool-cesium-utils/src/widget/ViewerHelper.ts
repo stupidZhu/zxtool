@@ -1,4 +1,4 @@
-import { EmitterHelper, MapList } from "@zxtool/utils"
+import { EmitterHelper } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { genZCUInfo } from "../util"
 import { ViewerUtilSync } from "../util/ViewerUtilSync"
@@ -15,7 +15,7 @@ export type InitViewerProps = Cesium.Viewer.ConstructorOptions & {
 
 class _ViewerHelper {
   private readonly KEY: PropertyKey = Symbol("viewer")
-  private readonly viewers: MapList<Cesium.Viewer> = new MapList()
+  private readonly viewers: Map<PropertyKey, Cesium.Viewer> = new Map()
   private readonly emitter = new EmitterHelper({ maxCount: { history: 1 } })
 
   readonly SyncHelper = new SyncViewerHelper(this.KEY, this.viewers)

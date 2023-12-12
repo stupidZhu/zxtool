@@ -6,11 +6,11 @@ group:
   order: 1
 ---
 
-# CatchHelper
+# CacheHelper
 
 参考了 [react-query](https://github.com/tanstack/query) 实现的简单的缓存工具
 
-<code src="./demo/CatchHelper.tsx"></code>
+<code src="./demo/CacheHelper.tsx"></code>
 
 ## result
 

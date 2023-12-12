@@ -1,4 +1,3 @@
-import { MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { genZCUInfo } from "../util"
 import { _ScreenEventHelper } from "./ScreenEventHelper"
@@ -7,19 +6,19 @@ const genInfo = genZCUInfo("SyncViewerHelper")
 
 class SyncViewerHelper {
   private readonly KEY: PropertyKey
-  private readonly viewers: MapList<Cesium.Viewer>
+  private readonly viewers: Map<PropertyKey, Cesium.Viewer>
 
   private curViewer: Cesium.Viewer | null = null
   private ScreenEventHelper = new _ScreenEventHelper()
   private config: Map<PropertyKey, { sync?: boolean; enable?: boolean }> = new Map()
 
-  constructor(KEY: PropertyKey, viewers: MapList<Cesium.Viewer>) {
+  constructor(KEY: PropertyKey, viewers: Map<PropertyKey, Cesium.Viewer>) {
     this.KEY = KEY
     this.viewers = viewers
   }
 
   private syncViewer = () => {
-    this.viewers.list.forEach(viewer => {
+    this.viewers.forEach(viewer => {
       if (this.curViewer && viewer !== this.curViewer) {
         viewer.camera.flyTo({
           destination: this.curViewer.camera.position,
@@ -37,7 +36,7 @@ class SyncViewerHelper {
   setConfig() {}
 
   startSync() {
-    this.viewers.map.forEach((viewer, key) => {
+    this.viewers.forEach((viewer, key) => {
       this.ScreenEventHelper.addEvent({
         key,
         viewer,
@@ -53,7 +52,7 @@ class SyncViewerHelper {
   }
 
   stopSync() {
-    this.viewers.map.forEach((viewer, key) => {
+    this.viewers.forEach((viewer, key) => {
       this.ScreenEventHelper.removeEvent({ key, type: "MOUSE_MOVE" })
 
       viewer.camera.changed.removeEventListener(this.syncViewer)

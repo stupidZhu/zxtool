@@ -1,5 +1,6 @@
-import { CommonUtil, TilesetManager, ViewerHelper } from "@zxtool/cesium-utils"
+import { CommonUtil, ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
+import { tilesetManager } from "src/bootstrap"
 import { 转坐标 } from "./坐标"
 
 class CesiumPageService {
@@ -15,8 +16,8 @@ class CesiumPageService {
       }),
     )
 
-    // this.loadTileset()
-    this.init()
+    this.loadTileset()
+    // this.init()
   }
 
   moduleExit() {}
@@ -49,8 +50,8 @@ class CesiumPageService {
   }
 
   loadTileset() {
-    TilesetManager.add({ url: 2373086, flyTo: true, name: "dyt" }).then(() => {
-      console.log(TilesetManager.getListByCondition({ name: "dyt" }), TilesetManager)
+    tilesetManager.add({ url: 2373086, flyTo: true, name: "dyt" }).then(() => {
+      console.log(tilesetManager.getByCondition({ name: "dyt" }), tilesetManager)
     })
     ViewerHelper.getViewer()!.scene.setTerrain(new Cesium.Terrain(Cesium.CesiumTerrainProvider.fromIonAssetId(2373160)))
   }
