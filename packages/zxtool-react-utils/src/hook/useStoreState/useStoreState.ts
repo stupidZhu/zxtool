@@ -3,7 +3,7 @@ import { useMemoizedFn } from "ahooks"
 import { merge as _merge } from "lodash"
 import { useState } from "react"
 
-const useStoreState = <T extends IObj = IObj>(value: T) => {
+export const useStoreState = <T extends IObj = IObj>(value: T) => {
   const [state, _setState] = useState(value)
 
   const setState = useMemoizedFn((val: Partial<T> | ((v: T) => T), merge?: boolean) => {
@@ -16,5 +16,3 @@ const useStoreState = <T extends IObj = IObj>(value: T) => {
 
   return [state, setState] as const
 }
-
-export default useStoreState

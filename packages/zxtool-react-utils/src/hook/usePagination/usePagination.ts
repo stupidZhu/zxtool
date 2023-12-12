@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import useCtrlComponent from "../useCtrlComponent/useCtrlComponent"
+import { useCtrlComponent } from "../useCtrlComponent/useCtrlComponent"
 
 export interface UsePaginationProps {
   /** 总页数*/
@@ -27,7 +27,7 @@ export interface PaginationItem {
   disabled: boolean
 }
 
-const usePagination = (props: UsePaginationProps) => {
+export const usePagination = (props: UsePaginationProps) => {
   const { total, pageSize = 10, fastForwardPages = 5, displayPagesCount: DPC = 3 } = props
 
   const displayPagesCount = useMemo(() => {
@@ -115,5 +115,3 @@ const usePagination = (props: UsePaginationProps) => {
 
   return { pageList, itemClick, utils: { summary, calcPage } }
 }
-
-export default usePagination

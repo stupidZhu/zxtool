@@ -6,14 +6,14 @@ class AnimationPlugin implements ThreeHelperPlugin {
   private animationId = { value: 0 }
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, clearCollection } = props
-    const { time, animationCollection } = ThreeHelper
+    const { threeHelper, initializedCache, clearCollection } = props
+    const { time, animationCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
     const clock = new THREE.Clock()
 
     const animation = (t = 0) => {
-      ThreeHelper.time.value = t
+      time.value = t
       animationCollection.forEach(fn => fn(t, clock.getDelta()))
       this.animationId.value = requestAnimationFrame(animation)
     }

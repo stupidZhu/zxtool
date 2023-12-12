@@ -42,7 +42,7 @@ export class ThreeHelper {
       initializedCache: this.initializedCache,
       clearCollection: this.clearCollection,
       widgetCollection: this.widgetCollection,
-      ThreeHelper: this,
+      threeHelper: this,
     }
     plugin.add(props)
   }
@@ -53,7 +53,7 @@ export class ThreeHelper {
       initializedCache: this.initializedCache,
       clearCollection: this.clearCollection,
       widgetCollection: this.widgetCollection,
-      ThreeHelper: this,
+      threeHelper: this,
     }
     plugin.remove(props)
   }

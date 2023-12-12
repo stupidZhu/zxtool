@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks"
-import useOnceEffect from "../useOnceEffect"
+import { useOnceEffect } from "../useOnceEffect"
 
 describe("useOnceEffect", () => {
   test("should be defined", () => {

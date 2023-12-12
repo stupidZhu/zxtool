@@ -20,11 +20,11 @@ class DevPlugin implements ThreeHelperPlugin {
   }
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, clearCollection } = props
-    const { animationCollection } = ThreeHelper
+    const { threeHelper, initializedCache, clearCollection } = props
+    const { animationCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
-    const scene = ThreeHelper.getWidget("scene")
+    const scene = threeHelper.getWidget("scene")
     if (!scene) return
 
     const { enableStats = true, enableAxes = true, axesSize = 50 } = this.config

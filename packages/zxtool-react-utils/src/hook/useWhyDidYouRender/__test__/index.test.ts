@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react-hooks"
 import { useState } from "react"
-import useWhyDidYouRender from "./../useWhyDidYouRender"
+import { useWhyDidYouRender } from "./../useWhyDidYouRender"
 
 describe("useWhyDidYouRender", () => {
   test("should be defined", () => {

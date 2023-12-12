@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react-hooks"
-import usePagination, { UsePaginationProps } from "../usePagination"
+import { UsePaginationProps, usePagination } from "../usePagination"
 
 describe("usePagination", () => {
   test("should be defined", () => {

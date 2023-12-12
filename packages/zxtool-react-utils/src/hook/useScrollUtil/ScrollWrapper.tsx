@@ -2,7 +2,7 @@ import classNames from "classnames"
 import React, { useImperativeHandle, useRef } from "react"
 import { ClassStyle, IRef, WithChildren } from "../../type"
 import { useWatchRefEffect } from "../effect/useWatchEffect"
-import useScrollUtil, { UseScrollUtilProps } from "./useScrollUtil"
+import { UseScrollUtilProps, useScrollUtil } from "./useScrollUtil"
 
 export type ScrollRef = { current: ReturnType<typeof useScrollUtil> | undefined }
 
@@ -11,7 +11,7 @@ export interface ScrollWrapperProps extends ClassStyle, Omit<UseScrollUtilProps,
   ensureScroll?: boolean
 }
 
-const ScrollWrapper: React.FC<ScrollWrapperProps & WithChildren> = props => {
+export const ScrollWrapper: React.FC<ScrollWrapperProps & WithChildren> = props => {
   const { scrollRef, ensureScroll, style, className, children, ...rest } = props
   const scrollWrapper = useRef<HTMLDivElement>(null)
   const scrollChildren = useRef<HTMLDivElement>(null)
@@ -49,5 +49,3 @@ const ScrollWrapper: React.FC<ScrollWrapperProps & WithChildren> = props => {
     </div>
   )
 }
-
-export default ScrollWrapper

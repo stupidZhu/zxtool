@@ -20,13 +20,13 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
   }
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, clearCollection } = props
-    const { animationCollection } = ThreeHelper
+    const { threeHelper, initializedCache, clearCollection } = props
+    const { animationCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
-    const scene = ThreeHelper.getWidget("scene")
-    const canvas = ThreeHelper.getWidget("canvas")
-    const camera = ThreeHelper.getWidget("p_camera")
+    const scene = threeHelper.getWidget("scene")
+    const canvas = threeHelper.getWidget("canvas")
+    const camera = threeHelper.getWidget("p_camera")
     if (!scene || !canvas || !camera) return
 
     const { enableDamping = true, distance = [1, 200], resetMouse = true } = this.config

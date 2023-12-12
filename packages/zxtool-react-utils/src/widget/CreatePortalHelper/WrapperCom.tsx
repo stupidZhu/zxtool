@@ -1,7 +1,7 @@
 import { debounce } from "lodash"
 import React, { Fragment, MutableRefObject, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { randomStr } from "../../util"
-import CreatePortalHelper, { CreatePortalHelperConfig } from "./CreatePortalHelper"
+import { CreatePortalHelper, CreatePortalHelperConfig } from "./CreatePortalHelper"
 
 export type AddFunc = (
   com: React.ReactNode,

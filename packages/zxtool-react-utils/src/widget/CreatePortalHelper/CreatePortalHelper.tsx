@@ -15,20 +15,20 @@ export interface CreatePortalHelperConfig {
   visibleChangeDelay: number
 }
 
-type CreatePortalHelperP = {
+export type CreatePortalHelperP = {
   renderType: "portal"
   rootKey?: string
   className?: string
 }
-type CreatePortalHelperR = {
+export type CreatePortalHelperR = {
   renderType: "render"
   rootKey?: string
   className?: string
   Provider?: React.FC<WithChildren>
 }
-type CreatePortalHelperProps = CreatePortalHelperP | CreatePortalHelperR
+export type CreatePortalHelperProps = CreatePortalHelperP | CreatePortalHelperR
 
-class CreatePortalHelper {
+export class CreatePortalHelper {
   private rootKey: string
   private renderType: "portal" | "render" = "render"
   private wrapperRef: { current: WrapperRef | null } = { current: null }
@@ -106,5 +106,3 @@ class CreatePortalHelper {
 
   getKeys = () => this.getWrapperRef().then(wrapperRef => new Set(wrapperRef.keySetRef.current))
 }
-
-export default CreatePortalHelper

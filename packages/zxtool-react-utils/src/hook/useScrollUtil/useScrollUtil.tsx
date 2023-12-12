@@ -25,7 +25,7 @@ export interface UseScrollUtilProps {
   onReach?: (type: "top" | "bottom" | "left" | "right", info: ScrollInfo, e: any) => void
 }
 
-const useScrollUtil = (props: UseScrollUtilProps) => {
+export const useScrollUtil = (props: UseScrollUtilProps) => {
   const { scrollType = "vertical", scrollDom, reachThreshold = 20, onScroll, onReach } = props
   const reachSwitch = useRef(true)
   const isFirstReach = useRef(true)
@@ -219,5 +219,3 @@ const useScrollUtil = (props: UseScrollUtilProps) => {
 
   return { scrollTo, scrollBy, getScrollInfo, scrollPixel, turnPage, autoScroll, autoTurnPage }
 }
-
-export default useScrollUtil

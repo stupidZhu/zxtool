@@ -11,7 +11,7 @@ export interface ThreeHelperPluginProps {
   initializedCache: Map<PropertyKey, boolean>
   clearCollection: Map<PropertyKey, Function>
   widgetCollection: Map<PropertyKey, any>
-  ThreeHelper: ThreeHelper
+  threeHelper: ThreeHelper
 }
 export interface ThreeHelperPlugin {
   add(props: ThreeHelperPluginProps): void

@@ -5,6 +5,7 @@ import { getCurrent } from "../../util"
 import { useWatchRefEffect } from "../effect/useWatchEffect"
 import { DialogMoveCb, DialogResizeCb, ISize, moveFunc, resetDialogStyle, resizeFunc } from "./util"
 export type { DialogMoveCb, DialogResizeCb, ISize } from "./util"
+
 export interface UseDialogProps {
   minSize?: ISize
   confine?: boolean
@@ -16,7 +17,7 @@ export interface UseDialogProps {
   onResizeEnd?: DialogResizeCb
 }
 
-const useDialog = (props: UseDialogProps) => {
+export const useDialog = (props: UseDialogProps) => {
   const {
     minSize = { width: 200, height: 150 },
     confine = true,
@@ -142,5 +143,3 @@ const useDialog = (props: UseDialogProps) => {
 
   return { setDialogRef, setMoveHandleRef, setResizeHandleRef, getDialogInfo, setDialogInfo, toTop, toBottom }
 }
-
-export default useDialog

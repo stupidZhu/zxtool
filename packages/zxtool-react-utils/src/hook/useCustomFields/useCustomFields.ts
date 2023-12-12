@@ -2,8 +2,8 @@ import { IObj } from "@zxtool/utils/dist/type"
 import { useMemoizedFn } from "ahooks"
 import { cloneDeep } from "lodash"
 import { CtrlProps } from "../../type"
-import useMemoValue from "../memo/useMemoValue"
-import useCtrlComponent from "../useCtrlComponent/useCtrlComponent"
+import { useMemoValue } from "../memo/useMemoValue"
+import { useCtrlComponent } from "../useCtrlComponent/useCtrlComponent"
 import {
   ChangeFieldInfo,
   addField as _addField,
@@ -19,7 +19,7 @@ export interface UseCustomFieldsProps<T extends IObj> extends CtrlProps<T[]> {
   onAction?: (info: ChangeFieldInfo<T>) => void
 }
 
-const useCustomFields = <T extends IObj = any>(props: UseCustomFieldsProps<T>) => {
+export const useCustomFields = <T extends IObj = any>(props: UseCustomFieldsProps<T>) => {
   const { templateItem: item, validateItem, keyName = "id", onAction } = props
   const [fields, setFields] = useCtrlComponent<T[]>(props, { defaultValue: [] })
   const templateItem = useMemoValue(item)
@@ -57,5 +57,3 @@ const useCustomFields = <T extends IObj = any>(props: UseCustomFieldsProps<T>) =
 
   return { fields, setFields, addField, editField, delField, validate }
 }
-
-export default useCustomFields

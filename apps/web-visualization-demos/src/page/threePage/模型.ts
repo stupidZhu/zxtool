@@ -1,9 +1,9 @@
 import { LoaderUtil } from "@zxtool/three-utils"
-import { ThreeHelper } from "src/bootstrap"
+import { threeHelper } from "src/bootstrap"
 import * as THREE from "three"
 
 export const 加载gltf = async () => {
-  const scene = ThreeHelper.getWidget("scene")!
+  const scene = threeHelper.getWidget("scene")!
 
   const Amlight = new THREE.AmbientLight(0xffffff, 2)
   scene.add(Amlight)
@@ -20,7 +20,7 @@ export const 加载gltf = async () => {
     mixer.clipAction(gltf.animations[i]).play()
   }
 
-  ThreeHelper.animationCollection.set("ani", (_, delta) => {
+  threeHelper.animationCollection.set("ani", (_, delta) => {
     mixer.update(delta)
   })
 }

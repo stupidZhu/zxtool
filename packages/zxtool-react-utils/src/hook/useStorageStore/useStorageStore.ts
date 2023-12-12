@@ -3,9 +3,9 @@ import { IObj } from "@zxtool/utils/dist/type"
 import { useEffect, useMemo } from "react"
 import { useConfigContext } from "../../component/ConfigProvider/ConfigProvider"
 import { reactStorageHelper } from "../../util/bootstrap"
-import useStoreState from "../useStoreState/useStoreState"
+import { useStoreState } from "../useStoreState/useStoreState"
 
-const useStorageStore = <T extends IObj>(key: string, defaultValue?: T, customStorageHelper?: StorageHelper) => {
+export const useStorageStore = <T extends IObj>(key: string, defaultValue?: T, customStorageHelper?: StorageHelper) => {
   const { storageHelper: _storageHelper } = useConfigContext() ?? {}
   const storageHelper = useMemo(
     () => customStorageHelper ?? _storageHelper ?? reactStorageHelper,
@@ -20,5 +20,3 @@ const useStorageStore = <T extends IObj>(key: string, defaultValue?: T, customSt
 
   return storeObj
 }
-
-export default useStorageStore

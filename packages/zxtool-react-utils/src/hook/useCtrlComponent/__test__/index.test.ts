@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react-hooks"
 import { IObj } from "@zxtool/utils/dist/type"
-import useCtrlComponent from "../useCtrlComponent"
+import { useCtrlComponent } from "../useCtrlComponent"
 
 describe("useCtrlComponent", () => {
   test("should be defined", () => {

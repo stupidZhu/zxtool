@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useConfigContext } from "../../component/ConfigProvider/ConfigProvider"
 import { reactStorageHelper } from "../../util/bootstrap"
 
-const useStorageValue = <T = unknown>(key: string, defaultValue?: T, customStorageHelper?: StorageHelper) => {
+export const useStorageValue = <T = unknown>(key: string, defaultValue?: T, customStorageHelper?: StorageHelper) => {
   const { storageHelper: _storageHelper } = useConfigContext() ?? {}
   const storageHelper = useMemo(
     () => customStorageHelper ?? _storageHelper ?? reactStorageHelper,
@@ -18,5 +18,3 @@ const useStorageValue = <T = unknown>(key: string, defaultValue?: T, customStora
 
   return stateObj
 }
-
-export default useStorageValue

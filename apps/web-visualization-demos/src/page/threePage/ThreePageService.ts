@@ -1,21 +1,21 @@
 import { DevPlugin } from "@zxtool/three-utils"
-import { ThreeHelper } from "src/bootstrap"
+import { threeHelper } from "src/bootstrap"
 import { 加载gltf } from "./模型"
 
 const flag = { current: false }
 
 class ThreePageService {
   moduleEnter() {
-    ThreeHelper.add(new DevPlugin())
+    threeHelper.add(new DevPlugin())
     this.init()
 
     // const plugin = new OrbitControlsPlugin()
     // setInterval(() => {
     //   if (flag.current) {
-    //     ThreeHelper.remove(plugin)
+    //     threeHelper.remove(plugin)
     //     flag.current = false
     //   } else {
-    //     ThreeHelper.add(plugin)
+    //     threeHelper.add(plugin)
     //     flag.current = true
     //   }
     // }, 5000)

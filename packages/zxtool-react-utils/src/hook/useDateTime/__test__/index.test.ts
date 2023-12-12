@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks"
-import useDateTime from "../useDateTime"
+import { useDateTime } from "../useDateTime"
 
 // https://github.com/testing-library/react-testing-library/issues/281#issuecomment-480349256
 

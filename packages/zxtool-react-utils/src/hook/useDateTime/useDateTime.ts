@@ -1,8 +1,8 @@
 import dayjs from "dayjs"
 import { useEffect, useState } from "react"
-import useMemoValue from "../memo/useMemoValue"
+import { useMemoValue } from "../memo/useMemoValue"
 
-interface UseDateTimeOptions<T extends string | string[]> {
+export interface UseDateTimeOptions<T extends string | string[]> {
   formatter?: T
   interval?: number
 }
@@ -23,7 +23,7 @@ const genCurTimeObj = (formatter: string | string[]) => {
   return [formatRes, date]
 }
 
-const useDateTime = <T extends string | string[]>(options: UseDateTimeOptions<T> = {}): [StrOrArr<T>, Date] => {
+export const useDateTime = <T extends string | string[]>(options: UseDateTimeOptions<T> = {}): [StrOrArr<T>, Date] => {
   // eslint-disable-next-line prefer-const
   let { formatter = "YYYY-MM-DD HH:mm:ss", interval = 1000 } = options
   if (interval < 1000) interval = 1000
@@ -38,5 +38,3 @@ const useDateTime = <T extends string | string[]>(options: UseDateTimeOptions<T>
 
   return curTimeObj
 }
-
-export default useDateTime

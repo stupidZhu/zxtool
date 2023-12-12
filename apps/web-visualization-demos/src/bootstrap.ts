@@ -1,5 +1,5 @@
 import { TilesetManager, ZCUConfig } from "@zxtool/cesium-utils"
-import { ThreeHelper as TH } from "@zxtool/three-utils"
+import { ThreeHelper } from "@zxtool/three-utils"
 import * as Cesium from "cesium"
 
 const myToken =
@@ -17,6 +17,6 @@ ZCUConfig.setConfig({
   viewerOptions: { hideWidget: true, fxaa: true },
 })
 
-export const ThreeHelper = new TH()
+export const threeHelper = new ThreeHelper()
 
 export const tilesetManager = new TilesetManager()

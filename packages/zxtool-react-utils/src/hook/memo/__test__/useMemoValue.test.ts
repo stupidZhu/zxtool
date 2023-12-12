@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks"
-import useMemoValue from "../useMemoValue"
+import { useMemoValue } from "../useMemoValue"
 
 describe("useMemoValue", () => {
   test("should be defined", () => {

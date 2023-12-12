@@ -12,11 +12,11 @@ class SyncCesiumPlugin implements ThreeHelperPlugin {
   }
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, clearCollection } = props
-    const { animationCollection } = ThreeHelper
+    const { threeHelper, initializedCache, clearCollection } = props
+    const { animationCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
-    const camera = ThreeHelper.getWidget("p_camera")!
+    const camera = threeHelper.getWidget("p_camera")!
 
     const cache = {
       near: camera.near,

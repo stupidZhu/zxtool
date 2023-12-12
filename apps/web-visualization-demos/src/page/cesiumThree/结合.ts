@@ -1,7 +1,8 @@
-import { Num2, ViewerHelper } from "@zxtool/cesium-utils"
+import { ViewerHelper } from "@zxtool/cesium-utils"
 import { LoaderUtil, SyncCesiumPlugin } from "@zxtool/three-utils"
+import { Num2 } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import { ThreeHelper } from "src/bootstrap"
+import { threeHelper } from "src/bootstrap"
 import * as THREE from "three"
 
 const minWGS84 = [115.23, 39.55]
@@ -43,8 +44,8 @@ const cartToVec = function (cart: Cesium.Cartesian3) {
 
 export const 结合1 = async () => {
   const viewer = ViewerHelper.getViewer()!
-  ThreeHelper.add(new SyncCesiumPlugin(viewer))
-  const scene = ThreeHelper.getWidget("scene")!
+  threeHelper.add(new SyncCesiumPlugin(viewer))
+  const scene = threeHelper.getWidget("scene")!
 
   const entity = viewer.entities.add({
     name: "Polygon",

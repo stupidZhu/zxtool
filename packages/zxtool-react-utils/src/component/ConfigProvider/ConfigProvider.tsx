@@ -17,7 +17,7 @@ interface ConfigContextType {
 
 const ConfigContext = createContext<ConfigContextType | null>(null)
 
-interface ConfigProviderProps extends PropsWithChildren {
+export interface ConfigProviderProps extends PropsWithChildren {
   initialZIndex?: number
   storageHelper?: StorageHelper
 }

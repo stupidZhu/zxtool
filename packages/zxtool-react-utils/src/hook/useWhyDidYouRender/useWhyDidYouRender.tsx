@@ -1,7 +1,7 @@
 import { IObj } from "@zxtool/utils/dist/type"
 import { useEffect, useRef } from "react"
 
-const useWhyDidYouRender = (key: React.Key, props: IObj) => {
+export const useWhyDidYouRender = (key: React.Key, props: IObj) => {
   const prevProps = useRef(props)
 
   useEffect(() => {
@@ -14,5 +14,3 @@ const useWhyDidYouRender = (key: React.Key, props: IObj) => {
     prevProps.current = props
   })
 }
-
-export default useWhyDidYouRender

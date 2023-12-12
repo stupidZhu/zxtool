@@ -10,7 +10,7 @@ export interface UseCtrlComponentOptions<T = any> {
 }
 
 // * 因为存在 *PropName 所以没有进行类型推断
-const useCtrlComponent = <T = any>(props: IObj, options: UseCtrlComponentOptions<T> = {}) => {
+export const useCtrlComponent = <T = any>(props: IObj, options: UseCtrlComponentOptions<T> = {}) => {
   const {
     defaultValuePropName = "defaultValue",
     valuePropName = "value",
@@ -35,5 +35,3 @@ const useCtrlComponent = <T = any>(props: IObj, options: UseCtrlComponentOptions
 
   return [value, onChange] as const
 }
-
-export default useCtrlComponent

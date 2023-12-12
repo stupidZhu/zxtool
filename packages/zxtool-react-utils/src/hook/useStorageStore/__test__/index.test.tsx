@@ -3,7 +3,7 @@ import { StorageHelper } from "@zxtool/utils"
 import React from "react"
 import { ConfigProvider } from "../../../component/ConfigProvider/ConfigProvider"
 import { WithChildren } from "../../../type"
-import useStorageStore from "../useStorageStore"
+import { useStorageStore } from "../useStorageStore"
 
 describe("useStorageStore", () => {
   test("should be defined", () => {

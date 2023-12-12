@@ -5,11 +5,11 @@ class ResizePlugin implements ThreeHelperPlugin {
   private rc_key = Symbol.for("resize_camera_renderer")
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, clearCollection } = props
-    const { resizeCollection } = ThreeHelper
+    const { threeHelper, initializedCache, clearCollection } = props
+    const { resizeCollection } = threeHelper
     if (initializedCache.get(this.key)) return
-    const camera = ThreeHelper.getWidget("p_camera")!
-    const renderer = ThreeHelper.getWidget("renderer")!
+    const camera = threeHelper.getWidget("p_camera")!
+    const renderer = threeHelper.getWidget("renderer")!
 
     const resizeFn = () => {
       resizeCollection.forEach(fn => fn())

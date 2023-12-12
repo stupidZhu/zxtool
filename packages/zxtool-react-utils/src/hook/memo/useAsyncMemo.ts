@@ -3,9 +3,9 @@ import { useMemoizedFn } from "ahooks"
 import { DependencyList, useEffect, useRef, useState } from "react"
 // TODO: 好像有 bug，暂时不知道原因和解决办法
 
-type AsyncMemoStatus = "idle" | "error" | "loading" | "success"
+export type AsyncMemoStatus = "idle" | "error" | "loading" | "success"
 
-interface UseAsyncMemoOptions<T> {
+export interface UseAsyncMemoOptions<T> {
   /** 初始值，不填初始为 undefined */
   defaultValue?: T
   /** 失败后重试的次数 */
@@ -14,17 +14,21 @@ interface UseAsyncMemoOptions<T> {
   reFetchDelay?: number
 }
 
-function useAsyncMemo<T>(
+export function useAsyncMemo<T>(
   factory: () => Promise<T>,
   deps: DependencyList | undefined,
   options: UseAsyncMemoOptions<T> & { defaultValue: T },
 ): { value: T; status: AsyncMemoStatus }
-function useAsyncMemo<T>(
+export function useAsyncMemo<T>(
   factory: () => Promise<T>,
   deps: DependencyList | undefined,
   options?: UseAsyncMemoOptions<T>,
 ): { value: T | undefined; status: AsyncMemoStatus }
-function useAsyncMemo<T>(factory: () => Promise<T>, deps: DependencyList | undefined, options?: UseAsyncMemoOptions<T>) {
+export function useAsyncMemo<T>(
+  factory: () => Promise<T>,
+  deps: DependencyList | undefined,
+  options?: UseAsyncMemoOptions<T>,
+) {
   // eslint-disable-next-line prefer-const
   let { defaultValue, reFetchTimes, reFetchDelay } = options ?? {}
   if (reFetchTimes && reFetchTimes < 0) reFetchTimes = 0
@@ -71,5 +75,3 @@ function useAsyncMemo<T>(factory: () => Promise<T>, deps: DependencyList | undef
 
   return { value, status }
 }
-
-export default useAsyncMemo

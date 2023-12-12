@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import "@testing-library/jest-dom"
-import useDialog, { DialogMoveCb } from "../useDialog"
+import { DialogMoveCb, useDialog } from "../useDialog"
 
 type MoveProps = Parameters<DialogMoveCb>[0]
 

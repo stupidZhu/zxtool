@@ -14,8 +14,8 @@ class ThreeBasePlugin implements ThreeHelperPlugin {
   }
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, emitter, clearCollection, widgetCollection } = props
-    const { animationCollection } = ThreeHelper
+    const { threeHelper, initializedCache, emitter, clearCollection, widgetCollection } = props
+    const { animationCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
     this.scene = new THREE.Scene()

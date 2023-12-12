@@ -1,7 +1,7 @@
 import { ClassStyle } from "@zxtool/react-utils"
 import { ClickPlugin, OrbitControlsPlugin } from "@zxtool/three-utils"
 import React, { useEffect, useRef } from "react"
-import { ThreeHelper } from "src/bootstrap"
+import { threeHelper } from "src/bootstrap"
 
 const ThreeCanvas: React.FC<ClassStyle> = props => {
   const { className, style } = props
@@ -9,9 +9,9 @@ const ThreeCanvas: React.FC<ClassStyle> = props => {
 
   useEffect(() => {
     if (!canvasRef.current) return
-    ThreeHelper.init(canvasRef.current)
-    ThreeHelper.add(new OrbitControlsPlugin())
-    ThreeHelper.add(new ClickPlugin(canvasRef.current))
+    threeHelper.init(canvasRef.current)
+    threeHelper.add(new OrbitControlsPlugin())
+    threeHelper.add(new ClickPlugin(canvasRef.current))
     return () => {}
   }, [])
 

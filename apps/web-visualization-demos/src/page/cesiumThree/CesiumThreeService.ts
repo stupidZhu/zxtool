@@ -1,10 +1,10 @@
 import { DevPlugin } from "@zxtool/three-utils"
-import { ThreeHelper } from "src/bootstrap"
+import { threeHelper } from "src/bootstrap"
 import { 结合1 } from "./结合"
 
 class CesiumThreeService {
   moduleEnter() {
-    ThreeHelper.add(new DevPlugin({ axesSize: 1e7 }))
+    threeHelper.add(new DevPlugin({ axesSize: 1e7 }))
     this.init()
   }
 

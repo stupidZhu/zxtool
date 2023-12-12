@@ -12,16 +12,16 @@ class ClickPlugin implements ThreeHelperPlugin {
   }
 
   add(props: ThreeHelperPluginProps): void {
-    const { ThreeHelper, initializedCache, clearCollection } = props
-    const { clickCollection } = ThreeHelper
+    const { threeHelper, initializedCache, clearCollection } = props
+    const { clickCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
     const raycaster = new THREE.Raycaster()
     const mouse = new THREE.Vector2()
 
     const clickFn = (ev: unknown) => {
-      const scene = ThreeHelper.getWidget("scene")
-      const camera = ThreeHelper.getWidget("p_camera")
+      const scene = threeHelper.getWidget("scene")
+      const camera = threeHelper.getWidget("p_camera")
       if (!scene || !camera) return
 
       const e = ev as MouseEvent
