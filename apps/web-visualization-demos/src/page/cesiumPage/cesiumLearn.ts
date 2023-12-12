@@ -1,6 +1,7 @@
-import { TilesetManager, ViewerHelper } from "@zxtool/cesium-utils"
+import { ViewerHelper } from "@zxtool/cesium-utils"
 import * as Cesium from "cesium"
 import GUI from "lil-gui"
+import { tilesetManager } from "src/bootstrap"
 
 export const cesiumFlightTracker = async () => {
   const viewer = ViewerHelper.getViewer()!
@@ -39,7 +40,7 @@ export const cesiumFlightTracker = async () => {
   // const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2352154);
   // viewer.scene.primitives.add(newBuildingTileset);
 
-  TilesetManager.add({ url: 2352154, key: "2352154" }).then(({ tileset }) => {
+  tilesetManager.add({ url: 2352154, key: "2352154" }).then(({ tileset }) => {
     console.log(tileset)
     viewer.flyTo(tileset)
 

@@ -1,29 +1,30 @@
-import { IObj } from "../../type"
 import { CommonUtil } from "../CommonUtil/CommonUtil"
 
 const { hashCacheKey } = CommonUtil
 
 export class CacheHelper {
-  private store: IObj = {}
+  private readonly store: Map<string, unknown> = new Map()
 
-  add = <T>(key: any[], value: T): T => {
+  set<T>(key: unknown[], value: T): T {
     const hashKey = hashCacheKey(key)
-    this.store[hashKey] = value
+    this.store.set(hashKey, value)
     return value
   }
 
-  remove = (key: any[]) => {
+  delete(key: unknown[]) {
     const hashKey = hashCacheKey(key)
-    Reflect.deleteProperty(this.store, hashKey)
+    this.store.delete(hashKey)
   }
 
-  clear = () => (this.store = {})
+  clear() {
+    this.store.clear()
+  }
 
-  get<T = unknown>(key: any[], cb: () => T | Promise<T>): Promise<T>
-  get<T = unknown>(key: any[]): Promise<T | undefined>
-  async get<T = unknown>(key: any[], cb?: () => T | Promise<T>) {
+  get<T = unknown>(key: unknown[], cb: () => T | Promise<T>): Promise<T>
+  get<T = unknown>(key: unknown[]): Promise<T | undefined>
+  async get<T = unknown>(key: unknown[], cb?: () => T | Promise<T>) {
     const hashKey = hashCacheKey(key)
-    if (!this.store[hashKey]) this.store[hashKey] = await cb?.()
-    return this.store[hashKey]
+    if (!this.store.has(hashKey) && cb) this.store.set(hashKey, await cb())
+    return this.store.get(hashKey)
   }
 }

@@ -1,4 +1,4 @@
-import { ZCUConfig } from "@zxtool/cesium-utils"
+import { TilesetManager, ZCUConfig } from "@zxtool/cesium-utils"
 import { ThreeHelper as TH } from "@zxtool/three-utils"
 import * as Cesium from "cesium"
 
@@ -18,3 +18,5 @@ ZCUConfig.setConfig({
 })
 
 export const ThreeHelper = new TH()
+
+export const tilesetManager = new TilesetManager()

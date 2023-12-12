@@ -1,4 +1,3 @@
-import { MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { genZCUInfo } from "../util"
 import { _ScreenEventHelper } from "./ScreenEventHelper"
@@ -13,14 +12,14 @@ interface SyncConfigItem {
 
 class SyncViewerHelper {
   private readonly KEY: PropertyKey
-  private readonly viewers: MapList<Cesium.Viewer>
+  private readonly viewers: Map<PropertyKey, Cesium.Viewer>
 
   private _flag = false
   private curViewer: Cesium.Viewer | null = null
   private ScreenEventHelper = new _ScreenEventHelper()
   private config: Record<PropertyKey, SyncConfigItem> = {}
 
-  constructor(KEY: PropertyKey, viewers: MapList<Cesium.Viewer>) {
+  constructor(KEY: PropertyKey, viewers: Map<PropertyKey, Cesium.Viewer>) {
     this.KEY = KEY
     this.viewers = viewers
   }
@@ -30,10 +29,9 @@ class SyncViewerHelper {
   }
 
   private syncViewer = () => {
-    this.viewers.map.forEach((viewer, key) => {
+    this.viewers.forEach((viewer, key) => {
       const beSync = this.config[key]?.beSync ?? true
       if (!beSync) return
-
       if (this.curViewer && viewer !== this.curViewer) {
         viewer.camera.flyTo({
           destination: this.curViewer.camera.position,
@@ -55,9 +53,18 @@ class SyncViewerHelper {
 
   startSync() {
     this._flag = true
-    this.viewers.map.forEach((viewer, key) => {
+
+    this.viewers.forEach((viewer, key) => {
       const doSync = this.config[key]?.doSync ?? true
       const control = this.config[key]?.control ?? true
+      this.ScreenEventHelper.addEvent({
+        key,
+        viewer,
+        type: "MOUSE_MOVE",
+        cb: () => {
+          this.curViewer = viewer
+        },
+      })
 
       if (!control) {
         const control = viewer.scene.screenSpaceCameraController
@@ -85,7 +92,7 @@ class SyncViewerHelper {
   }
 
   stopSync() {
-    this.viewers.map.forEach((viewer, key) => {
+    this.viewers.forEach((viewer, key) => {
       this.ScreenEventHelper.removeEvent({ key, type: "MOUSE_MOVE" })
 
       viewer.camera.changed.removeEventListener(this.syncViewer)

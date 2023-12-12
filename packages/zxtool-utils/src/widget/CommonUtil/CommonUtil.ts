@@ -193,6 +193,19 @@ const getValueUtil = {
   },
 }
 
+function mapOrSetFilter<T>(target: Set<T>, cb: (v: T) => boolean): Set<T>
+function mapOrSetFilter<T, K>(target: Map<K, T>, cb: (v: T) => boolean): Map<K, T>
+function mapOrSetFilter<T, K>(target: Map<K, T> | Set<T>, cb: (v: T) => boolean) {
+  if (target instanceof Map) {
+    const map = new Map()
+    for (const [key, value] of target) cb(value) && map.set(key, value)
+    return map
+  }
+  const set = new Set()
+  for (const item of target) cb(item) && set.add(item)
+  return set
+}
+
 export const CommonUtil = {
   hashCacheKey,
   addCacheWrapper,
@@ -208,5 +221,6 @@ export const CommonUtil = {
   genMap,
   removeStr,
   getValueUtil,
+  mapOrSetFilter,
   ...TreeUtil,
 }

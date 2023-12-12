@@ -14,6 +14,7 @@ toc: content
 | useCustomFields    | 1200  |
 | useDateTime        | 300   |
 | useDialog          | 1000  |
+| useObjList         | 1150  |
 | useOnceEffect      | 200   |
 | usePagination      | 900   |
 | useScrollUtil      | 1100  |
