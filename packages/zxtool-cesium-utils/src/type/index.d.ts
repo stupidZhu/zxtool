@@ -1,7 +1,5 @@
+import { Num2, Num3 } from "@zxtool/utils"
 import * as Cesium from "cesium"
-
-export type Num2 = [number, number]
-export type Num3 = [number, number, number]
 
 export type LonLat = Num2
 export type LonLatKey = { key: PropertyKey; lonLat: LonLat }

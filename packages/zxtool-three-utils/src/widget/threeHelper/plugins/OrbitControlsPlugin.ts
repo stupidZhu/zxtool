@@ -1,8 +1,6 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import type { ThreeHelperPlugin } from "."
-import type { ThreeHelper } from "../ThreeHelper"
-import type { ThreeHelperStore } from "../ThreeHelperStore"
+import type { ThreeHelperPlugin, ThreeHelperPluginProps } from "."
 
 export interface IControlsConfig {
   enableDamping?: boolean
@@ -21,8 +19,10 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
     this.config = config
   }
 
-  add(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    if (THS.initializedCache.get(this.key)) return
+  add(props: ThreeHelperPluginProps): void {
+    const { ThreeHelper, initializedCache, clearCollection } = props
+    const { animationCollection } = ThreeHelper
+    if (initializedCache.get(this.key)) return
 
     const scene = ThreeHelper.getWidget("scene")
     const canvas = ThreeHelper.getWidget("canvas")
@@ -42,22 +42,22 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
       this.controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE
     }
 
-    THS.animationCollection.set(this.ac_key, (_, delta) => {
+    animationCollection.set(this.ac_key, (_, delta) => {
       this.controls?.update(delta)
     })
 
-    THS.clearCollection.set(this.key, () => {
+    clearCollection.set(this.key, () => {
       this.controls?.dispose()
       this.controls = undefined
-      THS.animationCollection.delete(this.ac_key)
-      THS.initializedCache.set(this.key, false)
+      animationCollection.delete(this.ac_key)
+      initializedCache.set(this.key, false)
     })
 
-    THS.initializedCache.set(this.key, true)
+    initializedCache.set(this.key, true)
   }
 
-  remove(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    THS.clearCollection.get(this.key)?.()
+  remove({ clearCollection }: ThreeHelperPluginProps): void {
+    clearCollection.get(this.key)?.()
   }
 }
 

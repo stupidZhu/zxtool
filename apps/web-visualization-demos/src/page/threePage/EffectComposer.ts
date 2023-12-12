@@ -1,13 +1,13 @@
-import { threeHelper } from "src/bootstrap"
+import { ThreeHelper } from "src/bootstrap"
 import * as THREE from "three"
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js"
 import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js"
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js"
 
 export const 发光 = () => {
-  const scene = threeHelper.getWidget("scene")!
-  const renderer = threeHelper.getWidget("renderer")!
-  const camera = threeHelper.getWidget("p_camera")!
+  const scene = ThreeHelper.getWidget("scene")!
+  const renderer = ThreeHelper.getWidget("renderer")!
+  const camera = ThreeHelper.getWidget("p_camera")!
 
   const geometry = new THREE.SphereGeometry(1, 32, 32)
   const material = new THREE.MeshBasicMaterial({ color: "teal" })
@@ -36,8 +36,8 @@ export const 发光 = () => {
 
   outlinePass.selectedObjects = [sphere, cube, torusKnot]
 
-  threeHelper.removeFromAnimation(Symbol.for("update_renderer"))
-  threeHelper.addToAnimation("update_renderPass", (_, delta) => {
+  ThreeHelper.animationCollection.delete(Symbol.for("update_renderer"))
+  ThreeHelper.animationCollection.set("update_renderPass", (_, delta) => {
     composer.render(delta)
   })
 }

@@ -13,6 +13,7 @@ const isProd = process.env.MODE === "prod"
 const config: RollupOptions = {
   input: "src/index.ts",
   output: [{ file: pkg.main, format: "umd", name: "ZTU", globals: { "@zxtool/utils": "ZU" } }],
+  external: [/^(three\/examples\/jsm)/],
   plugins: [
     autoExternal(),
     resolve(),

@@ -2,7 +2,6 @@ import { EmitterHelper, MapList } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { genZCUInfo } from "../util"
 import { ViewerUtilSync } from "../util/ViewerUtilSync"
-import { ZCUConfig } from "../util/ZCUConfig"
 import SyncViewerHelper from "./SyncViewerHelper"
 
 const genInfo = genZCUInfo("ViewerHelper")
@@ -24,15 +23,13 @@ class _ViewerHelper {
     const { hideWidget, fxaa = true, viewerKey = this.KEY, ...rest } = options
     if (this.viewers.has(viewerKey)) throw new Error(genInfo(`key 为 ${viewerKey.toString()} 的 viewer 已经初始化过`))
 
-    const token = ZCUConfig.getConfig("CESIUM_TOKEN", false)
-    if (token) Cesium.Ion.defaultAccessToken = token
-
     const viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
     // @ts-ignore
     hideWidget && (viewer.cesiumWidget.creditContainer.style.display = "none")
     fxaa && ViewerUtilSync.fxaa(viewer)
     viewer.scene.globe.depthTestAgainstTerrain = true
 
+    this.SyncHelper.refreshSync()
     this.viewers.set(viewerKey, viewer)
     this.emitter.emit(viewerKey, viewer)
 
@@ -40,6 +37,7 @@ class _ViewerHelper {
   }
 
   setViewer = (viewer: Cesium.Viewer, viewerKey = this.KEY) => {
+    this.SyncHelper.refreshSync()
     this.viewers.set(viewerKey, viewer)
     this.emitter.emit(viewerKey, viewer)
   }
@@ -55,11 +53,14 @@ class _ViewerHelper {
   }
 
   destroy = (viewerKey = this.KEY) => {
+    this.SyncHelper.refreshSync()
+
     const viewer = this.viewers.get(viewerKey)
     if (viewer) {
       viewer.destroy()
       this.viewers.delete(viewerKey)
     }
+
     this.emitter.clearHistory(viewerKey)
   }
 }

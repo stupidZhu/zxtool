@@ -570,6 +570,9 @@ importers:
       '@types/rollup-plugin-auto-external':
         specifier: ^2.0.2
         version: 2.0.2
+      cesium:
+        specifier: ^1.111.0
+        version: 1.111.0
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3

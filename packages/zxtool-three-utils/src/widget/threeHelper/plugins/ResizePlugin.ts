@@ -1,39 +1,39 @@
-import type { ThreeHelperPlugin } from "."
-import type { ThreeHelper } from "../ThreeHelper"
-import type { ThreeHelperStore } from "../ThreeHelperStore"
+import type { ThreeHelperPlugin, ThreeHelperPluginProps } from "."
 
 class ResizePlugin implements ThreeHelperPlugin {
   private key = Symbol.for("resize")
   private rc_key = Symbol.for("resize_camera_renderer")
 
-  add(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    if (THS.initializedCache.get(this.key)) return
+  add(props: ThreeHelperPluginProps): void {
+    const { ThreeHelper, initializedCache, clearCollection } = props
+    const { resizeCollection } = ThreeHelper
+    if (initializedCache.get(this.key)) return
     const camera = ThreeHelper.getWidget("p_camera")!
     const renderer = ThreeHelper.getWidget("renderer")!
 
     const resizeFn = () => {
-      THS.resizeCollection.forEach(fn => fn())
+      resizeCollection.forEach(fn => fn())
     }
 
     window.addEventListener("resize", resizeFn)
 
-    THS.resizeCollection.set(this.rc_key, () => {
+    resizeCollection.set(this.rc_key, () => {
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
     })
-    THS.clearCollection.set(this.key, () => {
+    clearCollection.set(this.key, () => {
       window.removeEventListener("resize", resizeFn)
-      THS.resizeCollection.clear()
-      THS.initializedCache.set(this.key, false)
+      resizeCollection.clear()
+      initializedCache.set(this.key, false)
     })
 
-    THS.initializedCache.set(this.key, true)
+    initializedCache.set(this.key, true)
   }
 
-  remove(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    THS.clearCollection.get("resize")?.()
+  remove({ clearCollection }: ThreeHelperPluginProps): void {
+    clearCollection.get("resize")?.()
   }
 }
 

@@ -1,10 +1,10 @@
 import GUI from "lil-gui"
-import { threeHelper } from "src/bootstrap"
+import { ThreeHelper } from "src/bootstrap"
 import * as THREE from "three"
 
 export const clipping = () => {
-  const scene = threeHelper.getWidget("scene")!
-  const renderer = threeHelper.getWidget("renderer")!
+  const scene = ThreeHelper.getWidget("scene")!
+  const renderer = ThreeHelper.getWidget("renderer")!
   renderer.shadowMap.enabled = true
 
   const dirLight = new THREE.DirectionalLight("white", 2)
@@ -55,12 +55,8 @@ export const clipping = () => {
   gui.add(globalPlane, "constant", -0.8, 0.8, 0.01).name("global_constant")
   gui.add(globalPlaneHelper, "visible").name("global_visible")
 
-  threeHelper.addToAnimation("rotate", time => {
+  ThreeHelper.animationCollection.set("rotate", time => {
     mesh.rotation.x = time * 0.001 * 0.5
     mesh.rotation.y = time * 0.001 * 0.5
   })
 }
-
-// export const 墙=()=>{
-
-// }

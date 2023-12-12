@@ -1,8 +1,22 @@
 .multi-viewer {
   display: flex;
   height: 100vh;
+  flex-wrap: wrap;
+  .earth-with-key {
+    position: relative;
+    height: 50vh;
+    flex: 0 0 33.33%;
+    > span {
+      position: absolute;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      padding: 2px 5px;
+      background-color: #fff;
+    }
+  }
   .rcc-cesium-container {
-    height: 100%;
-    flex: 1;
+    height: 50vh;
+    flex: 0 0 33.33%;
   }
 }

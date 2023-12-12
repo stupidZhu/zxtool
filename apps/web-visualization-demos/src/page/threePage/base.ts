@@ -1,8 +1,8 @@
-import { threeHelper } from "src/bootstrap"
+import { ThreeHelper } from "src/bootstrap"
 import * as THREE from "three"
 
 export const 随机三角形 = () => {
-  const scene = threeHelper.getWidget("scene")!
+  const scene = ThreeHelper.getWidget("scene")!
 
   const num = 80
 

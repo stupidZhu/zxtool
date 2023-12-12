@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom"
 import CesiumPage from "src/page/cesiumPage/CesiumPage"
+import CesiumThree from "src/page/cesiumThree/CesiumThree"
 import MultiViewer from "src/page/multiViewer/MultiViewer"
 import ThreePage from "src/page/threePage/ThreePage"
 
@@ -8,4 +9,5 @@ export const router = createBrowserRouter([
   { path: "/cesiumPage", element: <CesiumPage /> },
   { path: "/multiViewer", element: <MultiViewer /> },
   { path: "/threePage", element: <ThreePage /> },
+  { path: "/cesiumThree", element: <CesiumThree /> },
 ])

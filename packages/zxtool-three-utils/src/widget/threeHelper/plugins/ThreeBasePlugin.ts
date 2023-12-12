@@ -1,7 +1,5 @@
 import * as THREE from "three"
-import type { ThreeHelperPlugin } from "."
-import type { ThreeHelper } from "../ThreeHelper"
-import type { ThreeHelperStore } from "../ThreeHelperStore"
+import type { ThreeHelperPlugin, ThreeHelperPluginProps } from "."
 
 class ThreeBasePlugin implements ThreeHelperPlugin {
   private key = Symbol.for("three_base")
@@ -15,38 +13,40 @@ class ThreeBasePlugin implements ThreeHelperPlugin {
     this.canvas = canvas
   }
 
-  add(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    if (THS.initializedCache.get(this.key)) return
+  add(props: ThreeHelperPluginProps): void {
+    const { ThreeHelper, initializedCache, emitter, clearCollection, widgetCollection } = props
+    const { animationCollection } = ThreeHelper
+    if (initializedCache.get(this.key)) return
 
     this.scene = new THREE.Scene()
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1e4)
     this.camera.position.set(5, 5, 5)
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true })
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-    THS.animationCollection.set(this.ac_key, () => {
+    animationCollection.set(this.ac_key, () => {
       if (this.renderer && this.camera && this.scene) this.renderer.render(this.scene, this.camera)
     })
 
-    THS.widgetCollection.set("scene", this.scene)
-    THS.widgetCollection.set("renderer", this.renderer)
-    THS.widgetCollection.set("p_camera", this.camera)
-    THS.widgetCollection.set("canvas", this.canvas)
-    THS.emitter.emit("scene", this.scene)
-    THS.emitter.emit("renderer", this.renderer)
-    THS.emitter.emit("p_camera", this.camera)
-    THS.emitter.emit("canvas", this.canvas)
+    widgetCollection.set("scene", this.scene)
+    widgetCollection.set("renderer", this.renderer)
+    widgetCollection.set("p_camera", this.camera)
+    widgetCollection.set("canvas", this.canvas)
+    emitter.emit("scene", this.scene)
+    emitter.emit("renderer", this.renderer)
+    emitter.emit("p_camera", this.camera)
+    emitter.emit("canvas", this.canvas)
 
-    THS.clearCollection.set(this.key, () => {
+    clearCollection.set(this.key, () => {
       // todo
     })
 
-    THS.initializedCache.set(this.key, true)
+    initializedCache.set(this.key, true)
   }
 
-  remove(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    THS.clearCollection.get(this.key)?.(true)
+  remove({ clearCollection }: ThreeHelperPluginProps): void {
+    clearCollection.get(this.key)?.(true)
   }
 }
 

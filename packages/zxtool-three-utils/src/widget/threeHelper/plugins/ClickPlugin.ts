@@ -1,7 +1,5 @@
 import * as THREE from "three"
-import type { ThreeHelperPlugin } from "."
-import type { ThreeHelper } from "../ThreeHelper"
-import type { ThreeHelperStore } from "../ThreeHelperStore"
+import type { ThreeHelperPlugin, ThreeHelperPluginProps } from "."
 
 type LikeDom = HTMLElement | typeof window | Document
 
@@ -13,8 +11,10 @@ class ClickPlugin implements ThreeHelperPlugin {
     this.dom = dom
   }
 
-  add(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    if (THS.initializedCache.get(this.key)) return
+  add(props: ThreeHelperPluginProps): void {
+    const { ThreeHelper, initializedCache, clearCollection } = props
+    const { clickCollection } = ThreeHelper
+    if (initializedCache.get(this.key)) return
 
     const raycaster = new THREE.Raycaster()
     const mouse = new THREE.Vector2()
@@ -31,7 +31,7 @@ class ClickPlugin implements ThreeHelperPlugin {
       raycaster.setFromCamera(mouse, camera)
       let res: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>[] | null = null
 
-      THS.clickCollection.forEach(({ fn, objs }) => {
+      clickCollection.forEach(({ fn, objs }) => {
         if (objs?.length) {
           const _res = raycaster.intersectObjects(objs)
           if (_res.length) fn(_res, e)
@@ -44,17 +44,17 @@ class ClickPlugin implements ThreeHelperPlugin {
 
     this.dom.addEventListener("click", clickFn)
 
-    THS.clearCollection.set(this.key, () => {
+    clearCollection.set(this.key, () => {
       this.dom.removeEventListener("click", clickFn)
-      THS.clickCollection.clear()
-      THS.initializedCache.set(this.key, false)
+      clickCollection.clear()
+      initializedCache.set(this.key, false)
     })
 
-    THS.initializedCache.set(this.key, true)
+    initializedCache.set(this.key, true)
   }
 
-  remove(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    THS.clearCollection.get(this.key)?.()
+  remove({ clearCollection }: ThreeHelperPluginProps): void {
+    clearCollection.get(this.key)?.()
   }
 }
 

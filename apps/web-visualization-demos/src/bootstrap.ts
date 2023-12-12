@@ -1,5 +1,5 @@
 import { ZCUConfig } from "@zxtool/cesium-utils"
-import { ThreeHelper } from "@zxtool/three-utils"
+import { ThreeHelper as TH } from "@zxtool/three-utils"
 import * as Cesium from "cesium"
 
 const myToken =
@@ -17,4 +17,4 @@ ZCUConfig.setConfig({
   viewerOptions: { hideWidget: true, fxaa: true },
 })
 
-export const threeHelper = new ThreeHelper()
+export const ThreeHelper = new TH()

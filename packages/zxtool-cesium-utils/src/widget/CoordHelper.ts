@@ -1,5 +1,6 @@
+import { Num3 } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import { LonLat, LonLatHeight, Num3 } from "../type"
+import { LonLat, LonLatHeight } from "../type"
 import { genZCUInfo } from "../util"
 
 const genInfo = genZCUInfo("CoordHelper")

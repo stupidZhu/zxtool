@@ -1,5 +1,5 @@
-import { AnimationItem, ClickItem, ThreeHelperStore } from "./ThreeHelperStore"
-import { ThreeHelperPlugin } from "./plugins"
+import { EmitterHelper } from "@zxtool/utils"
+import { AnimationItem, ClickItem, ThreeHelperPlugin, ThreeHelperPluginProps } from "./plugins"
 import AnimationPlugin from "./plugins/AnimationPlugin"
 import ResizePlugin from "./plugins/ResizePlugin"
 import ThreeBasePlugin from "./plugins/ThreeBasePlugin"
@@ -17,51 +17,54 @@ export interface ThreeHelper {
 }
 
 export class ThreeHelper {
-  private THS = new ThreeHelperStore()
-  private key = Symbol.for("th")
+  private readonly KEY: PropertyKey = Symbol("TH")
+  private readonly emitter = new EmitterHelper({ maxCount: { history: 1 } })
+  private readonly initializedCache: Map<PropertyKey, boolean> = new Map()
+  private readonly clearCollection: Map<PropertyKey, Function> = new Map()
+  private readonly widgetCollection: Map<PropertyKey, any> = new Map()
 
-  getTime() {
-    return this.THS.time
-  }
+  readonly time = { value: 0 }
+  readonly animationCollection: Map<PropertyKey, AnimationItem> = new Map()
+  readonly clickCollection: Map<PropertyKey, ClickItem> = new Map()
+  readonly resizeCollection: Map<PropertyKey, Function> = new Map()
+
   getWidget(key: PropertyKey): any {
-    return this.THS.widgetCollection.get(key)
+    return this.widgetCollection.get(key)
   }
   getWidgetAsync(key: PropertyKey) {
-    return this.THS.emitter.onceAsync(key, true).promise
-  }
-  addToAnimation(key: PropertyKey, val: AnimationItem) {
-    this.THS.animationCollection.set(key, val)
-  }
-  removeFromAnimation(key: PropertyKey) {
-    this.THS.animationCollection.delete(key)
-  }
-  addToClick(key: PropertyKey, val: ClickItem) {
-    this.THS.clickCollection.set(key, val)
-  }
-  removeFromClick(key: PropertyKey) {
-    this.THS.clickCollection.delete(key)
-  }
-  addToResize(key: PropertyKey, val: Function) {
-    this.THS.resizeCollection.set(key, val)
-  }
-  removeFromResize(key: PropertyKey) {
-    this.THS.resizeCollection.delete(key)
+    return this.emitter.onceAsync(key, true).promise
   }
 
   add(plugin: ThreeHelperPlugin) {
-    plugin.add(this, this.THS)
+    const props: ThreeHelperPluginProps = {
+      KEY: this.KEY,
+      emitter: this.emitter,
+      initializedCache: this.initializedCache,
+      clearCollection: this.clearCollection,
+      widgetCollection: this.widgetCollection,
+      ThreeHelper: this,
+    }
+    plugin.add(props)
   }
   remove(plugin: ThreeHelperPlugin) {
-    plugin.remove(this, this.THS)
+    const props: ThreeHelperPluginProps = {
+      KEY: this.KEY,
+      emitter: this.emitter,
+      initializedCache: this.initializedCache,
+      clearCollection: this.clearCollection,
+      widgetCollection: this.widgetCollection,
+      ThreeHelper: this,
+    }
+    plugin.remove(props)
   }
 
   init(canvas: HTMLCanvasElement) {
-    if (this.THS.initializedCache.get(this.key)) return
+    if (this.initializedCache.get(this.KEY)) return
 
     this.add(new ThreeBasePlugin(canvas))
     this.add(new AnimationPlugin())
     this.add(new ResizePlugin())
 
-    this.THS.initializedCache.set(this.key, true)
+    this.initializedCache.set(this.KEY, true)
   }
 }

@@ -3,7 +3,7 @@ import { ClassStyle } from "@zxtool/react-utils/dist/type"
 import classNames from "classnames"
 import React, { useEffect, useRef } from "react"
 
-interface EarthProps extends ClassStyle {
+export interface EarthProps extends ClassStyle {
   initViewerProps?: InitViewerProps
 }
 
@@ -13,11 +13,11 @@ const Earth: React.FC<EarthProps> = ({ initViewerProps = {}, className, style })
   useEffect(() => {
     if (ref.current) ViewerHelper.init(ref.current, initViewerProps)
     return () => {
-      ViewerHelper.destroy(initViewerProps.subViewerKey)
+      ViewerHelper.destroy(initViewerProps.viewerKey)
     }
   }, [])
 
-  return <div ref={ref} className={classNames("rcc-cesium-container", className)} style={{ height: "100%", ...style }} />
+  return <div ref={ref} className={classNames("rcc-cesium-container", className)} style={style} />
 }
 
 export default Earth

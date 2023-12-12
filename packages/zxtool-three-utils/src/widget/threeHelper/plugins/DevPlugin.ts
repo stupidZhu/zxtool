@@ -1,8 +1,6 @@
 import * as THREE from "three"
 import Stats from "three/examples/jsm/libs/stats.module.js"
-import type { ThreeHelperPlugin } from "."
-import type { ThreeHelper } from "../ThreeHelper"
-import type { ThreeHelperStore } from "../ThreeHelperStore"
+import type { ThreeHelperPlugin, ThreeHelperPluginProps } from "."
 
 export interface DevPluginConfig {
   enableStats?: boolean
@@ -21,8 +19,10 @@ class DevPlugin implements ThreeHelperPlugin {
     this.config = config
   }
 
-  add(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    if (THS.initializedCache.get(this.key)) return
+  add(props: ThreeHelperPluginProps): void {
+    const { ThreeHelper, initializedCache, clearCollection } = props
+    const { animationCollection } = ThreeHelper
+    if (initializedCache.get(this.key)) return
 
     const scene = ThreeHelper.getWidget("scene")
     if (!scene) return
@@ -36,12 +36,12 @@ class DevPlugin implements ThreeHelperPlugin {
     if (enableStats) {
       this.stats = new Stats()
       document.body.appendChild(this.stats.dom)
-      THS.animationCollection.set(this.ac_key, () => {
+      animationCollection.set(this.ac_key, () => {
         this.stats?.update()
       })
     }
 
-    THS.clearCollection.set(this.key, () => {
+    clearCollection.set(this.key, () => {
       if (this.stats) {
         this.stats.dom.remove()
         this.stats = undefined
@@ -50,14 +50,14 @@ class DevPlugin implements ThreeHelperPlugin {
         scene.remove(this.axesHelper)
         this.axesHelper = undefined
       }
-      THS.initializedCache.set(this.key, false)
+      initializedCache.set(this.key, false)
     })
 
-    THS.initializedCache.set(this.key, true)
+    initializedCache.set(this.key, true)
   }
 
-  remove(ThreeHelper: ThreeHelper, THS: ThreeHelperStore): void {
-    THS.clearCollection.get(this.key)?.()
+  remove({ clearCollection }: ThreeHelperPluginProps): void {
+    clearCollection.get(this.key)?.()
   }
 }
 

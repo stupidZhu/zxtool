@@ -13,6 +13,7 @@ class ZCUC {
 
   setConfig(c: ZCUConfigType) {
     merge(this.config, c)
+    if (c.CESIUM_TOKEN) Cesium.Ion.defaultAccessToken = c.CESIUM_TOKEN
   }
 
   getConfig<K extends keyof ZCUConfigType>(key: K, strict?: true): NonNullable<ZCUConfigType[K]>

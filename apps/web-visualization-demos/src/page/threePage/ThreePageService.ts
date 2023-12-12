@@ -1,21 +1,21 @@
 import { DevPlugin } from "@zxtool/three-utils"
-import { threeHelper } from "src/bootstrap"
-import { 发光 } from "./EffectComposer"
+import { ThreeHelper } from "src/bootstrap"
+import { 加载gltf } from "./模型"
 
 const flag = { current: false }
 
 class ThreePageService {
   moduleEnter() {
-    threeHelper.add(new DevPlugin())
+    ThreeHelper.add(new DevPlugin())
     this.init()
 
     // const plugin = new OrbitControlsPlugin()
     // setInterval(() => {
     //   if (flag.current) {
-    //     threeHelper.remove(plugin)
+    //     ThreeHelper.remove(plugin)
     //     flag.current = false
     //   } else {
-    //     threeHelper.add(plugin)
+    //     ThreeHelper.add(plugin)
     //     flag.current = true
     //   }
     // }, 5000)
@@ -26,8 +26,9 @@ class ThreePageService {
   init() {
     // 随机三角形()
     // clipping()
+    // 发光()
 
-    发光()
+    加载gltf()
   }
 }
 

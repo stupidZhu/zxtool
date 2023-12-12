@@ -6,6 +6,7 @@ class CesiumPageService {
   moduleEnter() {
     CommonUtil.enableIframe()
     const viewer = ViewerHelper.getViewer()!
+    console.log(viewer)
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(120.65187, 31.145227, 10000),
     })
