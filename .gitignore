@@ -35,3 +35,5 @@ dist
 # dumi
 **/.dumi/tmp
 **/.dumi/tmp-production
+
+/apps/study-webgl

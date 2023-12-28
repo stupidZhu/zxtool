@@ -1,7 +1,7 @@
 import { CommonUtil } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import { genZCUInfo } from "../util"
 import { ZCUConfig, ZCUConfigType } from "../util/ZCUConfig"
+import { genZCUInfo } from "../util/util"
 import { ViewerHelper } from "./ViewerHelper"
 
 const genInfo = genZCUInfo("TilesetManager")

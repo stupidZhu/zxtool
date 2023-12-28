@@ -14,7 +14,8 @@ class AnimationPlugin implements ThreeHelperPlugin {
 
     const animation = (t = 0) => {
       time.value = t
-      animationCollection.forEach(fn => fn(t, clock.getDelta()))
+      const delta = clock.getDelta()
+      animationCollection.forEach(fn => fn(t, delta))
       this.animationId.value = requestAnimationFrame(animation)
     }
     animation()

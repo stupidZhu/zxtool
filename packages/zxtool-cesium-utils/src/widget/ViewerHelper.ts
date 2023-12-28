@@ -1,7 +1,8 @@
 import { EmitterHelper } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import { genZCUInfo } from "../util"
+import { CesiumUtil } from "../util/CesiumUtil"
 import { ViewerUtilSync } from "../util/ViewerUtilSync"
+import { genZCUInfo } from "../util/util"
 import SyncViewerHelper from "./SyncViewerHelper"
 
 const genInfo = genZCUInfo("ViewerHelper")
@@ -9,6 +10,7 @@ const genInfo = genZCUInfo("ViewerHelper")
 export type InitViewerProps = Cesium.Viewer.ConstructorOptions & {
   hideWidget?: boolean
   fxaa?: boolean
+  enableIframe?: boolean
   viewerKey?: PropertyKey
 }
 
@@ -20,13 +22,14 @@ class _ViewerHelper {
   readonly SyncHelper = new SyncViewerHelper(this.KEY, this.viewers)
 
   init = (container: string | Element, options: InitViewerProps = {}) => {
-    const { hideWidget, fxaa = true, viewerKey = this.KEY, ...rest } = options
+    const { hideWidget, fxaa = true, viewerKey = this.KEY, enableIframe, ...rest } = options
     if (this.viewers.has(viewerKey)) throw new Error(genInfo(`key 为 ${viewerKey.toString()} 的 viewer 已经初始化过`))
 
     const viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
     // @ts-ignore
     hideWidget && (viewer.cesiumWidget.creditContainer.style.display = "none")
     fxaa && ViewerUtilSync.fxaa(viewer)
+    enableIframe && CesiumUtil.enableIframe()
     viewer.scene.globe.depthTestAgainstTerrain = true
 
     this.SyncHelper.refreshSync()

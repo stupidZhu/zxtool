@@ -1,5 +1,5 @@
 import * as Cesium from "cesium"
-import { genZCUInfo } from "../util"
+import { genZCUInfo } from "../util/util"
 import { _ScreenEventHelper } from "./ScreenEventHelper"
 
 const genInfo = genZCUInfo("SyncViewerHelper")

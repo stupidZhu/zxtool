@@ -20,7 +20,7 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
   }
 
   add(props: ThreeHelperPluginProps): void {
-    const { threeHelper, initializedCache, clearCollection } = props
+    const { threeHelper, initializedCache, clearCollection, widgetCollection, emitter } = props
     const { animationCollection } = threeHelper
     if (initializedCache.get(this.key)) return
 
@@ -46,11 +46,16 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
       this.controls?.update(delta)
     })
 
+    widgetCollection.set("o_controls", this.controls)
+    emitter.emit("o_controls", this.controls)
+
     clearCollection.set(this.key, () => {
       this.controls?.dispose()
       this.controls = undefined
       animationCollection.delete(this.ac_key)
       initializedCache.set(this.key, false)
+      widgetCollection.delete("o_controls")
+      emitter.clearHistory("o_controls")
     })
 
     initializedCache.set(this.key, true)

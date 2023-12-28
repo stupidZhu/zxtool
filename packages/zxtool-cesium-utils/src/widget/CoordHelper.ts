@@ -1,7 +1,7 @@
 import { Num3 } from "@zxtool/utils"
 import * as Cesium from "cesium"
 import { LonLat, LonLatHeight } from "../type"
-import { genZCUInfo } from "../util"
+import { genZCUInfo } from "../util/util"
 
 const genInfo = genZCUInfo("CoordHelper")
 const noCoordInfo = genInfo("请先设置坐标")
