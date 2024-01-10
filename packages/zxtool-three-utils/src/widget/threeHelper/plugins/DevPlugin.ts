@@ -8,7 +8,7 @@ export interface DevPluginConfig {
   axesSize?: number
 }
 
-class DevPlugin implements ThreeHelperPlugin {
+export class DevPlugin implements ThreeHelperPlugin {
   private key = Symbol.for("dev")
   private ac_key = Symbol.for("update_stats")
   private stats?: Stats
@@ -36,29 +36,30 @@ class DevPlugin implements ThreeHelperPlugin {
     if (enableStats) {
       this.stats = new Stats()
       document.body.appendChild(this.stats.dom)
-      animationCollection.set(this.ac_key, () => {
-        this.stats?.update()
+      animationCollection.set(this.ac_key, {
+        fn: () => this.stats?.update(),
       })
     }
 
-    clearCollection.set(this.key, () => {
-      if (this.stats) {
-        this.stats.dom.remove()
-        this.stats = undefined
-      }
-      if (this.axesHelper) {
-        scene.remove(this.axesHelper)
-        this.axesHelper = undefined
-      }
-      initializedCache.set(this.key, false)
+    clearCollection.set(this.key, {
+      fn: () => {
+        if (this.stats) {
+          this.stats.dom.remove()
+          this.stats = undefined
+        }
+        if (this.axesHelper) {
+          scene.remove(this.axesHelper)
+          this.axesHelper = undefined
+        }
+        initializedCache.set(this.key, false)
+      },
     })
 
     initializedCache.set(this.key, true)
   }
 
   remove({ clearCollection }: ThreeHelperPluginProps): void {
-    clearCollection.get(this.key)?.()
+    const clearObj = clearCollection.get(this.key)
+    if (clearObj) clearObj.fn({ state: clearObj.state ?? {} })
   }
 }
-
-export default DevPlugin

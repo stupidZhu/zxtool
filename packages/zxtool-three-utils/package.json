@@ -30,7 +30,6 @@
     "@types/lodash": "^4.14.185",
     "@types/node": "^18.7.18",
     "@types/rollup-plugin-auto-external": "^2.0.2",
-    "three": "0.158.0",
     "cesium": "^1.111.0",
     "cross-env": "^7.0.3",
     "esbuild": "^0.15.7",
@@ -43,6 +42,7 @@
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-esbuild": "^4.10.1",
     "rollup-plugin-terser": "^7.0.2",
+    "three": "0.158.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.2.2"
   },

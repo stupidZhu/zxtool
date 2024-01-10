@@ -36,4 +36,4 @@ dist
 **/.dumi/tmp
 **/.dumi/tmp-production
 
-/apps/study-webgl
+/playground/*

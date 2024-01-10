@@ -1,7 +1,8 @@
+import { throttle } from "lodash"
 import * as THREE from "three"
 import type { ThreeHelperPlugin, ThreeHelperPluginProps } from "."
 
-class AnimationPlugin implements ThreeHelperPlugin {
+export class AnimationPlugin implements ThreeHelperPlugin {
   private key = Symbol.for("animation")
   private animationId = { value: 0 }
 
@@ -15,24 +16,32 @@ class AnimationPlugin implements ThreeHelperPlugin {
     const animation = (t = 0) => {
       time.value = t
       const delta = clock.getDelta()
-      animationCollection.forEach(fn => fn(t, delta))
+      animationCollection.forEach<{ _throttled?: boolean }>(item => {
+        const { fn, state = {} } = item
+        if (state.throttleTime && !state._throttled) {
+          fn({ time: t, delta, state })
+          item.fn = throttle(item.fn, state.throttleTime)
+          state._throttled = true
+        } else fn({ time: t, delta, state })
+      })
       this.animationId.value = requestAnimationFrame(animation)
     }
     animation()
 
-    clearCollection.set(this.key, () => {
-      cancelAnimationFrame(this.animationId.value)
-      time.value = 0
-      animationCollection.clear()
-      initializedCache.set(this.key, false)
+    clearCollection.set(this.key, {
+      fn: () => {
+        cancelAnimationFrame(this.animationId.value)
+        time.value = 0
+        animationCollection.clear()
+        initializedCache.set(this.key, false)
+      },
     })
 
     initializedCache.set(this.key, true)
   }
 
   remove({ clearCollection }: ThreeHelperPluginProps): void {
-    clearCollection.get(this.key)?.()
+    const clearObj = clearCollection.get(this.key)
+    if (clearObj) clearObj.fn({ state: clearObj.state ?? {} })
   }
 }
-
-export default AnimationPlugin

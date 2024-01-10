@@ -9,7 +9,7 @@ export interface IControlsConfig {
   resetMouse?: boolean
 }
 
-class OrbitControlsPlugin implements ThreeHelperPlugin {
+export class OrbitControlsPlugin implements ThreeHelperPlugin {
   private key = Symbol.for("o_controls")
   private ac_key = Symbol.for("update_o_controls")
   private controls?: OrbitControls
@@ -29,7 +29,7 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
     const camera = threeHelper.getWidget("p_camera")
     if (!scene || !canvas || !camera) return
 
-    const { enableDamping = true, distance = [1, 200], resetMouse = true } = this.config
+    const { enableDamping = true, distance = [1, 1000], resetMouse = true } = this.config
 
     this.controls = new OrbitControls(camera, canvas)
     this.controls.enableDamping = enableDamping
@@ -42,28 +42,31 @@ class OrbitControlsPlugin implements ThreeHelperPlugin {
       this.controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE
     }
 
-    animationCollection.set(this.ac_key, (_, delta) => {
-      this.controls?.update(delta)
+    animationCollection.set(this.ac_key, {
+      fn: ({ delta }) => {
+        this.controls?.update(delta)
+      },
     })
 
     widgetCollection.set("o_controls", this.controls)
     emitter.emit("o_controls", this.controls)
 
-    clearCollection.set(this.key, () => {
-      this.controls?.dispose()
-      this.controls = undefined
-      animationCollection.delete(this.ac_key)
-      initializedCache.set(this.key, false)
-      widgetCollection.delete("o_controls")
-      emitter.clearHistory("o_controls")
+    clearCollection.set(this.key, {
+      fn: () => {
+        this.controls?.dispose()
+        this.controls = undefined
+        animationCollection.delete(this.ac_key)
+        initializedCache.set(this.key, false)
+        widgetCollection.delete("o_controls")
+        emitter.clearHistory("o_controls")
+      },
     })
 
     initializedCache.set(this.key, true)
   }
 
   remove({ clearCollection }: ThreeHelperPluginProps): void {
-    clearCollection.get(this.key)?.()
+    const clearObj = clearCollection.get(this.key)
+    if (clearObj) clearObj.fn({ state: clearObj.state ?? {} })
   }
 }
-
-export default OrbitControlsPlugin
