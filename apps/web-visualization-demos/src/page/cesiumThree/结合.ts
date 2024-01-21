@@ -44,7 +44,7 @@ const cartToVec = function (cart: Cesium.Cartesian3) {
 
 export const 结合1 = async () => {
   const viewer = ViewerHelper.getViewer()!
-  threeHelper.add(new SyncCesiumPlugin(viewer))
+  threeHelper.addPlugin(new SyncCesiumPlugin(viewer))
   const scene = threeHelper.getWidget("scene")!
 
   const entity = viewer.entities.add({

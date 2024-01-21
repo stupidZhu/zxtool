@@ -21,7 +21,8 @@
     "allowSyntheticDefaultImports": true,
     "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "suppressExcessPropertyErrors": true
   },
   "exclude": ["node_modules"]
 }

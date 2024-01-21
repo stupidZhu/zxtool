@@ -4,7 +4,7 @@ import { 结合1 } from "./结合"
 
 class CesiumThreeService {
   moduleEnter() {
-    threeHelper.add(new DevPlugin({ axesSize: 1e7 }))
+    threeHelper.addPlugin(new DevPlugin({ axesSize: 1e7 }))
     this.init()
   }
 

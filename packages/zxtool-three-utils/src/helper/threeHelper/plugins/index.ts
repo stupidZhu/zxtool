@@ -23,38 +23,39 @@ export interface StateCbCollection<K, V extends FunctionWithState> extends Omit<
   set<S extends IObj = never>(key: K, value: StateCbCollectionV<V, S>): this
   forEach<S extends IObj = never>(
     callbackfn: (value: StateCbCollectionV<V, S>, key: K, map: Map<K, StateCbCollectionV<V, S>>) => void,
-    thisArg?: any,
+    thisArg?: unknown,
   ): void
 }
 
-export type AnimationWithState<T extends IObj = { throttleTime?: number }> = {
+export type AnimationWithState<T extends IObj = { throttleTime?: number; enable?: boolean }> = {
   fn(props: { time: number; delta: number; state: T }): void
   state?: T
 }
-export type ClickWithState<T extends IObj = { objs?: THREE.Object3D[] }> = {
-  fn(props: { objs: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>[]; e: MouseEvent; state: T }): void
-  state?: T
-}
-export type FunctionWithState<T extends IObj = IObj> = {
+export type FunctionWithState<T extends IObj = { enable?: boolean }> = {
   fn(props: { state: T }): void
   state?: T
 }
 
 export interface ThreeHelperPluginProps {
-  KEY: PropertyKey
   emitter: EmitterHelper
-  initializedCache: Map<PropertyKey, boolean>
-  clearCollection: StateCbCollection<PropertyKey, FunctionWithState>
   widgetCollection: Map<PropertyKey, any>
   threeHelper: ThreeHelper
 }
-export interface ThreeHelperPlugin {
-  add(props: ThreeHelperPluginProps): void
-  remove(props: ThreeHelperPluginProps): void
+export interface ThreeHelperPlugin<AO extends IObj = {}, RO extends IObj = {}> {
+  add(props: ThreeHelperPluginProps, options?: AO): ThreeHelperPlugin<AO>
+  remove(options?: RO): void
 }
 
-export * from "./ClickPlugin"
+export * from "./AnimationPlugin"
+export * from "./CSS2DRendererPlugin"
+export * from "./CSS3DRendererPlugin"
 export * from "./DevPlugin"
 export * from "./EffectComposerPlugin"
-export * from "./OrbitControlsPlugin"
+export * from "./MouseEventPlugin"
+export * from "./OCameraPlugin"
+export * from "./OControlsPlugin"
+export * from "./PCameraPlugin"
+export * from "./RendererPlugin"
+export * from "./ResizePlugin"
+export * from "./ScenePlugin"
 export * from "./SyncCesiumPlugin"
