@@ -1,7 +1,6 @@
 import { CommonUtil } from "@zxtool/utils"
 import * as Cesium from "cesium"
-import { ViewerUtilSync } from "../util/ViewerUtilSync"
-import { ViewerHelper } from "./ViewerHelper"
+import { ViewerUtil } from "../util"
 
 export type IPrimitive = Cesium.GroundPrimitive | Cesium.ClassificationPrimitive | Cesium.Primitive
 
@@ -17,43 +16,40 @@ export type AddPrimitiveProps = {
 } & Record<string, any>
 
 export class PrimitiveManager {
-  private viewer?: Cesium.Viewer
+  private viewer: Cesium.Viewer
   readonly primitiveCollection = new Map<PropertyKey, PrimitiveObj>()
 
-  constructor(viewer?: Cesium.Viewer) {
-    if (viewer) this.viewer = viewer
+  constructor(viewer: Cesium.Viewer) {
+    this.viewer = viewer
   }
 
-  async add(props: AddPrimitiveProps) {
-    const viewer = await ViewerHelper.getViewerPromise(undefined, this.viewer)
+  add(props: AddPrimitiveProps) {
     const { key = Symbol(), flyTo = true, primitive, ...rest } = props
 
-    if (!viewer.scene.primitives.contains(primitive)) viewer.scene.primitives.add(primitive)
+    if (!this.viewer.scene.primitives.contains(primitive)) this.viewer.scene.primitives.add(primitive)
     const primitiveObj = { key, primitive, ...rest }
     this.primitiveCollection.set(key, primitiveObj)
-    if (flyTo) ViewerUtilSync.flyToPrimitive(primitive, viewer)
+    if (flyTo) ViewerUtil.flyToPrimitive(this.viewer, primitive)
     return primitiveObj
   }
 
-  showByCondition = async (condition: Partial<PrimitiveObj>, flyTo?: boolean) => {
-    const viewer = await ViewerHelper.getViewerPromise(undefined, this.viewer)
+  showByCondition = (condition: Partial<PrimitiveObj>, flyTo?: boolean) => {
     const map = this.getByCondition(condition)
     let last: IPrimitive | undefined
     map.forEach(item => {
       item.primitive.show = true
       last = item.tileset
     })
-    if (flyTo && last) ViewerUtilSync.flyToPrimitive(last, viewer)
+    if (flyTo && last) ViewerUtil.flyToPrimitive(this.viewer, last)
   }
 
-  showAll = async (flyTo?: boolean) => {
-    const viewer = await ViewerHelper.getViewerPromise(undefined, this.viewer)
+  showAll = (flyTo?: boolean) => {
     let last: IPrimitive | undefined
     this.primitiveCollection.forEach(item => {
       item.primitive.show = true
       last = item.primitive
     })
-    if (flyTo && last) ViewerUtilSync.flyToPrimitive(last, viewer)
+    if (flyTo && last) ViewerUtil.flyToPrimitive(this.viewer, last)
   }
 
   hideByCondition = (condition: Partial<PrimitiveObj>) => {
@@ -65,18 +61,16 @@ export class PrimitiveManager {
     this.primitiveCollection.forEach(v => (v.primitive.show = false))
   }
 
-  removeByCondition = async (condition: Partial<PrimitiveObj>) => {
-    const viewer = await ViewerHelper.getViewerPromise(undefined, this.viewer)
+  removeByCondition = (condition: Partial<PrimitiveObj>) => {
     const map = this.getByCondition(condition)
     map.forEach(item => {
-      viewer.scene.primitives.remove(item.primitive)
+      this.viewer.scene.primitives.remove(item.primitive)
       this.primitiveCollection.delete(item.key)
     })
   }
 
-  removeAll = async () => {
-    const viewer = await ViewerHelper.getViewerPromise(undefined, this.viewer)
-    this.primitiveCollection.forEach(item => viewer.scene.primitives.remove(item.primitive))
+  removeAll = () => {
+    this.primitiveCollection.forEach(item => this.viewer.scene.primitives.remove(item.primitive))
     this.primitiveCollection.clear()
   }
 

@@ -2,57 +2,55 @@ import * as Cesium from "cesium"
 import { merge } from "lodash"
 import { MaterialUtil } from "../util/MaterialUtil"
 
-const glsl = /* glsl */ `
-uniform float speed;
+const shader = /* glsl */ `
 uniform sampler2D img;
-uniform bool yAxis;
+uniform vec4 color;
+uniform float speed;
+uniform float rotate;
+
+mat2 rotate2d(float angle) {
+  return mat2(
+    cos(angle), - sin(angle),
+    sin(angle), cos(angle)
+  );
+}
 
 czm_material czm_getMaterial(czm_materialInput materialInput){
   czm_material material = czm_getDefaultMaterial(materialInput);
   vec2 st = materialInput.st;
+  st *= rotate2d(rotate);
 
   float t = fract(czm_frameNumber * speed / 500.0);
-  vec4 color = vec4(0.0);
-  if(yAxis) {
-    color = texture(img, vec2(fract(st.t - t), st.s));
-  } else {
-    color = texture(img, vec2(fract(st.s - t), st.t));
-  }
+  vec4 _color = texture(img, vec2(fract(st.s - t), st.t));
+  _color *= color;
 
-  material.diffuse = color.rgb;
-  material.alpha = color.a;
+  material.diffuse = _color.rgb;
+  material.alpha = _color.a;
   return material;
 }`
 
+const type = "FlowTextureMaterial"
+const defaultOptions: Required<FlowTextureMaterialPropertyOptions> = {
+  img: "",
+  color: Cesium.Color.WHITE,
+  speed: 1.0,
+  rotate: 0.0,
+}
+
 export interface FlowTextureMaterialPropertyOptions {
   img: string
+  color?: Cesium.Color
   speed?: number
-  yAxis?: boolean
+  rotate?: number
 }
 
 export class FlowTextureMaterialProperty {
-  private static readonly type = "FlowTextureMaterial"
-  private static readonly defaultOptions: Required<FlowTextureMaterialPropertyOptions> = {
-    img: "",
-    speed: 1.0,
-    yAxis: false,
-  }
-
   private _definitionChanged: Cesium.Event
   private options: Required<FlowTextureMaterialPropertyOptions>
 
   constructor(options: FlowTextureMaterialPropertyOptions) {
-    this.options = merge({ ...FlowTextureMaterialProperty.defaultOptions }, options)
+    this.options = merge({ ...defaultOptions }, options)
     this._definitionChanged = new Cesium.Event()
-
-    MaterialUtil.addMaterial(FlowTextureMaterialProperty.type, {
-      fabric: {
-        type: FlowTextureMaterialProperty.type,
-        uniforms: { ...FlowTextureMaterialProperty.defaultOptions },
-        source: glsl,
-      },
-      translucent: true,
-    })
   }
 
   get isConstant() {
@@ -64,7 +62,7 @@ export class FlowTextureMaterialProperty {
   }
 
   getType() {
-    return FlowTextureMaterialProperty.type
+    return type
   }
 
   getValue(time: any, result: any) {
@@ -76,3 +74,12 @@ export class FlowTextureMaterialProperty {
     return this === other && this.options === other.options
   }
 }
+
+MaterialUtil.addMaterial(type, {
+  fabric: {
+    type: type,
+    uniforms: { ...defaultOptions },
+    source: shader,
+  },
+  translucent: true,
+})

@@ -1,9 +1,9 @@
 import * as Cesium from "cesium"
 import { LonLat, LonLatKey, LonLatType, RECT } from "../type"
+import { ViewerUtil } from "../util"
 import { EntityUtil, IEntities } from "../util/EntityUtil"
-import { ViewerUtilSync } from "../util/ViewerUtilSync"
 
-const { getScreenRect } = ViewerUtilSync
+const { getScreenRect } = ViewerUtil
 
 export interface MassivePointsHelperOptions {
   xNums?: number

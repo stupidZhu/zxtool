@@ -1,51 +1,88 @@
 import * as Cesium from "cesium"
-import { cloneDeep, isNil } from "lodash"
-import { CoordHelper } from "../widget/CoordHelper"
+import { Cesium3DTileset } from "cesium"
+import { CoordHelper } from "../helper"
+import { genZCUInfo } from "./util"
 
-const padArr = (arr: any[], value: any, length?: number) => {
-  return Array.from(Array(length ?? arr.length)).map((item, index) => (isNil(arr[index]) ? value : arr[index]))
+const genInfo = genZCUInfo("TilesetUtil")
+
+export interface TransformTilesetOptions {
+  position?: Cesium.Cartesian3
+  translate?: Cesium.Cartesian3
+  scale?: Cesium.Cartesian3
+  rotation?: Cesium.HeadingPitchRoll
+  viewer?: Cesium.Viewer
 }
 
-type TransformModelFunc = (props: {
-  tileset: Cesium.Cesium3DTileset
-  alpha?: number
-  position?: [number, number, number?] // 经 纬 高
-  translate?: [number, number, number]
-  rotate?: [number, number, number]
-  scale?: [number, number, number]
-}) => Cesium.Cesium3DTileset
-
-const headingPitchRollToFixedFrame = (origin: Cesium.Cartesian3, headingPitchRoll: [number, number, number]) => {
-  return Cesium.Transforms.headingPitchRollToFixedFrame(
-    origin,
-    new Cesium.HeadingPitchRoll(...headingPitchRoll.map(item => Cesium.Math.toRadians(item))),
-  )
-}
-
-const transformBIMModel: TransformModelFunc = props => {
-  const { tileset, alpha = 1, position: p = [], translate: t = [], rotate: r = [], scale: s = [] } = props
-  const [position, translate, rotate] = [padArr(p, 0, 3), padArr(t, 0, 3), padArr(r, 0, 3)]
-  const scale = padArr(s, 1, 3).map(item => item || 1)
-
-  if (!(tileset.boundingSphere as any).__center) {
-    ;(tileset.boundingSphere as any).__center = cloneDeep(tileset.boundingSphere.center)
+/**
+ * 调整位置, 平移, 缩放
+ * 一般用作 3DTile 模型
+ */
+const transformTileset = (tileset: Cesium.Cesium3DTileset, options: TransformTilesetOptions) => {
+  const {
+    position,
+    translate,
+    scale = new Cesium.Cartesian3(1, 1, 1),
+    rotation = new Cesium.HeadingPitchRoll(0, 0, 0),
+    viewer,
+  } = options
+  const backup = {
+    center: tileset.boundingSphere.center.clone(),
+    transform: tileset.root.transform.clone(),
+    modelMatrix: tileset.modelMatrix.clone(),
   }
+  let center = position ?? tileset.boundingSphere.center
+  if (translate) center = CoordHelper.translate(center, translate, viewer)
+  const translateMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center)
+  const scaleMatrix = Cesium.Matrix4.fromScale(scale)
+  const rotationMatrix = Cesium.Matrix4.fromRotation(Cesium.Matrix3.fromHeadingPitchRoll(rotation))
 
-  let center = (tileset.boundingSphere as any).__center
-  if (position[0] && position[1]) center = Cesium.Cartesian3.fromDegrees(...(p as [number, number, number?]))
-  center = CoordHelper.translate(center, translate)
+  const temp = Cesium.Matrix4.multiply(rotationMatrix, scaleMatrix, new Cesium.Matrix4())
+  const transform = Cesium.Matrix4.multiply(translateMatrix, temp, new Cesium.Matrix4())
 
-  let modelMatrix = headingPitchRollToFixedFrame(center, rotate as [number, number, number])
-  modelMatrix = Cesium.Matrix4.multiply(modelMatrix, Cesium.Matrix4.fromScale(new Cesium.Cartesian3(...scale)), modelMatrix)
-  tileset.root.transform = modelMatrix
-
-  alpha && (tileset.style = new Cesium.Cesium3DTileStyle({ color: `color('rgba(255,255,255,${alpha})')` }))
-
-  return tileset
+  tileset.root.transform = transform
+  tileset.modelMatrix = Cesium.Matrix4.IDENTITY
+  tileset.__customField = backup
 }
 
-const TilesetUtil = {
-  transformBIMModel,
+export interface TranslateTilesetOptions {
+  position?: Cesium.Cartesian3
+  translate?: Cesium.Cartesian3
+  viewer?: Cesium.Viewer
+}
+/**
+ * 调整位置, 会保持原来的姿态
+ * 一般用作 3DTile 倾斜摄影
+ */
+const translateTileset = (tileset: Cesium3DTileset, options: TranslateTilesetOptions) => {
+  const { position, translate, viewer } = options
+  const backup = {
+    center: tileset.boundingSphere.center.clone(),
+    transform: tileset.root.transform.clone(),
+    modelMatrix: tileset.modelMatrix.clone(),
+  }
+  let center = position ?? tileset.boundingSphere.center
+  if (translate) center = CoordHelper.translate(center, translate, viewer)
+
+  const subtract = Cesium.Cartesian3.subtract(center, tileset.boundingSphere.center, new Cesium.Cartesian3())
+  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(subtract)
+  tileset.__customField = backup
 }
 
-export default TilesetUtil
+/**
+ * 恢复 3DTile 初始状态
+ * 只对使用 transformTileset/translateTileset 调整状态的模型有效
+ */
+const restoreTileset = (tileset: Cesium3DTileset) => {
+  const { transform, modelMatrix } = tileset.__customField ?? ({} as any)
+  if (!transform || !modelMatrix) {
+    return console.error(genInfo("restoreTileset 只对使用 transformTileset/translateTileset 调整状态的模型有效"))
+  }
+  tileset.modelMatrix = modelMatrix
+  tileset.root.transform = transform
+}
+
+export const TilesetUtil = {
+  transformTileset,
+  translateTileset,
+  restoreTileset,
+}

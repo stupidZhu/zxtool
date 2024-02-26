@@ -2,7 +2,7 @@ import * as Cesium from "cesium"
 import { merge } from "lodash"
 import { MaterialUtil } from "../util/MaterialUtil"
 
-const glsl = /* glsl */ `
+const shader = /* glsl */ `
 uniform vec4 color;
 uniform vec4 bgColor;
 uniform float speed;
@@ -32,6 +32,15 @@ czm_material czm_getMaterial(czm_materialInput materialInput){
   return material;
 }`
 
+const type = "FlowColorMaterial"
+const defaultOptions: Required<FlowColorMaterialPropertyOptions> = {
+  color: Cesium.Color.WHITE,
+  bgColor: Cesium.Color.WHITE.withAlpha(0.0),
+  speed: 1.0,
+  percent: 0.1,
+  gradient: true,
+}
+
 export interface FlowColorMaterialPropertyOptions {
   color?: Cesium.Color
   bgColor?: Cesium.Color
@@ -41,30 +50,12 @@ export interface FlowColorMaterialPropertyOptions {
 }
 
 export class FlowColorMaterialProperty {
-  private static readonly type = "FlowColorMaterial"
-  private static readonly defaultOptions: Required<FlowColorMaterialPropertyOptions> = {
-    color: Cesium.Color.CYAN,
-    bgColor: Cesium.Color.WHITE.withAlpha(0.0),
-    speed: 1.0,
-    percent: 0.1,
-    gradient: true,
-  }
-
   private _definitionChanged: Cesium.Event
   private options: Required<FlowColorMaterialPropertyOptions>
 
   constructor(options: FlowColorMaterialPropertyOptions) {
-    this.options = merge({ ...FlowColorMaterialProperty.defaultOptions }, options)
+    this.options = merge({ ...defaultOptions }, options)
     this._definitionChanged = new Cesium.Event()
-
-    MaterialUtil.addMaterial(FlowColorMaterialProperty.type, {
-      fabric: {
-        type: FlowColorMaterialProperty.type,
-        uniforms: { ...FlowColorMaterialProperty.defaultOptions },
-        source: glsl,
-      },
-      translucent: true,
-    })
   }
 
   get isConstant() {
@@ -76,7 +67,7 @@ export class FlowColorMaterialProperty {
   }
 
   getType() {
-    return FlowColorMaterialProperty.type
+    return type
   }
 
   getValue(time: any, result: any) {
@@ -88,3 +79,12 @@ export class FlowColorMaterialProperty {
     return this === other && this.options === other.options
   }
 }
+
+MaterialUtil.addMaterial(type, {
+  fabric: {
+    type: type,
+    uniforms: { ...defaultOptions },
+    source: shader,
+  },
+  translucent: true,
+})

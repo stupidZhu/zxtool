@@ -2,11 +2,13 @@ import * as Cesium from "cesium"
 import { merge } from "lodash"
 import { MaterialUtil } from "../util/MaterialUtil"
 
-const glsl = /* glsl */ `
+const shader = /* glsl */ `
 #define PI 3.14159265358979323846
 
 uniform sampler2D img;
+uniform vec4 color;
 uniform float speed;
+uniform bool clockwise;
 
 mat2 rotate2d(float angle) {
   return mat2(
@@ -19,45 +21,43 @@ czm_material czm_getMaterial(czm_materialInput materialInput){
   czm_material material = czm_getDefaultMaterial(materialInput);
   vec2 st = materialInput.st;
 
+  float _clockwise = clockwise ? 1.0 : -1.0;
+  float t = czm_frameNumber * speed * 0.01 * _clockwise;
   st -= vec2(0.5);
-  float t = czm_frameNumber * speed * 0.01;
   st *= rotate2d(t);
   st += vec2(0.5);
 
-  vec4 color = texture(img, st);
+  vec4 _color = texture(img, st);
+  _color *= color;
 
-  material.diffuse = color.rgb;
-  material.alpha = color.a;
+  material.diffuse = _color.rgb;
+  material.alpha = _color.a;
   return material;
 }`
 
-export interface RotateTextureMaterialPropertyOptions {
-  img: string
-  speed?: number
+const type = "RotateMaterial"
+
+const defaultOptions: Required<RotateMaterialPropertyOptions> = {
+  img: "",
+  color: Cesium.Color.WHITE,
+  speed: 1.0,
+  clockwise: true,
 }
 
-export class RotateTextureMaterialProperty {
-  private static readonly type = "RotateTextureMaterial"
-  private static readonly defaultOptions: Required<RotateTextureMaterialPropertyOptions> = {
-    img: "",
-    speed: 1.0,
-  }
+export interface RotateMaterialPropertyOptions {
+  img: string
+  color?: Cesium.Color
+  speed?: number
+  clockwise?: boolean
+}
 
+export class RotateMaterialProperty {
   private _definitionChanged: Cesium.Event
-  private options: Required<RotateTextureMaterialPropertyOptions>
+  private options: Required<RotateMaterialPropertyOptions>
 
-  constructor(options: RotateTextureMaterialPropertyOptions) {
-    this.options = merge({ ...RotateTextureMaterialProperty.defaultOptions }, options)
+  constructor(options: RotateMaterialPropertyOptions) {
+    this.options = merge({ ...defaultOptions }, options)
     this._definitionChanged = new Cesium.Event()
-
-    MaterialUtil.addMaterial(RotateTextureMaterialProperty.type, {
-      fabric: {
-        type: RotateTextureMaterialProperty.type,
-        uniforms: { ...RotateTextureMaterialProperty.defaultOptions },
-        source: glsl,
-      },
-      translucent: true,
-    })
   }
 
   get isConstant() {
@@ -69,7 +69,7 @@ export class RotateTextureMaterialProperty {
   }
 
   getType() {
-    return RotateTextureMaterialProperty.type
+    return type
   }
 
   getValue(time: any, result: any) {
@@ -81,3 +81,12 @@ export class RotateTextureMaterialProperty {
     return this === other && this.options === other.options
   }
 }
+
+MaterialUtil.addMaterial(type, {
+  fabric: {
+    type: type,
+    uniforms: { ...defaultOptions },
+    source: shader,
+  },
+  translucent: true,
+})

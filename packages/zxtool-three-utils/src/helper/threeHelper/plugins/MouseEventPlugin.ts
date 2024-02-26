@@ -68,7 +68,7 @@ export class MouseEventPlugin implements ThreeHelperPlugin<MouseEventPluginAO> {
   clearClick?: () => void
 
   private getIntersection = (screenX: number, screenY: number) => {
-    if (!this.addProps) throw new Error(genInfo("未添加插件"))
+    if (!this.addProps) return [null, []] as const
     const { threeHelper } = this.addProps
 
     const scene = threeHelper.getWidget("scene")

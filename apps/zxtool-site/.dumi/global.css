@@ -11,8 +11,12 @@ button {
 .column {
   flex-direction: column;
 }
-.info-img {
-  box-shadow: 1px 1px 4px #00000010;
+.resume-img-wrapper {
+  > img {
+    width: 49%;
+    height: auto;
+    box-shadow: 2px 2px 4px #00000020;
+  }
 }
 
 .hr-with-content {

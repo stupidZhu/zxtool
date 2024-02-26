@@ -1,12 +1,18 @@
 import { EmitterHelper, IObj } from "@zxtool/utils"
+import * as Cesium from "cesium"
 import { CesiumHelperPlugin, CesiumHelperPluginProps } from "./plugins"
 import { ViewerPlugin } from "./plugins/ViewerPlugin"
+
+export interface CesiumHelper {
+  getWidget(type: "viewer"): Cesium.Viewer | undefined
+
+  getWidgetAsync(type: "viewer"): Promise<Cesium.Viewer>
+}
 
 export class CesiumHelper {
   private isInit = false
   private readonly emitter = new EmitterHelper({ maxCount: { history: 1 } })
   private readonly widgetCollection: Map<PropertyKey, any> = new Map()
-
   readonly pluginCollection: Map<PropertyKey, CesiumHelperPlugin> = new Map()
 
   getWidget(key: PropertyKey): unknown {
@@ -33,7 +39,6 @@ export class CesiumHelper {
   init(container: string | Element) {
     if (this.isInit) return
 
-    // todo
     this.addPlugin(new ViewerPlugin(), { container })
 
     this.isInit = true

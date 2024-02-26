@@ -1,6 +1,6 @@
 import * as Cesium from "cesium"
 import { CesiumHelperPlugin, CesiumHelperPluginProps } from "."
-import { CesiumUtil, ViewerUtilSync } from "../../util"
+import { CesiumUtil, ViewerUtil } from "../../util"
 import { genZCUInfo } from "../../util/util"
 
 export type ViewerPluginAO = Cesium.Viewer.ConstructorOptions & {
@@ -13,7 +13,7 @@ export type ViewerPluginAO = Cesium.Viewer.ConstructorOptions & {
 const genInfo = genZCUInfo("ViewerPlugin")
 
 export class ViewerPlugin implements CesiumHelperPlugin<ViewerPluginAO> {
-  private key = Symbol.for("viewer")
+  private static key = Symbol.for("__viewer__")
   private addProps: CesiumHelperPluginProps | null = null
 
   private _viewer?: Cesium.Viewer
@@ -26,7 +26,7 @@ export class ViewerPlugin implements CesiumHelperPlugin<ViewerPluginAO> {
     const { cesiumHelper, widgetCollection, emitter } = props
     const { pluginCollection } = cesiumHelper
 
-    const plugin = pluginCollection.get(this.key) as ViewerPlugin
+    const plugin = pluginCollection.get(ViewerPlugin.key) as ViewerPlugin
     if (plugin) {
       console.error(genInfo("已经存在一个 ViewerPlugin, 不能重复添加"))
       return plugin
@@ -35,10 +35,14 @@ export class ViewerPlugin implements CesiumHelperPlugin<ViewerPluginAO> {
     const { container, hideWidget = true, fxaa = true, enableIframe, ...rest } = options
     if (!container) throw new Error("请传入 container")
 
-    const viewer = new Cesium.Viewer(container, { ...(hideWidget ? ViewerUtilSync.getHideWidgetOption() : null), ...rest })
+    const viewer = new Cesium.Viewer(container, {
+      // msaaSamples: 4,
+      ...(hideWidget ? ViewerUtil.getHideWidgetOption() : null),
+      ...rest,
+    })
     // @ts-ignore
     if (hideWidget) viewer.cesiumWidget.creditContainer.style.display = "none"
-    fxaa && ViewerUtilSync.fxaa(viewer)
+    fxaa && ViewerUtil.fxaa(viewer)
     enableIframe && CesiumUtil.enableIframe()
     viewer.scene.globe.depthTestAgainstTerrain = true
 
@@ -46,7 +50,7 @@ export class ViewerPlugin implements CesiumHelperPlugin<ViewerPluginAO> {
     widgetCollection.set("viewer", viewer)
     emitter.emit("viewer", viewer)
 
-    pluginCollection.set(this.key, this)
+    pluginCollection.set(ViewerPlugin.key, this)
     return this
   }
 
@@ -61,7 +65,7 @@ export class ViewerPlugin implements CesiumHelperPlugin<ViewerPluginAO> {
     this.viewer?.destroy()
     this._viewer = undefined
 
-    pluginCollection.delete(this.key)
+    pluginCollection.delete(ViewerPlugin.key)
     this.addProps = null
   }
 }

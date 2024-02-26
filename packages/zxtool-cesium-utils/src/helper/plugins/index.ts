@@ -11,4 +11,6 @@ export interface CesiumHelperPlugin<AO extends IObj = {}, RO extends IObj = {}> 
   remove(options?: RO): void
 }
 
+export * from "./MouseEventPlugin"
 export * from "./ViewerPlugin"
+export * from "./WidgetPlugin"

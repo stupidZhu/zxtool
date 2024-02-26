@@ -7,6 +7,7 @@ export type LikeDom = HTMLElement | typeof window | Document
 
 export type Num2 = [number, number]
 export type Num3 = [number, number, number]
+export type Num4 = [number, number, number, number]
 
 export type Merge<T> = {
   [K in keyof T]: T[K]
