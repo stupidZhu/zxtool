@@ -1,0 +1,19 @@
+{
+  "name": "@zxtool/three-math",
+  "version": "0.158.0",
+  "description": "提取了 three 和 @types/three 的 math 模块",
+  "module": "src/index.js",
+  "types": "src/index.d.ts",
+  "homepage": "https://stupidzhu.github.io/zxtool",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stupidZhu/zxtool"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
