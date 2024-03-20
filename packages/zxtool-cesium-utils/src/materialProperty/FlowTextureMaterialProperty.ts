@@ -2,6 +2,8 @@ import * as Cesium from "cesium"
 import { merge } from "lodash"
 import { MaterialUtil } from "../util/MaterialUtil"
 
+// todo repeat emission
+
 const shader = /* glsl */ `
 uniform sampler2D img;
 uniform vec4 color;

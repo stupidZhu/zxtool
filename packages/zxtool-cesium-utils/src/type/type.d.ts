@@ -4,17 +4,17 @@ declare module "cesium" {
   export interface Entity {
     __customField?: {
       hover?: boolean
-      onClick?: (data: Entity, raw: any) => void
-      onEnter?: (data: Entity, raw: any) => void
-      onLeave?: (data: Entity, raw: any) => void
+      onClick?: (data: Entity, raw: any, position: Cartesian2) => void
+      onEnter?: (data: Entity, raw: any, position: Cartesian2) => void
+      onLeave?: (data: Entity, raw: any, position: Cartesian2) => void
     } & IObj
   }
   export interface Primitive {
     __customField?: {
       hover?: boolean
-      onClick?: (data: Primitive, raw: any) => void
-      onEnter?: (data: Primitive, raw: any) => void
-      onLeave?: (data: Primitive, raw: any) => void
+      onClick?: (data: Primitive, raw: any, position: Cartesian2) => void
+      onEnter?: (data: Primitive, raw: any, position: Cartesian2) => void
+      onLeave?: (data: Primitive, raw: any, position: Cartesian2) => void
     } & IObj
   }
   export interface Cesium3DTileset {

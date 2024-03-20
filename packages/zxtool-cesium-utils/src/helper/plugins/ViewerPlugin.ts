@@ -46,6 +46,10 @@ export class ViewerPlugin implements CesiumHelperPlugin<ViewerPluginAO> {
     enableIframe && CesiumUtil.enableIframe()
     viewer.scene.globe.depthTestAgainstTerrain = true
 
+    // 移除默认事件
+    viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
+    viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+
     this._viewer = viewer
     widgetCollection.set("viewer", viewer)
     emitter.emit("viewer", viewer)

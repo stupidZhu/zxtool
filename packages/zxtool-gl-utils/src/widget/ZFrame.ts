@@ -19,39 +19,54 @@ float unpackDepth(vec4 depth){
 
 export class ZFrame extends ZScene {
   size: Num2 = [1024, 1024]
-  texture!: WebGLTexture
-  framebuffer!: WebGLFramebuffer
-  depthbuffer!: WebGLRenderbuffer
+  readonly texture!: WebGLTexture
+  readonly textures!: WebGLTexture[]
+  private framebuffer!: WebGLFramebuffer
+  private depthbuffer!: WebGLRenderbuffer
+  needUpdate = true
 
-  constructor(gl: WebGLRenderingContext) {
+  constructor(gl: WebGL2RenderingContext, textureCount = 1) {
     super(gl)
-    this.init()
-  }
-
-  init() {
-    const { gl } = this
-    this.texture = gl.createTexture()!
+    this.textures = Array.from(Array(textureCount), () => gl.createTexture()!)
+    this.texture = this.textures[0]
     this.framebuffer = gl.createFramebuffer()!
     this.depthbuffer = gl.createRenderbuffer()!
   }
 
   useFrame() {
-    const { gl, texture, framebuffer, depthbuffer, size } = this
+    const { gl, textures, framebuffer, depthbuffer, size } = this
 
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ...size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    textures.forEach((texture, index) => {
+      gl.activeTexture(gl.TEXTURE0 + index)
+      gl.bindTexture(gl.TEXTURE_2D, texture)
+    })
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
 
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer)
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, ...size)
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer)
 
     gl.viewport(0, 0, ...size)
+
+    if (this.needUpdate) {
+      this.needUpdate = false
+
+      const buffers: number[] = []
+      textures.forEach((texture, index) => {
+        buffers.push(gl.COLOR_ATTACHMENT0 + index)
+
+        gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ...size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+
+        gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGBA8, ...size)
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + index, gl.TEXTURE_2D, texture, 0)
+      })
+      gl.drawBuffers(buffers)
+
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, ...size)
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer)
+    }
   }
 
   clear() {

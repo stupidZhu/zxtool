@@ -1,19 +1,12 @@
-import { cloneDeep, isNil, isPlainObject, merge } from "lodash"
-import { IKey, IObj, IOption } from "../../type"
-import TreeUtil from "./TreeUtil"
-
-const hashCacheKey = (cacheKey: any[]): string => {
-  return JSON.stringify(cacheKey, (_, val) =>
-    isPlainObject(val)
-      ? Object.keys(val)
-          .sort()
-          .reduce((result, key) => {
-            result[key] = val[key]
-            return result
-          }, {} as any)
-      : val,
-  )
-}
+import { isNil } from "lodash"
+import { IObj, Num2 } from "../../type"
+import * as ArrUtil from "./ArrUtil"
+import * as DecoratorsUtil from "./DecoratorsUtil"
+import * as NumUtil from "./NumUtil"
+import * as ObjUtil from "./ObjUtil"
+import * as StrUtil from "./StrUtil"
+import { hashCacheKey } from "./StrUtil"
+import * as TreeUtil from "./TreeUtil"
 
 const addCacheWrapper = <T extends (...rest: any[]) => any>(func: T): T => {
   const cache: IObj = {}
@@ -24,31 +17,6 @@ const addCacheWrapper = <T extends (...rest: any[]) => any>(func: T): T => {
     cache[key] = (func as unknown as Function)(...rest)
     return cache[key]
   } as T
-}
-
-const genSetRefObjFunc = <T extends IObj>(obj: { current: T }) => {
-  return (val: Partial<T> | ((v: T) => T)) => {
-    if (typeof val === "function") obj.current = val(obj.current)
-    else obj.current = merge(obj.current, val)
-  }
-}
-
-const genSetObjFunc = <T extends IObj>(obj: T) => {
-  return (val: Partial<T> | ((v: T) => void)) => {
-    if (typeof val === "function") val(obj)
-    else merge(obj, val)
-  }
-}
-
-const parseJson = <T = any>(json: string, preventLog = false): T | null => {
-  let res: T | null = null
-  if (!json) return res
-  try {
-    res = JSON.parse(json)
-  } catch (e) {
-    !preventLog && console.error(e)
-  }
-  return res
 }
 
 const getDom = (id: string, option: { className?: string; tag?: keyof HTMLElementTagNameMap } = {}) => {
@@ -76,88 +44,6 @@ const abortablePromise = <T>(promise: Promise<T>) => {
     }),
     abortController,
   }
-}
-
-interface ClearEmptyValOption<T> {
-  /** 是否移除空字符串 */
-  clearEmptyStr?: boolean
-  /** 如果是字符串是否调用 trim 移除空格 */
-  clearSpace?: boolean
-  /** 返回：true - 该字段保留；false - 该字段移除 */
-  customCb?: <K extends keyof T>(k: K, v: T[K]) => boolean
-}
-const clearEmptyVal = <T extends {} = IObj>(obj: T, option: ClearEmptyValOption<T> = {}) => {
-  const { clearEmptyStr = true, clearSpace = true, customCb } = option
-  if (!isPlainObject(obj)) return obj
-  const newObj = cloneDeep(obj)
-
-  const condition = (k: string, v: unknown) => {
-    if (v === undefined || v === null || v === "$$") return false
-    if (clearEmptyStr && v === "") return false
-    if (customCb) return customCb(k as any, v)
-    return true
-  }
-
-  Object.entries(newObj).forEach(([k, v]) => {
-    if (clearSpace && typeof v === "string") newObj[k] = v.trim()
-    if (!condition(k, newObj[k])) Reflect.deleteProperty(newObj, k)
-  })
-
-  return newObj
-}
-
-const toOptions = {
-  arr2options<T extends IKey>(arr: T[]): IOption<T, T>[] {
-    return arr.map(item => ({ label: item, value: item }))
-  },
-  enum2options(e: Record<IKey, IKey>) {
-    const keys = Object.keys(e).filter(item => Number.isNaN(+item))
-    return keys.map(item => ({ value: e[item], label: item }))
-  },
-}
-
-/** 求差集 第一个减去第二个 */
-const subSet = <T = IKey>(arr1: T[], arr2: T[]): T[] => {
-  const set1 = new Set(arr1)
-  const set2 = new Set(arr2)
-  const result: T[] = []
-
-  set1.forEach(item => {
-    if (!set2.has(item)) result.push(item)
-  })
-
-  return result
-}
-
-const union = <T = IKey>(arr1: T[], arr2: T[]) => {
-  const set1 = new Set(arr1)
-  const set2 = new Set(arr2)
-  const result: T[] = []
-
-  set1.forEach(item => {
-    if (set2.has(item)) result.push(item)
-  })
-
-  return result
-}
-
-const genMap = <T extends IObj>(map: T) => {
-  return new Proxy(map, {
-    get(target, prop: string) {
-      if (!prop) return
-      return target[prop] ?? prop
-    },
-  })
-}
-
-const removeStr = (str: string, config: { removeStart?: string; removeEnd?: string }) => {
-  const { removeStart, removeEnd } = config
-  if (!removeStart && !removeEnd) return str
-  const regStrList = []
-  removeStart && regStrList.push(`^(${removeStart})+`)
-  removeEnd && regStrList.push(`(${removeEnd})+$`)
-  const reg = new RegExp(regStrList.join("|"), "g")
-  return str.replace(reg, "")
 }
 
 /**
@@ -193,34 +79,27 @@ const getValueUtil = {
   },
 }
 
-function mapOrSetFilter<T>(target: Set<T>, cb: (v: T) => boolean): Set<T>
-function mapOrSetFilter<T, K>(target: Map<K, T>, cb: (v: T) => boolean): Map<K, T>
-function mapOrSetFilter<T, K>(target: Map<K, T> | Set<T>, cb: (v: T) => boolean) {
-  if (target instanceof Map) {
-    const map = new Map()
-    for (const [key, value] of target) cb(value) && map.set(key, value)
-    return map
-  }
-  const set = new Set()
-  for (const item of target) cb(item) && set.add(item)
-  return set
+const lineFn = (P1: Num2, P2: Num2) => {
+  // (y-y1)/(y2-y1) = (x-x1)/(x2-x1)
+  const [x1, y1] = P1
+  const [x2, y2] = P2
+  const deltaX = x2 - x1
+  const deltaY = y2 - y1
+  const getX = (y: number) => ((y - y1) * deltaX) / deltaY + x1
+  const getY = (x: number) => ((x - x1) * deltaY) / deltaX + y1
+  return { getX, getY }
 }
 
 export const CommonUtil = {
-  hashCacheKey,
   addCacheWrapper,
   abortablePromise,
-  genSetRefObjFunc,
-  genSetObjFunc,
-  parseJson,
   getDom,
-  clearEmptyVal,
-  toOptions,
-  subSet,
-  union,
-  genMap,
-  removeStr,
+  lineFn,
   getValueUtil,
-  mapOrSetFilter,
+  ...DecoratorsUtil,
+  ...ArrUtil,
+  ...ObjUtil,
+  ...StrUtil,
+  ...NumUtil,
   ...TreeUtil,
 }

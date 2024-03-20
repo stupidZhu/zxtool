@@ -428,6 +428,9 @@ importers:
       '@rollup/plugin-node-resolve':
         specifier: ^13.3.0
         version: 13.3.0(rollup@2.79.0)
+      '@rollup/plugin-typescript':
+        specifier: ^11.1.6
+        version: 11.1.6(rollup@2.79.0)(typescript@5.3.2)
       '@types/lodash':
         specifier: ^4.14.185
         version: 4.14.202
@@ -437,9 +440,6 @@ importers:
       '@types/rollup-plugin-auto-external':
         specifier: ^2.0.2
         version: 2.0.2
-      esbuild:
-        specifier: ^0.15.7
-        version: 0.15.7
       eslint:
         specifier: ^8.24.0
         version: 8.55.0
@@ -836,6 +836,9 @@ importers:
       delaunator:
         specifier: ^5.0.0
         version: 5.0.0
+      earcut:
+        specifier: ^2.2.4
+        version: 2.2.4
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
@@ -881,6 +884,9 @@ importers:
       three:
         specifier: ^0.158.0
         version: 0.158.0
+      three-subdivide:
+        specifier: ^1.1.5
+        version: 1.1.5(three@0.158.0)
       web-ifc-three:
         specifier: ^0.0.126
         version: 0.0.126(three@0.158.0)
@@ -888,6 +894,9 @@ importers:
       '@types/delaunator':
         specifier: ^5.0.2
         version: 5.0.2
+      '@types/earcut':
+        specifier: ^2.1.4
+        version: 2.1.4
       '@types/geojson':
         specifier: ^7946.0.13
         version: 7946.0.13
@@ -4364,6 +4373,25 @@ packages:
       rollup: 2.79.0
     dev: true
 
+  /@rollup/plugin-typescript@11.1.6(rollup@2.79.0)(typescript@5.3.2):
+    resolution: {integrity: sha512-R92yOmIACgYdJ7dJ97p4K69I8gg6IEHt8M7dUBxN3W6nrO8uUxX5ixl0yU/N3aZTi8WhPuICvOHXQvF6FaykAA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^2.14.0||^3.0.0||^4.0.0
+      tslib: '*'
+      typescript: '>=3.7.0'
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+      tslib:
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@2.79.0)
+      resolve: 1.22.8
+      rollup: 2.79.0
+      typescript: 5.3.2
+    dev: true
+
   /@rollup/pluginutils@3.1.0(rollup@2.79.0):
     resolution: {integrity: sha512-GksZ6pr6TpIjHm8h9lSQ8pi8BE9VeubNT0OMJ3B5uZJ8pz73NPiqOtCog/x2/QzM1ENChPKxMDhiQuRHsqc+lg==}
     engines: {node: '>= 8.0.0'}
@@ -4386,6 +4414,21 @@ packages:
 
   /@rollup/pluginutils@5.0.5(rollup@2.79.0):
     resolution: {integrity: sha512-6aEYR910NyP73oHiJglti74iRyOwgFU4x3meH/H8OJx6Ry0j6cOVZ5X/wTvub7G7Ao6qaHBEaNsV3GLJkSsF+Q==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@types/estree': 1.0.2
+      estree-walker: 2.0.2
+      picomatch: 2.3.1
+      rollup: 2.79.0
+    dev: true
+
+  /@rollup/pluginutils@5.1.0(rollup@2.79.0):
+    resolution: {integrity: sha512-XTIWOPPcpvyKI6L1NHo0lFlCyznUEyPmPY1mc3KpPVDYulHSTvyeLNVW00QTLIAFNhR3kYnJTQHeGqU4M3n09g==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -6086,6 +6129,10 @@ packages:
 
   /@types/delaunator@5.0.2:
     resolution: {integrity: sha512-lqBrFSZT+7NYMtz454avpNJaAJYz4TAxsR99HOYqZLXYTduPYjpcmm8BonGGHXsE3L67yk5qO6qxKcrHpxXPMA==}
+    dev: true
+
+  /@types/earcut@2.1.4:
+    resolution: {integrity: sha512-qp3m9PPz4gULB9MhjGID7wpo3gJ4bTGXm7ltNDsmOvsPduTeHp8wSW9YckBj3mljeOh4F0m2z/0JKAALRKbmLQ==}
     dev: true
 
   /@types/eslint-scope@3.7.5:
@@ -19535,7 +19582,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
       shallowequal: 1.1.0
       stylis: 4.3.0
-      tslib: 2.5.0
+      tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -19937,6 +19984,14 @@ packages:
       three: 0.158.0
     dev: false
 
+  /three-subdivide@1.1.5(three@0.158.0):
+    resolution: {integrity: sha512-eEWMevrsHIMnC1xbsZSQZIB8QBr8XeXZhTSAdYrLm3ZC/yTdR4ocOZ2Qi+gEyPJFOt3iirQ+SQR0jCamk7e6FQ==}
+    peerDependencies:
+      three: '>= 0.125.0'
+    dependencies:
+      three: 0.158.0
+    dev: false
+
   /three@0.158.0:
     resolution: {integrity: sha512-TALj4EOpdDPF1henk2Q+s17K61uEAAWQ7TJB68nr7FKxqwyDr3msOt5IWdbGm4TaWKjrtWS8DJJWe9JnvsWOhQ==}
 
@@ -20126,6 +20181,10 @@ packages:
 
   /tslib@2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
+
+  /tslib@2.6.2:
+    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: true
 
   /tsutils@3.21.0(typescript@5.3.2):
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}

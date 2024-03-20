@@ -13,6 +13,7 @@ group: WebGL
 
 ```ts
 const lookAt = (eye: Vector3, target: Vector3, up: Vector3) => {
+  // z 轴方向和视线方向相反, 这里不是 target - eye
   const zAxis = new Vector3().subVectors(eye, target).normalize()
   const xAxis = new Vector3().crossVectors(up, zAxis).normalize()
   //基向量 yAxis，修正上方向

@@ -98,11 +98,15 @@ export const rayIntersectPlane = (P1: Vector3, v: Vector3, P2: Vector3, n: Vecto
   // 2: n·(P - P2) = 0
   // => n·(P1 + t*v - P2) = 0
   // => t = (n·P2 - n·P1)/(n·v)
-  // 若 t >= 0, 则射线与平面相交，且交点为 P(P1 + t*v), 若t < 0, 则不相交
-  // 若 t = Infinity, 则射线与平面平行
 
-  const t = (n.clone().dot(P2) - n.clone().dot(P1)) / n.clone().dot(v)
-  if (t < 0 || !Number.isFinite(t)) return null
+  const dotV = n.clone().dot(v)
+  // dotV === 0 射线与平面平行
+  // dotV > 0 射线与平面背面相交
+  if (dotV >= 0) return null
+
+  const t = (n.clone().dot(P2) - n.clone().dot(P1)) / dotV
+  // 平面与射线反方向相交
+  if (t < 0) return null
   const P = P1.clone().add(v.clone().multiplyScalar(t))
   return P
 }
@@ -114,6 +118,22 @@ export const rayIntersectPlane = (P1: Vector3, v: Vector3, P2: Vector3, n: Vecto
 
 ```ts
 /**
+ * 射线和球是否相交
+ * @param P 射线起点
+ * @param v 射线方向
+ * @param O 圆心
+ * @param r 半径
+ */
+export const isRayIntersectSphere = (P: Vector3, v: Vector3, O: Vector3, r: number) => {
+  const po = O.clone().sub(P)
+  const pe_len = po.clone().dot(v)
+  const oe_len = Math.sqrt(po.length() ** 2 - pe_len ** 2)
+  return oe_len <= r
+}
+```
+
+```ts
+/**
  * 射线和球的交点
  * @param P 射线起点
  * @param v 射线方向
@@ -121,30 +141,69 @@ export const rayIntersectPlane = (P1: Vector3, v: Vector3, P2: Vector3, n: Vecto
  * @param r 半径
  */
 export const rayIntersectSphere = (P: Vector3, v: Vector3, O: Vector3, r: number) => {
-  // cos(∠OPE) = len(PE)/len(PO) 求出 PE 长度
-  // sin(∠OPE) = len(OE)/len(PO) 求出 OE 长度
-  // 勾股定理 求出 P1E 长度
-  // t = len(PE)-len(P1E) | len(PE)+len(P1E)
-
   const po = O.clone().sub(P)
-  const po_l = po.length()
-  const po_n = po.clone().normalize()
+  const pe_len = po.clone().dot(v)
 
-  const sin = v.clone().cross(po_n).length()
-  const oe_l = po_l * sin
-  if (oe_l > r) return null
+  const oe_len = Math.sqrt(po.length() ** 2 - pe_len ** 2)
 
-  const cos = po_n.clone().dot(v)
-  if (cos <= 0) return null // 只可能在射线反方向相交
-  const pe_l = po_l * cos
+  // 没有交点
+  if (oe_len > r) return []
 
-  const p1e_l = Math.sqrt(r ** 2 - oe_l ** 2)
-
-  if (p1e_l <= 1e-5) {
-    return [P.clone().add(v.clone().multiplyScalar(pe_l))]
+  // 当作只有一个交点(相切)
+  if (Math.abs(r - oe_len) < 1e-5) {
+    const t = pe_len
+    return [{ t: t, point: P.clone().add(v.clone().multiplyScalar(t)) }]
   }
 
-  return [P.clone().add(v.clone().multiplyScalar(pe_l - p1e_l)), P.clone().add(v.clone().multiplyScalar(pe_l + p1e_l))]
+  // 有两个交点
+  const p1e_len = Math.sqrt(r ** 2 - oe_len ** 2)
+
+  const t1 = pe_len - p1e_len
+  const t2 = pe_len + p1e_len
+
+  return [
+    { t: t1, point: P.clone().add(v.clone().multiplyScalar(t1)) },
+    { t: t2, point: P.clone().add(v.clone().multiplyScalar(t2)) },
+  ]
+}
+```
+
+## 射线和三角面的交点
+
+[直线与三角形相交Moller Trumbore算法推导](https://www.blurredcode.com/2020/04/%E7%9B%B4%E7%BA%BF%E4%B8%8E%E4%B8%89%E8%A7%92%E5%BD%A2%E7%9B%B8%E4%BA%A4moller-trumbore%E7%AE%97%E6%B3%95%E6%8E%A8%E5%AF%BC/)
+
+![Moller Trumbore算法](./img/mt.jpg)
+
+```ts
+/**
+ *
+ * @param triangle 由三个Vector3组成的三角形
+ * @param P 射线起点
+ * @param v 射线方向
+ */
+export const rayIntersectTriangle = (triangle: Vector3[], P: Vector3, v: Vector3) => {
+  const [A, B, C] = triangle
+  const e1 = B.clone().sub(A)
+  const e2 = C.clone().sub(A)
+  const s = P.clone().sub(A)
+  const s1 = v.clone().cross(e2)
+  const s2 = s.clone().cross(e1)
+
+  const dotV = s1.clone().dot(e1)
+  // dotV === 0 射线和三角面平行
+  // dotV < 0 射线和三角面背面相交
+  if (dotV <= 0) return null
+
+  const [t, b, c] = [s2.clone().dot(e2), s1.clone().dot(s), s2.clone().dot(v)].map(item => item * (1 / dotV))
+  // 三角形与射线反方向相交
+  if (t < 0) return null
+
+  const a = 1 - b - c
+
+  // 点不在三角形内部
+  if (a < 0 || a > 1 || b < 0 || b > 1 || c < 0 || c > 1) return null
+
+  return { t, a, b, c, point: P.clone().add(v.clone().multiplyScalar(t)) }
 }
 ```
 

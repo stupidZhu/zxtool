@@ -3,7 +3,7 @@ import { IKey, IObj } from "../../type"
 
 // 广度优先
 export type BFSOptions = { childrenStr?: string }
-const bfsTree = <T = any>(tree: T[], cb: (item: T) => void | boolean, options: BFSOptions = {}) => {
+export const bfsTree = <T = any>(tree: T[], cb: (item: T) => void | boolean, options: BFSOptions = {}) => {
   const { childrenStr = "children" } = options
   const queue = [...tree]
   while (queue.length > 0) {
@@ -26,7 +26,7 @@ const dfsTree1 = <T = any>(tree: T[], cb: (item: T) => void, options: DFSOptions
   _dfs(tree, cb)
 }
 
-const dfsTree = <T = any>(tree: T[], cb: (item: T) => void | boolean, options: DFSOptions = {}) => {
+export const dfsTree = <T = any>(tree: T[], cb: (item: T) => void | boolean, options: DFSOptions = {}) => {
   const { childrenStr = "children" } = options
   const stack = [...tree]
   while (stack.length > 0) {
@@ -42,7 +42,7 @@ export interface TreeTransformOptions {
   childrenStr?: string
 }
 
-const TreeTransform = {
+export const TreeTransform = {
   pid2children<T = IObj>(data: T[], options: TreeTransformOptions = {}) {
     const { idStr = "id", pidStr = "pid", childrenStr = "children" } = options
     const map = {},
@@ -76,10 +76,4 @@ const TreeTransform = {
     _flatTreeArr(data, options)
     return resArr
   },
-}
-
-export default {
-  bfsTree,
-  dfsTree,
-  TreeTransform,
 }

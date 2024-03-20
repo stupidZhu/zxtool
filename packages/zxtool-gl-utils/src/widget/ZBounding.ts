@@ -1,21 +1,28 @@
 import { Matrix4, Vector3 } from "@zxtool/three-math"
 import { Num3 } from "@zxtool/utils"
 
-export interface BoundingPoints {
+export interface BoundingInfos {
   minx?: Num3
   _minx?: Num3
+  minxIndex?: number
   miny?: Num3
   _miny?: Num3
+  minyIndex?: number
   minz?: Num3
   _minz?: Num3
+  minzIndex?: number
   maxx?: Num3
   _maxx?: Num3
+  maxxIndex?: number
   maxy?: Num3
   _maxy?: Num3
+  maxyIndex?: number
   maxz?: Num3
   _maxz?: Num3
+  maxzIndex?: number
   r?: Num3
   _r?: Num3
+  rIndex?: number
 }
 
 /**
@@ -38,7 +45,7 @@ export class ZBounding {
   height: number = 0
   depth: number = 0
 
-  points: BoundingPoints = {}
+  infos: BoundingInfos = {}
 
   constructor(vertices?: number[][], modelMat?: Matrix4) {
     vertices && this.update(vertices, modelMat)
@@ -51,7 +58,7 @@ export class ZBounding {
 
     const keys = ["minx", "miny", "minz", "maxx", "maxy", "maxz", "r"]
     keys.forEach(key => {
-      this.points[`_${key}`] = this.points[key]
+      this.infos[`_${key}`] = this.infos[key]
     })
   }
 
@@ -60,33 +67,39 @@ export class ZBounding {
     this.vertices = vertices
     this.modelMat = modelMat
 
-    const { min, max, points, center } = this
+    const { min, max, infos, center } = this
 
-    vertices.forEach(item => {
+    vertices.forEach((item, index) => {
       const [x = 0, y = 0, z = 0] = item
       if (x < min[0]) {
         min[0] = x
-        points.minx = [x, y, z]
+        infos.minx = [x, y, z]
+        infos.minxIndex = index
       }
       if (x > max[0]) {
         max[0] = x
-        points.maxx = [x, y, z]
+        infos.maxx = [x, y, z]
+        infos.maxxIndex = index
       }
       if (y < min[1]) {
         min[1] = y
-        points.miny = [x, y, z]
+        infos.miny = [x, y, z]
+        infos.minyIndex = index
       }
       if (y > max[1]) {
         max[1] = y
-        points.maxy = [x, y, z]
+        infos.maxy = [x, y, z]
+        infos.maxyIndex = index
       }
       if (z < min[2]) {
         min[2] = z
-        points.minz = [x, y, z]
+        infos.minz = [x, y, z]
+        infos.minzIndex = index
       }
       if (z > max[2]) {
         max[2] = z
-        points.maxz = [x, y, z]
+        infos.maxz = [x, y, z]
+        infos.maxzIndex = index
       }
     })
 
@@ -98,13 +111,14 @@ export class ZBounding {
     this.height = max[1] - min[1]
     this.depth = max[2] - min[2]
 
-    for (const k in points) {
-      if (k === "r") continue
-      const point = points[k]
+    for (const k in infos) {
+      if (k === "r" || k === "_r") continue
+      const point = infos[k as keyof BoundingInfos]
+      if (!point || !Array.isArray(point)) continue
       const dis = Math.sqrt((center[0] - point[0]) ** 2 + (center[1] - point[1]) ** 2 + (center[1] - point[1]) ** 2)
       if (dis > this.r) {
         this.r = dis
-        points.r = point
+        infos.r = point
       }
     }
 
@@ -126,9 +140,9 @@ export class ZBounding {
 
     const pointsKeys = ["minx", "miny", "minz", "maxx", "maxy", "maxz", "r"]
     pointsKeys.forEach(key => {
-      const point = this.points[`_${key}`]
+      const point = this.infos[`_${key}`]
       const pointV3 = new Vector3(...point)
-      this.points[key] = [...pointV3.applyMatrix4(modelMat)] as Num3
+      this.infos[key] = [...pointV3.applyMatrix4(modelMat)] as Num3
     })
   }
 
@@ -144,7 +158,7 @@ export class ZBounding {
     this.width = 0
     this.height = 0
     this.depth = 0
-    this.points = {}
+    this.infos = {}
     this.vertices = []
     this.modelMat = undefined
   }

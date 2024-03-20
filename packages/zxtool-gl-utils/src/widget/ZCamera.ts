@@ -16,6 +16,7 @@ export interface CameraConfig {
   far?: number
   fov?: number
   aspect?: number
+  scale?: number
 }
 
 export class ZCamera {
@@ -57,15 +58,15 @@ export class ZCamera {
     return this.viewMat
   }
   updateProjMat() {
-    const { left, right, top, bottom, near, far, fov, aspect } = this.config
+    const { left, right, top, bottom, near, far, fov, aspect, scale = 1 } = this.config
 
     if (this.type === "Orthographic") {
       if (!isNil(left) && !isNil(right) && !isNil(top) && !isNil(bottom) && !isNil(near) && !isNil(far)) {
-        this.projMat = getOrthographicMat(left, right, top, bottom, near, far)
+        this.projMat = getOrthographicMat(left, right, top, bottom, near, far, scale)
       } else this.projMat = new Matrix4()
     } else if (this.type === "Perspective") {
       if (!isNil(fov) && !isNil(aspect) && !isNil(near) && !isNil(far)) {
-        this.projMat = getPerspectiveMat(fov, aspect, near, far)
+        this.projMat = getPerspectiveMat(fov, aspect, near, far, scale)
       } else this.projMat = new Matrix4()
     }
 

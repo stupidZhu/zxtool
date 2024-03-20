@@ -23,13 +23,13 @@ export class MouseEventPlugin implements CesiumHelperPlugin {
         const fn = entity.__customField?.onClick
         if (typeof fn === "function") {
           this.clearClick?.()
-          fn(entity!, raw)
+          fn(entity!, raw, position)
         }
       } else if (primitive) {
         const fn = primitive.__customField?.onClick
         if (typeof fn === "function") {
           this.clearClick?.()
-          fn(primitive!, raw)
+          fn(primitive!, raw, position)
         }
       }
     },

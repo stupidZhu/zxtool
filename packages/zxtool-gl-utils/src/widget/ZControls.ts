@@ -4,6 +4,7 @@ import { isNil } from "lodash"
 import { ZCamera } from "./ZCamera"
 
 export type ControlsState = "move" | "rotate" | "none"
+export type OnChangeFunc = (camera: ZCamera, controls: ZControls) => void
 
 export class ZControls {
   private camera: ZCamera
@@ -17,18 +18,29 @@ export class ZControls {
 
   moveAxis: "x" | "y" | "xy" = "xy"
   rotateAxis: "x" | "y" | "xy" = "xy"
+
   zoomStep = 0.05
+  zoomType: "move" | "scale" = "move"
+  zoomRange: Num2 = [0, Infinity]
 
   enableMove = true
   enableScale = true
   enableRotate = true
 
-  onChange?: (camera: ZCamera, controls: ZControls) => void
+  private _onChange?: OnChangeFunc
+  get onChange() {
+    return this._onChange
+  }
+  set onChange(fn: OnChangeFunc | undefined) {
+    this._onChange = fn
+    fn?.(this.camera, this)
+  }
 
   constructor(camera: ZCamera, canvas: HTMLCanvasElement) {
     this.camera = camera
     this.canvas = canvas
 
+    this.zoomType = camera.type === "Orthographic" ? "scale" : "move"
     this.initEvent()
     this.update()
   }
@@ -59,7 +71,7 @@ export class ZControls {
   private move(offset: Num2) {
     if (!this.enableMove) return
     if (this.camera.type === "Perspective") this.movePCamera(offset)
-    if (this.camera.type === "Orthographic") this.moveOCamrea(offset)
+    if (this.camera.type === "Orthographic") this.moveOCamera(offset)
     this.update()
   }
   private movePCamera(offset: Num2) {
@@ -88,7 +100,7 @@ export class ZControls {
     eye.add(moveOffset)
     target.add(moveOffset)
   }
-  private moveOCamrea(offset: Num2) {
+  private moveOCamera(offset: Num2) {
     const { camera, canvas } = this
     const { mat } = camera
     const { eye, target, left, right, top, bottom } = camera.config
@@ -132,6 +144,11 @@ export class ZControls {
 
   private zoom(deltaY: number) {
     if (!this.enableScale) return
+    if (this.zoomType === "move") this.zoomByMove(deltaY)
+    if (this.zoomType === "scale") this.zoomByScale(deltaY)
+    this.update()
+  }
+  private zoomByMove(deltaY: number) {
     const { camera, zoomStep } = this
     const { eye, target } = camera.config
 
@@ -140,8 +157,14 @@ export class ZControls {
     const zoom = deltaY > 0 ? -zoomStep : zoomStep
     // * lerp 类似于 mix(eye, target, zoom)
     eye.lerp(target, zoom)
+  }
+  private zoomByScale(deltaY: number) {
+    const { camera, zoomStep, zoomRange } = this
 
-    this.update()
+    const scale = deltaY < 0 ? 1 + zoomStep : 1 - zoomStep
+    if (!camera.config.scale) camera.config.scale = 1
+    camera.config.scale = MathUtils.clamp(camera.config.scale * scale, ...zoomRange)
+    camera.updateProjMat()
   }
 
   update() {

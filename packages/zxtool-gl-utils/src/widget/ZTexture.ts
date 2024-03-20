@@ -1,44 +1,59 @@
-import { FileUtil } from "@zxtool/utils"
+import { CommonUtil, FileUtil } from "@zxtool/utils"
+
+const { onSet } = CommonUtil
+
+const setUpdate = onSet<ZTexture>({
+  after: tex => {
+    tex.needUpdate = true
+  },
+})
+const setUpdateAndLoaded = onSet<ZTexture>({
+  after: tex => {
+    tex.needUpdate = true
+    // @ts-ignore
+    tex.loaded = true
+  },
+})
 
 export class ZTexture {
-  private _path?: string
-  get path(): string | undefined {
-    return this._path
-  }
-  set path(p: string) {
-    this._path = p
-    this.load()
-  }
+  private anisotropicExt?: EXT_texture_filter_anisotropic
 
-  private _img?: TexImageSource
-  get img(): TexImageSource | undefined {
-    return this._img
-  }
-  set img(i: TexImageSource) {
-    this._img = i
-    this.needUpdate = true
-    this.loaded = true
-  }
+  @onSet<ZTexture>({ after: tex => tex.load() })
+  accessor path: string | null = null
 
-  private _texture?: WebGLTexture
-  get texture(): WebGLTexture | undefined {
-    return this._texture
-  }
-  set texture(i: WebGLTexture) {
-    this._texture = i
-    this.needUpdate = true
-    this.loaded = true
-  }
+  @setUpdateAndLoaded
+  accessor img: TexImageSource | null = null
 
-  flip = true
-  readonly configMap: Map<number, number> = new Map([
-    [0x2801, 0x2601], // gl.TEXTURE_MIN_FILTER, gl.LINEAR
-    [0x2800, 0x2601], // gl.TEXTURE_MAG_FILTER, gl.LINEAR
-    [0x2802, 0x812f], // gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE
-    [0x2803, 0x812f], // gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE
-  ])
+  @setUpdateAndLoaded
+  accessor texture: WebGLTexture | null = null
 
-  private loaded = false
+  @setUpdate
+  accessor mipmap = false
+
+  @setUpdate
+  accessor anisotropic = false
+
+  @setUpdate
+  accessor flip = true
+
+  readonly configMap = new Proxy(
+    new Map<number, number>([
+      [0x2801, 0x2601], // gl.TEXTURE_MIN_FILTER, gl.LINEAR
+      [0x2800, 0x2601], // gl.TEXTURE_MAG_FILTER, gl.LINEAR
+      [0x2802, 0x812f], // gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE
+      [0x2803, 0x812f], // gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE
+    ]),
+    {
+      get: (target, key, receiver) => {
+        if (key === "set" || key === "clear" || key === "delete") {
+          this.needUpdate = true
+        }
+        return Reflect.get(target, key, receiver).bind(target)
+      },
+    },
+  )
+
+  protected loaded = false
   needUpdate = true
   loadSucc?: (texture: ZTexture) => void
   loadFail?: (e: any, texture: ZTexture) => void
@@ -56,22 +71,31 @@ export class ZTexture {
       .then(img => {
         this.loadSucc?.(this)
         this.img = img
-        this.needUpdate = true
-        this.loaded = true
       })
       .catch(e => {
         this.loadFail?.(e, this)
+        throw e
       })
   }
 
-  updateConfig(gl: WebGLRenderingContext) {
+  updateConfig(gl: WebGL2RenderingContext) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.flip)
+    if (this.mipmap && this.img) {
+      gl.generateMipmap(gl.TEXTURE_2D)
+      this.configMap.set(gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+    }
+
+    if (!this.anisotropicExt) this.anisotropicExt = gl.getExtension("EXT_texture_filter_anisotropic")!
+    if (this.anisotropicExt && this.anisotropic) {
+      gl.texParameterf(gl.TEXTURE_2D, this.anisotropicExt.TEXTURE_MAX_ANISOTROPY_EXT, 4)
+    }
+
     this.configMap.forEach((v, k) => {
       gl.texParameteri(gl.TEXTURE_2D, k, v)
     })
   }
 
-  useTexture(gl: WebGLRenderingContext, location: WebGLUniformLocation, index: number) {
+  useTexture(gl: WebGL2RenderingContext, location: WebGLUniformLocation, index: number) {
     if (!this.texture) this.texture = gl.createTexture()!
     if (!this.loaded) return
 
@@ -80,10 +104,9 @@ export class ZTexture {
     gl.uniform1i(location, index)
 
     if (this.needUpdate) {
-      this.updateConfig(gl)
       this.img && gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img)
+      this.updateConfig(gl)
       this.needUpdate = false
-      return
     }
   }
 }
