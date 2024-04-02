@@ -23,6 +23,7 @@ export class ZControls {
   zoomType: "move" | "scale" = "move"
   zoomRange: Num2 = [0, Infinity]
 
+  enable = true
   enableMove = true
   enableScale = true
   enableRotate = true
@@ -49,6 +50,7 @@ export class ZControls {
     const { canvas } = this
     canvas.addEventListener("contextmenu", e => e.preventDefault())
     canvas.addEventListener("pointerdown", e => {
+      if (!this.enable) return
       if (e.button === 0) this.curState = this.leftBtn
       else if (e.button === 1) this.curState = this.middleBtn
       else if (e.button === 2) this.curState = this.rightBtn
@@ -58,11 +60,13 @@ export class ZControls {
       this.curState = "none"
     })
     canvas.addEventListener("pointermove", e => {
+      if (!this.enable) return (this.curState = "none")
       const { movementX, movementY } = e
       if (this.curState === "move") this.move([movementX, movementY])
       if (this.curState === "rotate") this.rotate([movementX, movementY])
     })
     canvas.addEventListener("wheel", e => {
+      if (!this.enable) return (this.curState = "none")
       e.preventDefault()
       this.zoom(e.deltaY)
     })

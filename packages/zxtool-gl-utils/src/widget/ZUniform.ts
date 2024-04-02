@@ -1,9 +1,12 @@
 import { isTypedArray as _isTypedArray, isNil } from "lodash"
-import { genZGUInfo } from "../util/util"
+import { genZGUMsg } from "../util/util"
+import type { ZGPProgram } from "./ZGPProgram"
+import { store } from "./ZGlobalStore"
+import type { ZProgram } from "./ZProgram"
 import { ZTexture } from "./ZTexture"
 import { ZUbo } from "./ZUbo"
 
-const genInfo = genZGUInfo("ZUniform")
+const genMsg = genZGUMsg("ZUniform")
 
 export type TypedArray =
   | Float32Array
@@ -17,11 +20,11 @@ export type TypedArray =
   | Float64Array
 const isTypedArray = (v: any): v is TypedArray => _isTypedArray(v)
 
-export type UniformSetType = "vec" | "matrix" | "int" | "float"
+export type UniformSetType = "vec" | "mat" | "int" | "float"
 export interface UseUniformProps {
   gl: WebGL2RenderingContext
   program: WebGLProgram
-  location: WebGLUniformLocation
+  zProgram: ZProgram | ZGPProgram
   index?: number
 }
 
@@ -31,15 +34,23 @@ export interface ZUniformOptions<T> {
   needUpdate?: boolean
 }
 
+export interface UniformInfo {
+  updated: boolean
+  location?: number | WebGLUniformLocation | null
+}
+
 /**
  * - 可以处理的类型: `ZTexture`, `ZUbo`, `number`, `boolean`, `number[]`, `number[][]`
  * - 如果存在 `options.getValueFunc`, 可以处理的类型为 `getValueFunc` 的返回值, 否则为 `data` 的类型
- * - 如果类型为 `number[]` 或者 `number[][]`, 则必须传入 `options.type`, 且值为 `"vec" | "matrix"`
+ * - 如果类型为 `number[]` 或者 `number[][]`, 则必须传入 `options.type`, 且值为 `"vec" | "mat"`
  */
 export class ZUniform<T = any> {
   readonly name: string
-  readonly options: ZUniformOptions<T>
-  private updated = false
+  readonly type?: UniformSetType
+  readonly getValueFunc?: (data: T) => unknown
+
+  needUpdate = true
+  private uniformInfos: WeakMap<ZProgram | ZGPProgram, UniformInfo> = new WeakMap()
 
   private _data!: T
   get data() {
@@ -64,20 +75,51 @@ export class ZUniform<T = any> {
   constructor(name: string, data: T, options: ZUniformOptions<T> = {}) {
     this.name = name
     this.data = data
-    this.options = options
+    const { type, getValueFunc, needUpdate = true } = options
+    this.type = type
+    this.getValueFunc = getValueFunc
+    this.needUpdate = needUpdate
   }
 
-  useUniform(props: UseUniformProps) {
-    const { gl, program, location, index } = props
-    const { getValueFunc, needUpdate = true, type } = this.options
-    if (!needUpdate && this.updated) return
+  getData() {
+    return this.getValueFunc?.(this.data) ?? this.data
+  }
 
-    const value = getValueFunc?.(this.data) ?? this.data
+  private getUniformLocation(gl: WebGL2RenderingContext, program: WebGLProgram, zProgram: ZProgram | ZGPProgram) {
+    const debugMode = zProgram.debugMode ?? store.debugMode
+    const { name: programName } = zProgram
+    const { name, isUbo } = this
+
+    let info = this.uniformInfos.get(zProgram)!
+    if (!info) {
+      this.uniformInfos.set(zProgram, { updated: false })
+      info = this.uniformInfos.get(zProgram)!
+    }
+
+    if (info.location === undefined) {
+      const location = isUbo ? gl.getUniformBlockIndex(program, name) : gl.getUniformLocation(program, name)
+      if ((location === null || location === -1) && debugMode) {
+        console.log(genMsg(`${programName} 没有找到 name 为 ${name} 的 uniform`, "warn"))
+      }
+      info.location = location
+    }
+
+    return info.location
+  }
+
+  processUniform(props: UseUniformProps) {
+    const { gl, program, zProgram, index } = props
+    const { needUpdate, type } = this
+    if (!needUpdate && this.uniformInfos.get(zProgram)?.updated) return
+
+    const location = this.getUniformLocation(gl, program, zProgram)
+    if (location === -1 || isNil(location)) return
+
+    const value = this.getData()
     if (isNil(value)) return
 
-    textureChain.run({ gl, program, location, value, updated: this.updated, index, type })
-
-    this.updated = true
+    textureChain.run({ gl, program, location, value, updated: this.uniformInfos.get(zProgram)!.updated, index, type })
+    this.uniformInfos.get(zProgram)!.updated = true
   }
 }
 
@@ -119,7 +161,7 @@ const uboChain = new UniformChain(params => {
   const { gl, program, location, value, index, updated } = params
   if (value instanceof ZUbo && !isNil(index)) {
     if (!updated) gl.uniformBlockBinding(program, location as number, index)
-    value.useUbo(gl, index)
+    value.processUbo(gl, index)
   } else return false
 })
 
@@ -135,11 +177,11 @@ const arrayChain = new UniformChain(params => {
   const { gl, location, value, type, updated } = params
   if (isTypedArray(value) || Array.isArray(value)) {
     if (!type) {
-      if (!updated) console.error(genInfo("data 是数组的情况下, 需要传入 options.type"))
+      if (!updated) console.error(genMsg("data 是数组的情况下, 需要传入 options.type"))
       return
     }
     const first = value[0]
-    if (type === "matrix") {
+    if (type === "mat") {
       if (Array.isArray(first)) {
         const len = Math.trunc(Math.sqrt(first.length))
         const fn = `uniformMatrix${len}fv`
@@ -160,7 +202,7 @@ const arrayChain = new UniformChain(params => {
         gl[fn](location, value)
       }
     } else {
-      if (!updated) console.error(genInfo("data 是数组的情况下, options.type 只接受 'matrix' | 'vec'"))
+      if (!updated) console.error(genMsg("data 是数组的情况下, options.type 只接受 'mat' | 'vec'"))
       return
     }
   } else return false
@@ -168,7 +210,7 @@ const arrayChain = new UniformChain(params => {
 
 const unknownChain = new UniformChain(params => {
   const { value, updated } = params
-  if (!updated) console.error(genInfo("不支持的类型"), value)
+  if (!updated) console.error(genMsg("不支持的类型"), value)
 })
 
 textureChain.setNext(uboChain).setNext(numChain).setNext(arrayChain).setNext(unknownChain)

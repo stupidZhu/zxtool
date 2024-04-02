@@ -1,79 +1,43 @@
 import { Matrix4 } from "@zxtool/three-math"
 import { multiplyMats } from "../util"
-import { genZGUInfo } from "../util/util"
-import { AttributeItem, ZProgram } from "./ZProgram"
+import { ZAttribute } from "./ZAttribute"
+import { ZProgram } from "./ZProgram"
 
-const genInfo = genZGUInfo("ZInstanceProgram")
+const IdentityMat = new Matrix4()
 
-interface ModelMatsAttr extends Omit<AttributeItem, "data"> {
-  data: Matrix4[]
-}
-
-// todo: normalMat
 export class ZInstanceProgram extends ZProgram {
-  instanceCount: number
-  readonly modelMatsAttr: ModelMatsAttr
+  readonly instanceCount: number
   modelMatsNeedUpdate = true
+
+  readonly modelMats: Matrix4[] = []
+  private worldModelMats: Matrix4[] = []
+  private modelMatsZAttr: ZAttribute
 
   constructor(vs: string, fs: string, count: number) {
     super(vs, fs)
     this.instanceCount = count
-    this.modelMatsAttr = {
-      name: "a_modelMat",
-      data: Array.from(Array(this.instanceCount), () => new Matrix4()),
-    }
-  }
-
-  setModelMatAt(i: number, mat: Matrix4) {
-    const { modelMatsAttr } = this
-    modelMatsAttr.data[i] = mat
-    modelMatsAttr.bufferData = new Float32Array(modelMatsAttr.data.map(mat => mat.elements).flat())
-    return this
-  }
-
-  protected processAttrData() {
-    const { modelMatsAttr } = this
-    const { name, data } = modelMatsAttr
-    const { gl, program } = this.getProgram()
-
-    super.processAttrData()
-
-    if (modelMatsAttr.location === undefined) modelMatsAttr.location = gl.getAttribLocation(program, name)
-    if (modelMatsAttr.location === -1) {
-      return console.warn(genInfo(`${this.name} 没有找到 name 为 ${name} 的 attribute`))
-    }
-    if (!modelMatsAttr.buffer) modelMatsAttr.buffer = gl.createBuffer()!
-
-    modelMatsAttr.bufferData = new Float32Array(data.map(mat => mat.elements).flat())
-    const BYTES = Float32Array.BYTES_PER_ELEMENT
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, modelMatsAttr.buffer)
-    gl.bufferData(gl.ARRAY_BUFFER, modelMatsAttr.bufferData.byteLength, gl.DYNAMIC_DRAW)
-
-    for (let i = 0; i < 4; i++) {
-      const location = modelMatsAttr.location + i
-      const offset = BYTES * 4 * i // 每行 4 个数
-      gl.vertexAttribPointer(location, 4, gl.FLOAT, false, BYTES * 16, offset)
-      gl.enableVertexAttribArray(location)
-      gl.vertexAttribDivisor(location, 1)
-    }
+    this.modelMatsZAttr = new ZAttribute("a_modelMat", {
+      data: this.worldModelMats,
+      getValueFunc: v => v.map(mat => mat.elements),
+      isInstanceAttr: true,
+    })
+    this.addAttribute(this.modelMatsZAttr)
   }
 
   private updateModelMats() {
-    const { modelMatsAttr, parent } = this
-    const gl = this.getGl()
-
-    const modelWorldMats = modelMatsAttr.data.map(mat => {
-      return parent ? multiplyMats(parent.modelMat.world, mat) : mat
-    })
-    modelMatsAttr.bufferData = new Float32Array(modelWorldMats.map(mat => mat.elements).flat())
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, modelMatsAttr.buffer!)
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, modelMatsAttr.bufferData!)
+    const { parent, instanceCount, worldModelMats, modelMats, modelMatsZAttr } = this
+    for (let i = 0; i < instanceCount; i++) {
+      const mat = modelMats[i] ?? IdentityMat
+      worldModelMats[i] = parent ? multiplyMats(parent.modelMat.world, mat) : mat
+    }
+    modelMatsZAttr.needUpdate = true
   }
 
   render() {
     const {
+      gl,
+      program,
+      vao,
       count,
       instanceCount,
       parent,
@@ -84,15 +48,14 @@ export class ZInstanceProgram extends ZProgram {
       uniformNeedUpdate,
       modelMatsNeedUpdate,
     } = this
-    const { gl, program } = this.getProgram()
     if (!this.isShow()) return
     this.useProgram()
 
-    this.bindVAO()
+    gl.bindVertexArray(vao)
+    if (modelMatsNeedUpdate) this.updateModelMats()
     if (attrNeedUpdate) this.processAttrData()
     if (indexNeedUpdate) this.processIndies()
-    if (uniformNeedUpdate) this.updateUniform()
-    if (modelMatsNeedUpdate) this.updateModelMats()
+    if (uniformNeedUpdate) this.processUniform()
 
     this.beforeRender?.({ node: this, parent: parent!, scene: root!, gl, program })
 
@@ -101,6 +64,7 @@ export class ZInstanceProgram extends ZProgram {
     } else if (count.vertex) {
       renderTypes.forEach(type => gl.drawArraysInstanced(type, 0, count.vertex, instanceCount))
     }
+    gl.bindVertexArray(null)
 
     this.afterRender?.({ node: this, parent: parent!, scene: root!, gl, program })
 

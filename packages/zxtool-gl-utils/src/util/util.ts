@@ -1,4 +1,13 @@
-import { genInfo } from "@zxtool/utils/dist/util"
+import chalk from "chalk"
+import { curry } from "lodash"
 
-// @ts-ignore
-export const genZGUInfo = genInfo("@zxtool/gl-utils")
+export type MsgType = "error" | "warn" | "info" | "success"
+const msgColorMap = { error: "red", warn: "yellow", info: "blue", success: "green" }
+
+const genMsg = curry((mainModule: string, subModule: string, info: string, type: MsgType | undefined) => {
+  let moduleInfo = `[${mainModule} - ${subModule}]`
+  if (type) moduleInfo = chalk[msgColorMap[type]](moduleInfo)
+  return `${moduleInfo} ${info}`
+})
+
+export const genZGUMsg = genMsg("@zxtool/gl-utils")

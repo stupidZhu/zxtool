@@ -1,32 +1,22 @@
-import { Matrix4 } from "@zxtool/three-math"
 import { CommonUtil } from "@zxtool/utils"
-import { isNil } from "lodash"
 import { createProgram } from "../util"
-import { genZGUInfo } from "../util/util"
+import { genZGUMsg } from "../util/util"
 import { GLNode } from "./GLNode"
+import { ZAttribute } from "./ZAttribute"
 import { ZBounding } from "./ZBounding"
-import type { ZScene } from "./ZScene"
+import { store } from "./ZGlobalStore"
 import { ZUniform } from "./ZUniform"
+import type { ZGeom } from "./geometry"
 
-const genInfo = genZGUInfo("ZProgram")
+const genMsg = genZGUMsg("ZProgram")
 
-interface RenderHookProps {
+export interface RenderHookProps {
   node: ZProgram
-  parent: GLNode | ZScene
-  scene: ZScene
   gl: WebGL2RenderingContext
   program: WebGLProgram
 }
 export type RenderHook = (props: RenderHookProps) => void
-export type ShowCondition = (bounding: ZBounding, programHelper: ZProgram) => boolean
-
-export interface AttributeItem {
-  name: string
-  data: number[][]
-  buffer?: WebGLBuffer
-  location?: number
-  bufferData?: Float32Array
-}
+export type ShowCondition = (program: ZProgram) => boolean
 
 export interface IndexData {
   data?: number[] | null
@@ -34,87 +24,75 @@ export interface IndexData {
   bufferData?: Uint16Array
 }
 
-export interface ProgramOptions {
-  vs?: string
-  fs?: string
-  program?: WebGLProgram
-}
-
 export class ZProgram extends GLNode {
   readonly vs: string
   readonly fs: string
 
-  private programKey: PropertyKey
-  private vao?: WebGLVertexArrayObject
+  protected program!: WebGLProgram
+  protected programKey!: PropertyKey
+  protected vao!: WebGLVertexArrayObject
 
-  readonly attrData: Map<string, AttributeItem> = new Map()
   readonly indexData: IndexData = {}
   readonly count = { vertex: 0, index: 0 }
 
+  readonly attrData: Map<string, ZAttribute> = new Map()
+
   readonly uniformData: Map<string, ZUniform> = new Map()
-  private innerUniform = {
-    u_modelMat: new ZUniform("u_modelMat", new Matrix4(), { getValueFunc: data => data.elements, type: "matrix" }),
-    u_normalMat: new ZUniform("u_normalMat", new Matrix4(), { getValueFunc: data => data.elements, type: "matrix" }),
-  }
-  // 因为 ZUniform 有可能是共用的, 所以不方便把 location 存在 ZUniform 里面
-  private uniformLocation: Record<string, WebGLUniformLocation | number | null> = {}
 
   readonly bounding = new ZBounding()
+  autoUpdateBounding = false
 
-  show = true
-  attrNeedUpdate = false
   indexNeedUpdate = false
+  attrNeedUpdate = true
   uniformNeedUpdate = true
-  transparent = false
   renderTypes = [0x0004] // gl.TRIANGLES
   beforeRender?: RenderHook
   afterRender?: RenderHook
   showCondition?: ShowCondition
 
+  transparent = false
+  // depthWrite = true
+  // depthTest = true
+
   constructor(vs: string, fs: string) {
     super()
     this.vs = vs
     this.fs = fs
+    this.init()
+  }
+
+  protected init() {
+    const { gl, vs, fs } = this
+    const { programMap } = store
     this.programKey = CommonUtil.hashStr(`${vs}\n${fs}`)
-  }
-
-  getProgram() {
-    const gl = this.getGl()
-    const programMap = this.root?.store.programMap
-    if (!programMap) throw new Error(genInfo(`请检查是否将此 zProgram(${this.name}) 插入到了 scene 中`))
-
     if (!programMap.has(this.programKey)) programMap.set(this.programKey, createProgram(gl, this.vs, this.fs))
-    return { gl, program: programMap.get(this.programKey)! }
+    this.program = programMap.get(this.programKey)!
+    this.vao = gl.createVertexArray()!
+
+    this.addUniform(new ZUniform("u_modelMat", this.modelMat, { getValueFunc: v => v.world.elements, type: "mat" }))
+    this.addUniform(
+      new ZUniform("u_normalMat", this.modelMat, {
+        getValueFunc: v => v.world.clone().invert().transpose().elements,
+        type: "mat",
+      }),
+    )
   }
 
-  addAttribute(name: string, data: number[][]) {
-    this.attrNeedUpdate = true
-    this.attrData.set(name, { name, data })
+  setGeom(geom: ZGeom) {
+    geom.setProgramGeom(this)
+    return this
+  }
+
+  addAttribute(attribute: ZAttribute) {
+    this.attrData.set(attribute.name, attribute)
     return this
   }
   protected processAttrData() {
-    const { attrData } = this
-    const { gl, program } = this.getProgram()
+    const { gl, program, attrData } = this
 
-    this.attrNeedUpdate = false
-
-    attrData.forEach(item => {
-      const { name, data } = item
-
-      if (item.location === undefined) item.location = gl.getAttribLocation(program, name)
-      if (item.location === -1) {
-        return console.warn(genInfo(`${this.name} 没有找到 name 为 ${name} 的 attribute`))
-      }
-      if (!item.buffer) item.buffer = gl.createBuffer()!
-
-      item.bufferData = new Float32Array(data.flat())
-      const BYTES = Float32Array.BYTES_PER_ELEMENT
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, item.buffer)
-      gl.bufferData(gl.ARRAY_BUFFER, item.bufferData, gl.STATIC_DRAW)
-      gl.vertexAttribPointer(item.location, data[0].length, gl.FLOAT, false, BYTES * data[0].length, 0)
-      gl.enableVertexAttribArray(item.location)
-      this.count.vertex = data.length
+    attrData.forEach(zAttr => {
+      const count = zAttr.processAttr({ gl, program, zProgram: this })
+      if (count && !zAttr.isInstanceAttr) this.count.vertex = count
     })
   }
 
@@ -124,8 +102,7 @@ export class ZProgram extends GLNode {
     return this
   }
   protected processIndies() {
-    const { indexData } = this
-    const gl = this.getGl()
+    const { gl, indexData } = this
 
     this.indexNeedUpdate = false
 
@@ -143,102 +120,62 @@ export class ZProgram extends GLNode {
     this.uniformData.set(uniform.name, uniform)
     return this
   }
-  protected getUniformLocation(uniform: ZUniform) {
-    const { name, isUbo } = uniform
-    const { gl, program } = this.getProgram()
-
-    if (this.uniformLocation[name] === undefined) {
-      const location = isUbo ? gl.getUniformBlockIndex(program, name) : gl.getUniformLocation(program, name)
-      if (location === null) console.warn(genInfo(`${this.name} 没有找到 name 为 ${name} 的 uniform`))
-      this.uniformLocation[name] = location
-    }
-    return this.uniformLocation[name]
-  }
-  protected updateUniform() {
-    const { root, modelMat, innerUniform } = this
-    const { u_modelMat, u_normalMat } = innerUniform
-    const { gl, program } = this.getProgram()
+  protected processUniform() {
+    const { gl, program, root } = this
     let textureIndex = -1
     let uboBindingPoint = -1
+    const zUniforms: ZUniform[] = [...(root?.uniformData.values() ?? []), ...this.uniformData.values()]
 
-    // globalUniform
-    root?.uniformData.forEach(zUniform => {
-      const location = this.getUniformLocation(zUniform)
-      if (!isNil(location)) {
-        let index = 0
-        if (zUniform.isTexture) index = ++textureIndex
-        if (zUniform.isUbo) index = ++uboBindingPoint
-        zUniform.useUniform({ gl, program, location, index })
-      }
+    zUniforms.forEach(zUniform => {
+      let index = 0
+      if (zUniform.isTexture) index = ++textureIndex
+      if (zUniform.isUbo) index = ++uboBindingPoint
+      zUniform.processUniform({ gl, program, zProgram: this, index })
     })
-    // localUniform
-    this.uniformData.forEach(zUniform => {
-      const location = this.getUniformLocation(zUniform)
-      if (!isNil(location)) {
-        let index = 0
-        if (zUniform.isTexture) index = ++textureIndex
-        if (zUniform.isUbo) index = ++uboBindingPoint
-        zUniform.useUniform({ gl, program, location, index })
-      }
-    })
-
-    // innerUniform
-    // isShow 里面执行过 this.updateWorldMat()
-    {
-      const location = this.getUniformLocation(u_modelMat)
-      u_modelMat.data = modelMat.world
-      location && u_modelMat.useUniform({ gl, program, location })
-    }
-    {
-      const location = this.getUniformLocation(u_normalMat)
-      if (location) {
-        u_normalMat.data = modelMat.world.clone().invert().transpose()
-        u_normalMat.useUniform({ gl, program, location })
-      }
-    }
   }
 
-  updateBounding() {
-    const vertices = this.attrData.get("a_position")?.data
-    if (!vertices) return console.error(genInfo("请先设置 a_position, updateBounding 失败"))
-    this.updateWorldMat()
+  updateBounding(logErr = false) {
+    const aPos = this.attrData.get("a_position")
+    const vertices = aPos?.getData()
+    if (!vertices) {
+      if (logErr) console.error(genMsg("没有找到 a_position 的 data, updateBounding 失败"))
+      return
+    }
     this.bounding.update(vertices, this.modelMat.world)
     return this
   }
 
   protected isShow() {
-    const { show, showCondition } = this
+    const { show, autoUpdateBounding, destroyed, showCondition } = this
+    if (destroyed) return console.warn(genMsg(`${this.name} 已经被销毁, 不能执行 render`, "error"))
     if (show === false) return false
-    this.updateBounding()
-    return showCondition?.(this.bounding, this) ?? true
+
+    this.updateWorldMat()
+
+    autoUpdateBounding && this.updateBounding()
+    return showCondition?.(this) ?? true
   }
 
   protected useProgram() {
-    const { gl, program } = this.getProgram()
-    const currentProgram = this.root!.store.currentProgram
+    const { gl, program } = this
+    const currentProgram = store.currentProgram
     if (program !== currentProgram) {
-      this.root!.store.currentProgram = program
+      store.currentProgram = program
       gl.useProgram(program)
     }
-  }
-  protected bindVAO() {
-    const gl = this.getGl()
-    if (!this.vao) this.vao = gl.createVertexArray()!
-    gl.bindVertexArray(this.vao)
   }
 
   render() {
     if (!this.isShow()) return
-    const { count, parent, root, renderTypes, attrNeedUpdate, indexNeedUpdate, uniformNeedUpdate } = this
-    const { gl, program } = this.getProgram()
+    const { gl, program, vao, count, renderTypes, attrNeedUpdate, indexNeedUpdate, uniformNeedUpdate } = this
     this.useProgram()
 
-    this.bindVAO()
+    gl.bindVertexArray(vao)
     if (attrNeedUpdate) this.processAttrData()
     if (indexNeedUpdate) this.processIndies()
-    if (uniformNeedUpdate) this.updateUniform()
+    if (uniformNeedUpdate) this.processUniform()
 
-    this.beforeRender?.({ node: this, parent: parent!, scene: root!, gl, program })
+    this.beforeRender?.({ node: this, gl, program })
 
     if (count.index) {
       renderTypes.forEach(type => gl.drawElements(type, count.index, gl.UNSIGNED_SHORT, 0))
@@ -246,8 +183,27 @@ export class ZProgram extends GLNode {
       renderTypes.forEach(type => gl.drawArrays(type, 0, count.vertex))
     }
 
-    this.afterRender?.({ node: this, parent: parent!, scene: root!, gl, program })
+    this.afterRender?.({ node: this, gl, program })
+
+    gl.bindVertexArray(null)
 
     super.renderChildren()
+  }
+
+  _render(initiator?: GLNode) {}
+
+  destroy() {
+    const { gl, vao } = this
+    gl.deleteVertexArray(vao)
+    // @ts-ignore
+    this.indexData = {}
+    this.count.vertex = 0
+    this.count.index = 0
+    this.attrData.clear()
+    this.uniformData.clear()
+    this.beforeRender = undefined
+    this.afterRender = undefined
+    this.showCondition = undefined
+    super.destroy()
   }
 }

@@ -116,7 +116,7 @@ export class ZBounding {
       const point = infos[k as keyof BoundingInfos]
       if (!point || !Array.isArray(point)) continue
       const dis = Math.sqrt((center[0] - point[0]) ** 2 + (center[1] - point[1]) ** 2 + (center[1] - point[1]) ** 2)
-      if (dis > this.r) {
+      if (dis >= this.r) {
         this.r = dis
         infos.r = point
       }

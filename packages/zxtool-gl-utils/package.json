@@ -46,6 +46,7 @@
   "dependencies": {
     "@zxtool/three-math": "workspace:*",
     "@zxtool/utils": "workspace:*",
+    "chalk": "^5.3.0",
     "lodash": "^4.17.21"
   }
 }

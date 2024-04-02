@@ -15,6 +15,18 @@ const setUpdateAndLoaded = onSet<ZTexture>({
   },
 })
 
+export interface TexturePixels {
+  data: ArrayBufferView
+  texImage2DFn: (gl: WebGL2RenderingContext, data: ArrayBufferView) => void
+}
+
+export interface ZTextureProps {
+  path?: string
+  img?: TexImageSource
+  texture?: WebGLTexture
+  pixels?: TexturePixels
+}
+
 export class ZTexture {
   private anisotropicExt?: EXT_texture_filter_anisotropic
 
@@ -26,6 +38,9 @@ export class ZTexture {
 
   @setUpdateAndLoaded
   accessor texture: WebGLTexture | null = null
+
+  @setUpdateAndLoaded
+  accessor pixels: TexturePixels | null = null
 
   @setUpdate
   accessor mipmap = false
@@ -58,11 +73,12 @@ export class ZTexture {
   loadSucc?: (texture: ZTexture) => void
   loadFail?: (e: any, texture: ZTexture) => void
 
-  constructor(props: { path?: string; img?: TexImageSource; texture?: WebGLTexture }) {
-    const { path, img, texture } = props
+  constructor(props: ZTextureProps) {
+    const { path, img, texture, pixels } = props
     if (path) this.path = path
     if (img) this.img = img
     if (texture) this.texture = texture
+    if (pixels) this.pixels = pixels
   }
 
   private async load() {
@@ -96,15 +112,17 @@ export class ZTexture {
   }
 
   useTexture(gl: WebGL2RenderingContext, location: WebGLUniformLocation, index: number) {
+    const { loaded, img, pixels } = this
     if (!this.texture) this.texture = gl.createTexture()!
-    if (!this.loaded) return
+    if (!loaded) return
 
     gl.activeTexture(gl.TEXTURE0 + index)
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.uniform1i(location, index)
 
     if (this.needUpdate) {
-      this.img && gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img)
+      if (pixels) pixels.texImage2DFn(gl, pixels.data)
+      else if (img) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
       this.updateConfig(gl)
       this.needUpdate = false
     }
