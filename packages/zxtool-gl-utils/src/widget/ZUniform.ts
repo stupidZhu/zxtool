@@ -42,7 +42,8 @@ export interface UniformInfo {
 /**
  * - 可以处理的类型: `ZTexture`, `ZUbo`, `number`, `boolean`, `number[]`, `number[][]`
  * - 如果存在 `options.getValueFunc`, 可以处理的类型为 `getValueFunc` 的返回值, 否则为 `data` 的类型
- * - 如果类型为 `number[]` 或者 `number[][]`, 则必须传入 `options.type`, 且值为 `"vec" | "mat"`
+ * - 如果类型为 `number[]` 或者 `number[][]`, 则必
+ * 须传入 `options.type`, 且值为 `"vec" | "mat"`
  */
 export class ZUniform<T = any> {
   readonly name: string
@@ -177,7 +178,7 @@ const arrayChain = new UniformChain(params => {
   const { gl, location, value, type, updated } = params
   if (isTypedArray(value) || Array.isArray(value)) {
     if (!type) {
-      if (!updated) console.error(genMsg("data 是数组的情况下, 需要传入 options.type"))
+      if (!updated) console.error(genMsg("data 是数组的情况下, 需要传入 options.type", "error"))
       return
     }
     const first = value[0]
@@ -202,7 +203,7 @@ const arrayChain = new UniformChain(params => {
         gl[fn](location, value)
       }
     } else {
-      if (!updated) console.error(genMsg("data 是数组的情况下, options.type 只接受 'mat' | 'vec'"))
+      if (!updated) console.error(genMsg("data 是数组的情况下, options.type 只接受 'mat' | 'vec'", "error"))
       return
     }
   } else return false

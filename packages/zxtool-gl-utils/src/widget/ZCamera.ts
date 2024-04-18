@@ -51,7 +51,6 @@ export class ZCamera {
 
     if (eye && target && up) {
       this.mat = lookAt(eye, target, up)
-      // const realUp = new Vector3(0, 1, 0).applyMatrix4(this.mat)
       this.viewMat = this.mat.clone().invert()
     } else this.viewMat = new Matrix4()
 

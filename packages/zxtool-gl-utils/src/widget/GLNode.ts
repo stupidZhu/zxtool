@@ -1,13 +1,17 @@
 import { Matrix4 } from "@zxtool/three-math"
+import { FileUtil } from "@zxtool/utils"
 import { multiplyMats } from "../util"
 import { genZGUMsg } from "../util/util"
+import { TRS } from "./TRS"
 import { store } from "./ZGlobalStore"
 import type { ZScene } from "./ZScene"
 
 const genMsg = genZGUMsg("GLNode")
 
+const pixelData = new Uint8Array(4)
+
 export class GLNode {
-  name = "unnamed"
+  name = "GLNode"
   debugMode?: boolean
   show = true
 
@@ -17,6 +21,7 @@ export class GLNode {
   readonly gl: WebGL2RenderingContext
 
   readonly children: GLNode[] = []
+  trs?: TRS
   readonly modelMat: { local: Matrix4; world: Matrix4 } = { local: new Matrix4(), world: new Matrix4() }
 
   readonly destroyed = false
@@ -34,12 +39,14 @@ export class GLNode {
     this.gl = store.gl
   }
 
-  add(child: GLNode) {
-    this.children.push(child)
-    // @ts-ignore
-    child.parent = this
+  add(...children: GLNode[]) {
+    children.forEach(child => {
+      this.children.push(child)
+      // @ts-ignore
+      child.parent = this
+      if (this.root) child.updateRoot(this.root)
+    })
     this.resortChildren()
-    if (this.root) child.updateRoot(this.root)
     return this
   }
   remove(child: GLNode) {
@@ -61,44 +68,57 @@ export class GLNode {
 
   setModelMat(mat: Matrix4) {
     this.modelMat.local = mat
+    this.trs?.setFromMat(mat)
     return this
   }
   updateWorldMat() {
-    const { modelMat, parent } = this
-    modelMat.world = parent ? multiplyMats(parent.modelMat.world, modelMat.local) : modelMat.local
+    const { modelMat, trs, parent } = this
+    const localMat = trs?.getMat() ?? modelMat.local
+    modelMat.world = parent ? multiplyMats(parent.modelMat.world, localMat) : localMat
   }
 
-  renderChildren() {
-    const { gl, children } = this
+  protected renderChildren(initiator?: GLNode) {
+    const { children } = this
     if (!children.length) return
-
-    const tChildren: GLNode[] = []
 
     children.forEach(child => {
       if (child.destroyed) {
         this.remove(child)
-        console.warn(genMsg(`${child.name} 已经被销毁, 不能执行 render`))
+        console.warn(genMsg(`${child.name} 已经被销毁, 不能执行 render`, "error"))
         return
       }
       if (!child.show) return
-      // @ts-ignore
-      if (child.transparent) tChildren.push(child)
-      else child.render()
+      child.render(initiator)
     })
-
-    // todo: child的child渲染之后会重置 BLEND 为 false
-    gl.depthMask(false)
-    gl.enable(gl.BLEND)
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-    tChildren.forEach(child => child.render())
-    gl.depthMask(true)
-    gl.disable(gl.BLEND)
   }
 
-  render() {
-    if (this.destroyed) return console.warn(genMsg(`${this.name} 已经被销毁, 不能执行 render`))
+  screenshot(name?: string) {
+    this.render()
+    const canvas = this.gl.canvas as HTMLCanvasElement
+    const fileName = name ? `${name}.png` : `${this.name}-${Date.now()}.png`
+    canvas.toBlob(blob => FileUtil.downloadFile(blob!, fileName), "image/png")
+  }
+  readPixel(e: MouseEvent) {
+    const { gl } = this
+    const canvas = gl.canvas as HTMLCanvasElement
+    this.render()
+    gl.readPixels(
+      e.offsetX * devicePixelRatio,
+      (canvas.clientHeight - e.offsetY) * devicePixelRatio,
+      1,
+      1,
+      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT),
+      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE),
+      pixelData,
+    )
+    return [...pixelData]
+  }
+
+  render(initiator?: GLNode) {
+    if (this.destroyed) return console.warn(genMsg(`${this.name} 已经被销毁, 不能执行 render`, "error"))
+    if (!this.show) return
     this.updateWorldMat()
-    this.renderChildren()
+    this.renderChildren(initiator)
   }
 
   destroy() {

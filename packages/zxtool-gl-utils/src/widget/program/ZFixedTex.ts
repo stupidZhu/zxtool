@@ -13,7 +13,7 @@ const setUpdate = onSet<ZFixedTex>({
   },
 })
 
-const vs = `#version 300 es
+const _vs = `#version 300 es
 in vec4 a_position;
 in vec2 a_uv;
 uniform mat4 u_modelMat;
@@ -24,7 +24,7 @@ void main(){
   gl_Position = u_modelMat * vec4(a_position.xy, -1.0, 1.0);
 }`
 
-const fs = `#version 300 es
+const _fs = `#version 300 es
 precision lowp float;
 in vec2 v_uv;
 uniform sampler2D u_tex;
@@ -45,6 +45,12 @@ const positionMap: Record<FixedTexPosition, Num2> = {
   BOTTOM_RIGHT: [1, -1],
 }
 
+export interface ZFixedTexProps {
+  texName?: string
+  vs?: string
+  fs?: string
+}
+
 export class ZFixedTex extends ZProgram {
   @setUpdate
   accessor padding: number = 0.01
@@ -55,14 +61,17 @@ export class ZFixedTex extends ZProgram {
   @setUpdate
   accessor position: FixedTexPosition = "TOP_LEFT"
 
-  constructor() {
+  constructor(props: ZFixedTexProps = {}) {
+    // eslint-disable-next-line prefer-const
+    let { texName, vs = _vs, fs = _fs } = props
+    if (texName) fs = fs.replaceAll("u_tex", texName)
     super(vs, fs)
     this._init()
   }
 
   private _init() {
     this.name = "ZFixedTex"
-    this.transparent = true
+    // this.transparent = true
     this.setGeom(plane).setModelMat(this.calcModelMat())
   }
 

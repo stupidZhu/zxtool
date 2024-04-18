@@ -1,3 +1,5 @@
 export * from "./ZAxis"
+export * from "./ZBillboard"
 export * from "./ZFixedTex"
+export * from "./ZLineBox"
 export * from "./ZQuad"

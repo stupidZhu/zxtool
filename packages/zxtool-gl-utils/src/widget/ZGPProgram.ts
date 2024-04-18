@@ -91,12 +91,12 @@ export class ZGPProgram {
     const buffer = this.buffers[i]
     const size =
       this.bufferMode === 0x8c8c ? this.tfVaryings.reduce((prev, cur) => prev + cur.perSize, 0) : this.tfVaryings[i].perSize
-    if (!buffer || !size) throw new Error(genMsg(`索引为 ${i} 的 buffer 不存在`))
+    if (!buffer || !size) throw new Error(genMsg(`索引为 ${i} 的 buffer 不存在`, "error"))
     return getBufferContent(store.gl, buffer, this.count * size)
   }
 
-  addAttribute(attribute: ZAttribute) {
-    this.attrData.set(attribute.name, attribute)
+  addAttribute(...attributes: ZAttribute[]) {
+    attributes.forEach(attribute => this.attrData.set(attribute.name, attribute))
     return this
   }
   protected processAttrData() {
@@ -110,8 +110,8 @@ export class ZGPProgram {
     this.updateTransformFeedBackBuffer()
   }
 
-  addUniform(uniform: ZUniform) {
-    this.uniformData.set(uniform.name, uniform)
+  addUniform(...uniforms: ZUniform[]) {
+    uniforms.forEach(uniform => this.uniformData.set(uniform.name, uniform))
     return this
   }
   private processUniform() {
@@ -119,7 +119,9 @@ export class ZGPProgram {
     let textureIndex = -1
     let uboBindingPoint = -1
 
-    this.uniformData.forEach(zUniform => {
+    const zUniforms: ZUniform[] = [...store.uniformData.values(), ...this.uniformData.values()]
+
+    zUniforms.forEach(zUniform => {
       let index = 0
       if (zUniform.isTexture) index = ++textureIndex
       if (zUniform.isUbo) index = ++uboBindingPoint

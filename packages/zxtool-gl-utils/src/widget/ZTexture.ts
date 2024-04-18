@@ -1,4 +1,7 @@
 import { CommonUtil, FileUtil } from "@zxtool/utils"
+import { genZGUMsg } from "../util/util"
+
+const genMsg = genZGUMsg("ZTexture")
 
 const { onSet } = CommonUtil
 
@@ -51,6 +54,9 @@ export class ZTexture {
   @setUpdate
   accessor flip = true
 
+  @setUpdate
+  accessor premultiplyAlpha = false
+
   readonly configMap = new Proxy(
     new Map<number, number>([
       [0x2801, 0x2601], // gl.TEXTURE_MIN_FILTER, gl.LINEAR
@@ -90,12 +96,11 @@ export class ZTexture {
       })
       .catch(e => {
         this.loadFail?.(e, this)
-        throw e
+        throw new Error(genMsg(`图片加载失败: ${this.path}`, undefined))
       })
   }
 
   updateConfig(gl: WebGL2RenderingContext) {
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.flip)
     if (this.mipmap && this.img) {
       gl.generateMipmap(gl.TEXTURE_2D)
       this.configMap.set(gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
@@ -112,17 +117,21 @@ export class ZTexture {
   }
 
   useTexture(gl: WebGL2RenderingContext, location: WebGLUniformLocation, index: number) {
-    const { loaded, img, pixels } = this
-    if (!this.texture) this.texture = gl.createTexture()!
+    const { loaded, img, pixels, flip, premultiplyAlpha } = this
     if (!loaded) return
 
+    if (!this.texture) this.texture = gl.createTexture()!
     gl.activeTexture(gl.TEXTURE0 + index)
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.uniform1i(location, index)
 
     if (this.needUpdate) {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip)
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha)
+
       if (pixels) pixels.texImage2DFn(gl, pixels.data)
       else if (img) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+
       this.updateConfig(gl)
       this.needUpdate = false
     }

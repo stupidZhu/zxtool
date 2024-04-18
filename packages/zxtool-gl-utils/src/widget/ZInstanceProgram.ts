@@ -16,6 +16,7 @@ export class ZInstanceProgram extends ZProgram {
   constructor(vs: string, fs: string, count: number) {
     super(vs, fs)
     this.instanceCount = count
+    this.name = "ZInstanceProgram"
     this.modelMatsZAttr = new ZAttribute("a_modelMat", {
       data: this.worldModelMats,
       getValueFunc: v => v.map(mat => mat.elements),
@@ -33,7 +34,7 @@ export class ZInstanceProgram extends ZProgram {
     modelMatsZAttr.needUpdate = true
   }
 
-  render() {
+  protected _render() {
     const {
       gl,
       program,
@@ -48,9 +49,8 @@ export class ZInstanceProgram extends ZProgram {
       uniformNeedUpdate,
       modelMatsNeedUpdate,
     } = this
-    if (!this.isShow()) return
-    this.useProgram()
 
+    this.useProgram()
     gl.bindVertexArray(vao)
     if (modelMatsNeedUpdate) this.updateModelMats()
     if (attrNeedUpdate) this.processAttrData()
@@ -58,16 +58,12 @@ export class ZInstanceProgram extends ZProgram {
     if (uniformNeedUpdate) this.processUniform()
 
     this.beforeRender?.({ node: this, parent: parent!, scene: root!, gl, program })
-
     if (count.index) {
       renderTypes.forEach(type => gl.drawElementsInstanced(type, count.index, gl.UNSIGNED_SHORT, 0, instanceCount))
     } else if (count.vertex) {
       renderTypes.forEach(type => gl.drawArraysInstanced(type, 0, count.vertex, instanceCount))
     }
-    gl.bindVertexArray(null)
-
     this.afterRender?.({ node: this, parent: parent!, scene: root!, gl, program })
-
-    super.renderChildren()
+    gl.bindVertexArray(null)
   }
 }

@@ -18,12 +18,14 @@ export const isEqual = (a: number, b: number, precision = 1e-5) => {
   return Math.abs(a - b) < precision
 }
 
-export function mix(a: number, b: number, t: number): number
-export function mix(a: number[], b: number[], t: number): number[]
-export function mix<T extends number | number[]>(a: T, b: T, t: number): T {
+export function mix(a: number, b: number, t: number, clamp?: boolean): number
+export function mix(a: number[], b: number[], t: number, clamp?: boolean): number[]
+export function mix<T extends number | number[]>(a: T, b: T, t: number, clamp?: boolean): T {
   const mixNum = (a: number, b: number, t: number) => {
-    if (t <= 0) return a
-    if (t >= 1) return b
+    if (clamp) {
+      if (t <= 0) return a
+      if (t >= 1) return b
+    }
     return a * (1 - t) + b * t
   }
   if (Array.isArray(a) && Array.isArray(b)) {

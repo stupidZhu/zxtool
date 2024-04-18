@@ -19,7 +19,9 @@ export class ZRenderer {
 
   readonly renderQueue: RenderFunc[] = []
   readonly resizeQueue: ResizeFunc[] = []
+
   needUpdate = true
+  quality = 1
 
   private frameTime?: number
   private prevTime: number = -Infinity
@@ -32,20 +34,34 @@ export class ZRenderer {
   }
 
   private render(time: number) {
-    const { gl, renderQueue, resizeQueue } = this
-    resizeViewport(gl, (width, height) => resizeQueue.forEach(fn => fn(width, height)))
+    const { gl, renderQueue, resizeQueue, quality } = this
+    resizeViewport({
+      gl,
+      cb(width, height) {
+        resizeQueue.forEach(fn => fn(width, height))
+      },
+      quality,
+    })
     renderQueue.forEach(fn => fn(time))
   }
 
   private loop(time: number) {
+    const { timeObj } = store
     const { needUpdate, frameTime } = this
 
+    const render = () => {
+      timeObj.frameCount++
+      timeObj.deltaTime = time - timeObj.time
+      timeObj.time = time
+      this.render(time)
+    }
+
     if (needUpdate) {
-      if (!frameTime) this.render(time)
+      if (!frameTime) render()
       else {
         const deltaTime = time - this.prevTime
         if (deltaTime >= frameTime) {
-          this.render(time)
+          render()
           this.prevTime = time
         }
       }

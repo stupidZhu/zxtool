@@ -51,8 +51,6 @@ export class ZProgram extends GLNode {
   showCondition?: ShowCondition
 
   transparent = false
-  // depthWrite = true
-  // depthTest = true
 
   constructor(vs: string, fs: string) {
     super()
@@ -64,13 +62,14 @@ export class ZProgram extends GLNode {
   protected init() {
     const { gl, vs, fs } = this
     const { programMap } = store
+    this.name = "ZProgram"
     this.programKey = CommonUtil.hashStr(`${vs}\n${fs}`)
     if (!programMap.has(this.programKey)) programMap.set(this.programKey, createProgram(gl, this.vs, this.fs))
     this.program = programMap.get(this.programKey)!
     this.vao = gl.createVertexArray()!
 
-    this.addUniform(new ZUniform("u_modelMat", this.modelMat, { getValueFunc: v => v.world.elements, type: "mat" }))
     this.addUniform(
+      new ZUniform("u_modelMat", this.modelMat, { getValueFunc: v => v.world.elements, type: "mat" }),
       new ZUniform("u_normalMat", this.modelMat, {
         getValueFunc: v => v.world.clone().invert().transpose().elements,
         type: "mat",
@@ -82,9 +81,20 @@ export class ZProgram extends GLNode {
     geom.setProgramGeom(this)
     return this
   }
+  cloneData(program: ZProgram) {
+    this.modelMat.local = program.modelMat.local
+    this.modelMat.world = program.modelMat.world
+    this.trs = program.trs
 
-  addAttribute(attribute: ZAttribute) {
-    this.attrData.set(attribute.name, attribute)
+    program.indexData.data && this.setIndies(program.indexData.data)
+    program.attrData.forEach(attr => this.addAttribute(attr))
+    program.uniformData.forEach(uniform => this.addUniform(uniform))
+
+    return this
+  }
+
+  addAttribute(...attributes: ZAttribute[]) {
+    attributes.forEach(attribute => this.attrData.set(attribute.name, attribute))
     return this
   }
   protected processAttrData() {
@@ -116,15 +126,19 @@ export class ZProgram extends GLNode {
     this.count.index = indexData.bufferData.length
   }
 
-  addUniform(uniform: ZUniform) {
-    this.uniformData.set(uniform.name, uniform)
+  addUniform(...uniforms: ZUniform[]) {
+    uniforms.forEach(uniform => this.uniformData.set(uniform.name, uniform))
     return this
   }
   protected processUniform() {
     const { gl, program, root } = this
     let textureIndex = -1
     let uboBindingPoint = -1
-    const zUniforms: ZUniform[] = [...(root?.uniformData.values() ?? []), ...this.uniformData.values()]
+    const zUniforms: ZUniform[] = [
+      ...store.uniformData.values(),
+      ...(root?.uniformData.values() ?? []),
+      ...this.uniformData.values(),
+    ]
 
     zUniforms.forEach(zUniform => {
       let index = 0
@@ -148,7 +162,7 @@ export class ZProgram extends GLNode {
   protected isShow() {
     const { show, autoUpdateBounding, destroyed, showCondition } = this
     if (destroyed) return console.warn(genMsg(`${this.name} 已经被销毁, 不能执行 render`, "error"))
-    if (show === false) return false
+    if (!show) return false
 
     this.updateWorldMat()
 
@@ -165,17 +179,45 @@ export class ZProgram extends GLNode {
     }
   }
 
-  render() {
-    if (!this.isShow()) return
-    const { gl, program, vao, count, renderTypes, attrNeedUpdate, indexNeedUpdate, uniformNeedUpdate } = this
-    this.useProgram()
+  render(initiator?: GLNode) {
+    const { transparent } = this
+    const { isRenderingTransparent } = store
 
+    // 手动渲染或者非透明阶段, 判断可见性
+    if (!initiator || !isRenderingTransparent) {
+      // 在 isShow 里面更新了矩阵
+      if (!this.isShow()) return
+    }
+
+    // 手动调用 ZProgram.render, 而不是通过 Scene 调度
+    if (!initiator) {
+      this._render()
+      super.renderChildren(initiator)
+      return
+    }
+
+    // 非透明物体
+    if (!transparent) {
+      if (!isRenderingTransparent) this._render()
+      super.renderChildren(initiator)
+    }
+
+    // 透明物体
+    if (transparent) {
+      if (isRenderingTransparent) this._render()
+      super.renderChildren(initiator)
+    }
+  }
+
+  protected _render() {
+    const { gl, program, vao, count, renderTypes, attrNeedUpdate, indexNeedUpdate, uniformNeedUpdate } = this
+
+    this.beforeRender?.({ node: this, gl, program })
+    this.useProgram()
     gl.bindVertexArray(vao)
     if (attrNeedUpdate) this.processAttrData()
     if (indexNeedUpdate) this.processIndies()
     if (uniformNeedUpdate) this.processUniform()
-
-    this.beforeRender?.({ node: this, gl, program })
 
     if (count.index) {
       renderTypes.forEach(type => gl.drawElements(type, count.index, gl.UNSIGNED_SHORT, 0))
@@ -183,14 +225,9 @@ export class ZProgram extends GLNode {
       renderTypes.forEach(type => gl.drawArrays(type, 0, count.vertex))
     }
 
-    this.afterRender?.({ node: this, gl, program })
-
     gl.bindVertexArray(null)
-
-    super.renderChildren()
+    this.afterRender?.({ node: this, gl, program })
   }
-
-  _render(initiator?: GLNode) {}
 
   destroy() {
     const { gl, vao } = this

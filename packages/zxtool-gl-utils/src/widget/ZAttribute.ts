@@ -26,9 +26,16 @@ export interface CustomBuffer {
   perSize: number
 }
 
+export interface SizeBuffer {
+  count: number
+  perSize: number
+  buffer?: WebGLBuffer
+}
+
 export interface ZAttributeOptions<T> {
   data?: T
   customBuffer?: CustomBuffer
+  sizeBuffer?: Omit<SizeBuffer, "buffer">
   isInstanceAttr?: boolean
   getValueFunc?: (data: T) => number[][]
 }
@@ -53,16 +60,20 @@ export class ZAttribute<T = any> {
   @setUpdate
   accessor customBuffer: CustomBuffer | null = null
 
+  @setUpdate
+  accessor sizeBuffer: SizeBuffer | null = null
+
   readonly isInstanceAttr: boolean
 
   needUpdate = true
   private attrInfos: WeakMap<ZProgram | ZGPProgram, AttrInfo> = new WeakMap()
 
   constructor(name: string, options: ZAttributeOptions<T>) {
-    const { data, customBuffer, isInstanceAttr = false, getValueFunc } = options
+    const { data, customBuffer, sizeBuffer, isInstanceAttr = false, getValueFunc } = options
     this.name = name
     if (data) this.dataBuffer = { data, getValueFunc }
     if (customBuffer) this.customBuffer = customBuffer
+    if (sizeBuffer) this.sizeBuffer = sizeBuffer
     this.isInstanceAttr = isInstanceAttr
   }
 
@@ -94,7 +105,7 @@ export class ZAttribute<T = any> {
 
   processAttr(props: ProcessAttrProps) {
     const { gl, program, zProgram } = props
-    const { dataBuffer, customBuffer, isInstanceAttr } = this
+    const { dataBuffer, customBuffer, sizeBuffer, isInstanceAttr } = this
     if (!this.needUpdate && this.attrInfos.get(zProgram)?.updated) return 0
     this.needUpdate = false
 
@@ -102,29 +113,18 @@ export class ZAttribute<T = any> {
     if (location === -1) return 0
 
     let count = 0
+    let perSize = 0
     const BYTES = Float32Array.BYTES_PER_ELEMENT
 
     if (customBuffer) {
-      const { buffer, perSize } = customBuffer
+      const { buffer } = customBuffer
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
 
-      if (perSize > 4) {
-        for (let i = 0; i < Math.floor(perSize / 4); i++) {
-          const loc = location! + i
-          const offset = BYTES * 4 * i // 每行 4 个数
-          gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, BYTES * perSize, offset)
-          gl.enableVertexAttribArray(loc)
-          if (isInstanceAttr) gl.vertexAttribDivisor(loc, 1)
-        }
-      } else {
-        gl.vertexAttribPointer(location, perSize, gl.FLOAT, false, 0, 0)
-        gl.enableVertexAttribArray(location)
-        if (isInstanceAttr) gl.vertexAttribDivisor(location, 1)
-      }
-
+      perSize = customBuffer.perSize
       if (!isInstanceAttr) count = gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) / (customBuffer.perSize * BYTES)
     } else if (dataBuffer) {
       const data = this.getData()!
+      if (!data.length) return 0
       if (!dataBuffer.buffer) dataBuffer.buffer = gl.createBuffer()!
       dataBuffer.bufferData = new Float32Array(data.flat())
       const { buffer, bufferData } = dataBuffer
@@ -132,21 +132,30 @@ export class ZAttribute<T = any> {
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
       gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW)
 
-      const length0 = data[0].length
-      if (length0 > 4) {
-        for (let i = 0; i < Math.floor(length0 / 4); i++) {
-          const loc = location + i
-          const offset = BYTES * 4 * i // 每行 4 个数
-          gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, BYTES * length0, offset)
-          gl.enableVertexAttribArray(loc)
-          if (isInstanceAttr) gl.vertexAttribDivisor(loc, 1)
-        }
-      } else {
-        gl.vertexAttribPointer(location, data[0].length, gl.FLOAT, false, BYTES * data[0].length, 0)
-        gl.enableVertexAttribArray(location)
-        if (isInstanceAttr) gl.vertexAttribDivisor(location, 1)
+      perSize = data[0].length
+      if (!isInstanceAttr) count = data.length
+    } else if (sizeBuffer) {
+      if (!sizeBuffer.buffer) sizeBuffer.buffer = gl.createBuffer()!
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer.buffer)
+      gl.bufferData(gl.ARRAY_BUFFER, sizeBuffer.count * sizeBuffer.perSize * BYTES, gl.STATIC_DRAW)
+
+      perSize = sizeBuffer.perSize
+      if (!isInstanceAttr) count = sizeBuffer.count
+    }
+
+    if (perSize > 4) {
+      for (let i = 0; i < Math.floor(perSize / 4); i++) {
+        const loc = location! + i
+        const offset = BYTES * 4 * i // 每行 4 个数
+        gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, BYTES * perSize, offset)
+        gl.enableVertexAttribArray(loc)
+        if (isInstanceAttr) gl.vertexAttribDivisor(loc, 1)
       }
-      count = data.length
+    } else {
+      gl.vertexAttribPointer(location, perSize, gl.FLOAT, false, 0, 0)
+      gl.enableVertexAttribArray(location)
+      if (isInstanceAttr) gl.vertexAttribDivisor(location, 1)
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null)

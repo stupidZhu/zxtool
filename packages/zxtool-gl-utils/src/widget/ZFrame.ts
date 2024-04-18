@@ -1,12 +1,13 @@
-import { Num2 } from "@zxtool/utils"
+import { ITimer, Num2 } from "@zxtool/utils"
 import { store } from "./ZGlobalStore"
 import { ZScene } from "./ZScene"
 import { ZTexture } from "./ZTexture"
 
-type TexImage2DFn = (gl: WebGL2RenderingContext, size: Num2) => void
+const pixelData = new Uint8Array(4)
 
+export type TexImage2DFn = (gl: WebGL2RenderingContext, size: Num2) => void
 export class ZFrame extends ZScene {
-  _size: Num2 = [2048, 2048]
+  private _size: Num2 = [2048, 2048]
   get size() {
     return this._size
   }
@@ -27,11 +28,12 @@ export class ZFrame extends ZScene {
 
   needUpdate = false
   private updated = false
+  private resizeTimer: ITimer = null
 
   constructor(size?: Num2) {
     super()
     const { gl, canvas } = store
-    this.size = size ?? [canvas.clientWidth, canvas.clientHeight]
+    this.size = size ?? [canvas.width * devicePixelRatio, canvas.height * devicePixelRatio]
     this.gl = store.gl
     this.name = "ZFrame"
 
@@ -91,8 +93,15 @@ export class ZFrame extends ZScene {
   }
 
   private onResize() {
-    const { gl, size, updated, depthTexture } = this
-    if (!updated) return
+    const { gl, size, depthTexture } = this
+
+    if (!this.updated) {
+      this.resizeTimer && clearTimeout(this.resizeTimer)
+      this.resizeTimer = setTimeout(() => this.onResize())
+      return
+    }
+    this.resizeTimer = null
+
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, ...size)
     gl.bindTexture(gl.TEXTURE_2D, depthTexture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, ...size, 0, gl.DEPTH_COMPONENT, gl.FLOAT, null)
@@ -112,7 +121,9 @@ export class ZFrame extends ZScene {
     const zTexture = new ZTexture({ texture })
     gl.bindTexture(gl.TEXTURE_2D, texture)
 
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+    // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+
     if (texImage2DFn) texImage2DFn(gl, size)
     else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ...size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
@@ -134,6 +145,24 @@ export class ZFrame extends ZScene {
     gl.viewport(0, 0, ...size)
   }
 
+  readPixel(e: MouseEvent, colorAttachment?: number) {
+    const { gl, framebuffer } = this
+    const canvas = gl.canvas as HTMLCanvasElement
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+    gl.readBuffer(colorAttachment ?? gl.COLOR_ATTACHMENT0)
+    gl.readPixels(
+      e.offsetX * devicePixelRatio,
+      (canvas.clientHeight - e.offsetY) * devicePixelRatio,
+      1,
+      1,
+      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT),
+      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE),
+      pixelData,
+    )
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    return [...pixelData]
+  }
+
   private clear() {
     const { gl } = this
     const { width, height } = gl.canvas as HTMLCanvasElement
@@ -141,10 +170,10 @@ export class ZFrame extends ZScene {
     gl.viewport(0, 0, width, height)
   }
 
-  render(time?: number) {
+  render() {
     this.processFrame()
     this.useFrame()
-    super.render(time)
+    super.render()
     this.clear()
   }
 }
